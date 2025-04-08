@@ -39,6 +39,20 @@ class GoogleLogin implements SocialLogin {
 
   @override
   Future<void> logout() async {
-    // 로그아웃 기능 정의
+    try {
+      debugPrint("Attempting to sign out from Google...");
+      await GoogleSignIn().signOut();
+      debugPrint("Successfully signed out from Google.");
+    } catch (error) {
+      debugPrint("Failed to sign out from Google: $error");
+    }
+
+    try {
+      debugPrint("Attempting to sign out from Firebase...");
+      await FirebaseAuth.instance.signOut();
+      debugPrint("Successfully signed out from Firebase.");
+    } catch (error) {
+      debugPrint("Failed to sign out from Firebase: $error");
+    }
   }
 }

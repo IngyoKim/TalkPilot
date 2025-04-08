@@ -73,8 +73,8 @@ class _LoginPageState extends State<LoginPage> {
                         tryLogin(
                         context: context,
                         loginAction: () async {
-                        // 여기에 카카오 로그인 로직 구현
-                        await Future.delayed(const Duration(seconds: 2)); // 임시 딜레이
+                       
+                        await Future.delayed(const Duration(seconds: 2));
                           },
                          setLoading: _setLoading,
                         );
@@ -110,12 +110,12 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 20),
                     GestureDetector(
                       onTap: () {
-                        // 구글 로그인 로직 구현
+                       
                         tryLogin(
                         context: context,
                         loginAction: () async {
                         // 여기에 카카오 로그인 로직 구현
-                        await Future.delayed(const Duration(seconds: 2)); // 임시 딜레이
+                        await Future.delayed(const Duration(seconds: 2));
                           },
                          setLoading: _setLoading,
                         );
@@ -132,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              'assets/login/google.png',//구글 사진
+                              'assets/login/google.png',
                               height: 32,
                               width: 32,
                             ),

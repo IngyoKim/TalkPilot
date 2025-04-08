@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
                     Column(
                       children: [
                         Image.asset(
-                          '',//로고 사진
+                          'assets/login/logo.png',
                           height: 200,
                           width: 200,
                         ),
@@ -91,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              '',//카카오 사진진
+                              'assets/login/kakao.png',
                               height: 32,
                               width: 32,
                             ),
@@ -132,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              '',//구글 사진
+                              'assets/login/google.png',//구글 사진
                               height: 32,
                               width: 32,
                             ),

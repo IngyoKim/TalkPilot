@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 
-import 'package:talk_pilot/app.dart';
+import 'package:talk_pilot/src/app.dart';
 import 'package:talk_pilot/firebase_options.dart';
 
 Future<void> main() async {

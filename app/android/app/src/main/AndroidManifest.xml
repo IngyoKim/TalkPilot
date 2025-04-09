@@ -8,6 +8,36 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
+        <!-- 카카오톡 로그인용 Activity -->
+        <activity
+            android:name="com.kakao.sdk.flutter.TalkAuthCodeActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            tools:replace="android:exported">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="kakao${KAKAO_NATIVE_APP_KEY}"
+                    android:host="oauth" />
+            </intent-filter>
+        </activity>
+
+        <!-- 웹뷰 로그인용 Activity -->
+        <activity
+            android:name="com.kakao.sdk.flutter.AuthCodeCustomTabsActivity"
+            android:exported="true">
+            <intent-filter android:label="flutter_web_auth">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="kakao${KAKAO_NATIVE_APP_KEY}"
+                    android:host="oauth" />
+            </intent-filter>
+        </activity>
+
         <!-- 앱 메인 액티비티 -->
         <activity
             android:name=".MainActivity"
@@ -24,6 +54,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- 카카오 링크 URI 수신용 -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="kakao${KAKAO_NATIVE_APP_KEY}"
+                    android:host="kakaolink" />
+            </intent-filter>
         </activity>
 
         <meta-data

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:talk_pilot/src/login/kakao_login.dart';
 import 'package:talk_pilot/src/login/google_login.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
 
@@ -48,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
                     Column(
                       children: [
                         Image.asset(
-                          'assets/login/logo.png',
+                          'assets/login/logo.png', // 로고 사진 추가하기기
                           height: 200,
                           width: 200,
                         ),
@@ -75,7 +76,10 @@ class _LoginPageState extends State<LoginPage> {
                         tryLogin(
                           context: context,
                           loginAction: () async {
-                            await Future.delayed(const Duration(seconds: 2));
+                            final user = await KakaoLogin().login();
+                            if (user == null) {
+                              throw Exception("Kakao login failed");
+                            }
                           },
                           setLoading: _setLoading,
                         );
@@ -92,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              'assets/login/kakao.png',
+                              'assets/login/kakao.png', // 카카오 로고 추가하기
                               height: 32,
                               width: 32,
                             ),
@@ -134,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              'assets/login/google.png',
+                              'assets/login/google.png', // 구글 로고 추가하기
                               height: 32,
                               width: 32,
                             ),

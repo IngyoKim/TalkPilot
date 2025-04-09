@@ -1,0 +1,39 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Firebase debug logs
+firebase-debug.log
+firebase-debug.*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# dotenv environment variables
+.env
+*.local
+
+# Build / Coverage
+build/
+coverage/
+.nyc_output/
+
+# Dependency directories
+node_modules/
+
+# Optional caches and generated files
+.npm
+.eslintcache
+.yarn-integrity
+.dataconnect
+*.tgz
+
+# Output of 'npm pack'
+*.tgz
+
+#serviceAccountKey.json
+serviceAccountKey.json

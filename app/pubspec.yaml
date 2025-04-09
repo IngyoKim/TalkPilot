@@ -38,6 +38,7 @@ dependencies:
   firebase_auth: ^5.5.2
   flutter_dotenv: ^5.2.1
   kakao_flutter_sdk_common: ^1.9.7+3
+  kakao_flutter_sdk_user: ^1.9.7+3
 
 dev_dependencies:
   flutter_test:

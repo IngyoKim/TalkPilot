@@ -1,4 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+class Project {
+  final String title;
+  final DateTime createdAt;
+  final int practiceCount;
+
+  Project({
+    required this.title,
+    required this.createdAt,
+    required this.practiceCount,
+  });
+}
 
 class WorkPage extends StatefulWidget {
   const WorkPage({super.key});
@@ -8,51 +21,47 @@ class WorkPage extends StatefulWidget {
 }
 
 class _WorkPageState extends State<WorkPage> {
-  List<String> workItems = [];
+  List<Project> projects = [];
 
-  void _addNewItem(String title) {
-    setState(() {
-      // 최신순으로 위에 추가
-      workItems.insert(0, title);
-    });
-  }
-
-  void _showAddDialog() {
-    String newTitle = '';
+  void _showAddProjectDialog() {
+    String title = '';
 
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('작업 제목 입력'),
-          content: TextField(
-            autofocus: true,
-            onChanged: (value) {
-              newTitle = value;
-            },
-            decoration: const InputDecoration(
-              hintText: '예: 보고서 작성',
-            ),
+      builder: (context) => AlertDialog(
+        title: const Text('새 대본 추가'),
+        content: TextField(
+          autofocus: true,
+          onChanged: (value) {
+            title = value;
+          },
+          decoration: const InputDecoration(hintText: '대본 제목'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // 닫기
-              },
-              child: const Text('취소'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (newTitle.trim().isNotEmpty) {
-                  _addNewItem(newTitle.trim());
-                }
-                Navigator.pop(context);
-              },
-              child: const Text('추가'),
-            ),
-          ],
-        );
-      },
+          TextButton(
+            onPressed: () {
+              if (title.trim().isNotEmpty) {
+                setState(() {
+                  projects.insert(
+                    0,
+                    Project(
+                      title: title.trim(),
+                      createdAt: DateTime.now(),
+                      practiceCount: 0,
+                    ),
+                  );
+                });
+              }
+              Navigator.pop(context);
+            },
+            child: const Text('추가'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -60,7 +69,7 @@ class _WorkPageState extends State<WorkPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('작업'),
+        title: const Text('워크페이지'),
         backgroundColor: Colors.purple,
         actions: [
           IconButton(
@@ -73,15 +82,14 @@ class _WorkPageState extends State<WorkPage> {
       ),
       body: Column(
         children: [
-          // + 추가 버튼
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
                 ElevatedButton.icon(
-                  onPressed: _showAddDialog,
+                  onPressed: _showAddProjectDialog,
                   icon: const Icon(Icons.add),
-                  label: const Text('추가'),
+                  label: const Text('대본 추가'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.purple,
                     foregroundColor: Colors.white,
@@ -93,36 +101,49 @@ class _WorkPageState extends State<WorkPage> {
               ],
             ),
           ),
-
-          // 작업 리스트
           Expanded(
-            child: workItems.isEmpty
-                ? const Center(child: Text('추가된 작업이 없습니다.'))
-                : ListView.builder(
-                    itemCount: workItems.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
+            child: projects.isEmpty
+                ? const Center(child: Text('등록된 대본이 없습니다.'))
+                : Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: GridView.builder(
+                      itemCount: projects.length,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: 3 / 2,
+                      ),
+                      itemBuilder: (context, index) {
+                        final project = projects[index];
+                        return Card(
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.2),
-                                blurRadius: 6,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
                           ),
-                          child: Text(
-                            workItems[index],
-                            style: const TextStyle(fontSize: 16),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  project.title,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                Text('생성일: ${DateFormat('yyyy-MM-dd').format(project.createdAt)}'),
+                                Text('연습 횟수: ${project.practiceCount}회'),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
           ),
         ],

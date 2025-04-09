@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'about_page.dart';
 import 'help_page.dart';
+import 'faq_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -90,7 +91,12 @@ class _ProfilePageState extends State<ProfilePage> {
             ListTile(
               leading: const Icon(Icons.question_answer),
               title: const Text('FAQ'),
-              onTap: () => debugPrint('FAQ 페이지로 이동'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FaqPage()),
+                );
+              }
             ),
             const Divider(),
             ListTile(

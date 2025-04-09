@@ -17,7 +17,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
- Future<void> tryLogin({
+  Future<void> tryLogin({
     required BuildContext context,
     required Future<void> Function() loginAction,
     required void Function(bool) setLoading,
@@ -71,12 +71,11 @@ class _LoginPageState extends State<LoginPage> {
                       onTap: () {
                         // 카카오 로그인 로직 구현
                         tryLogin(
-                        context: context,
-                        loginAction: () async {
-                       
-                        await Future.delayed(const Duration(seconds: 2));
+                          context: context,
+                          loginAction: () async {
+                            await Future.delayed(const Duration(seconds: 2));
                           },
-                         setLoading: _setLoading,
+                          setLoading: _setLoading,
                         );
                       },
                       child: Container(
@@ -110,14 +109,13 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 20),
                     GestureDetector(
                       onTap: () {
-                       
                         tryLogin(
-                        context: context,
-                        loginAction: () async {
-                        // 여기에 카카오 로그인 로직 구현
-                        await Future.delayed(const Duration(seconds: 2));
+                          context: context,
+                          loginAction: () async {
+                            // 여기에 구글 로그인 로직 구현
+                            await Future.delayed(const Duration(seconds: 2));
                           },
-                         setLoading: _setLoading,
+                          setLoading: _setLoading,
                         );
                       },
                       child: Container(

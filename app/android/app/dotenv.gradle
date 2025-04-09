@@ -1,0 +1,13 @@
+def dotenvFile = rootProject.file(".env")
+def env = [:]
+
+if (dotenvFile.exists()) {
+    dotenvFile.eachLine { line ->
+        if (line && line.contains('=')) {
+            def (key, value) = line.split('=')
+            env[key.trim()] = value.trim()
+        }
+    }
+}
+
+ext.env = env

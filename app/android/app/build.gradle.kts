@@ -1,12 +1,14 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
-    // START: FlutterFire Configuration
-    id("com.google.gms.google-services")
-    // END: FlutterFire Configuration
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services") // FlutterFire
+    id("dev.flutter.flutter-gradle-plugin") // Flutter Plugin
 }
+
+// dotenv.gradle 적용
+apply(from = rootProject.file("app/dotenv.gradle"))
 
 android {
     namespace = "com.oss.talk_pilot"
@@ -23,20 +25,19 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.oss.talk_pilot"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 31
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // manifestPlaceholders
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] =
+            project.findProperty("KAKAO_NATIVE_APP_KEY") as String? ?: ""
     }
 
     buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+        getByName("release") {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -44,4 +45,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-Xlint:deprecation")
 }

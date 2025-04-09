@@ -24,18 +24,16 @@ class _WorkPageState extends State<WorkPage> {
   List<Project> projects = [];
 
   void _showAddProjectDialog() {
-    String title = '';
+    final TextEditingController _controller = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('새 대본 추가'),
         content: TextField(
+          controller: _controller,
           autofocus: true,
-          onChanged: (value) {
-            title = value;
-          },
-          decoration: const InputDecoration(hintText: '대본 제목'),
+          decoration: const InputDecoration(hintText: '대본본 제목'),
         ),
         actions: [
           TextButton(
@@ -44,12 +42,13 @@ class _WorkPageState extends State<WorkPage> {
           ),
           TextButton(
             onPressed: () {
-              if (title.trim().isNotEmpty) {
+              final title = _controller.text.trim();
+              if (title.isNotEmpty) {
                 setState(() {
                   projects.insert(
                     0,
                     Project(
-                      title: title.trim(),
+                      title: title,
                       createdAt: DateTime.now(),
                       practiceCount: 0,
                     ),
@@ -65,11 +64,20 @@ class _WorkPageState extends State<WorkPage> {
     );
   }
 
+  void _openProjectDetail(Project project) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ProjectDetailPage(project: project),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('워크페이지'),
+        title: const Text('대본'),
         backgroundColor: Colors.purple,
         actions: [
           IconButton(
@@ -116,29 +124,32 @@ class _WorkPageState extends State<WorkPage> {
                       ),
                       itemBuilder: (context, index) {
                         final project = projects[index];
-                        return Card(
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  project.title,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                        return GestureDetector(
+                          onTap: () => _openProjectDetail(project),
+                          child: Card(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    project.title,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 8),
-                                Text('생성일: ${DateFormat('yyyy-MM-dd').format(project.createdAt)}'),
-                                Text('연습 횟수: ${project.practiceCount}회'),
-                              ],
+                                  const SizedBox(height: 8),
+                                  Text('생성일: ${DateFormat('yyyy-MM-dd').format(project.createdAt)}'),
+                                  Text('연습 횟수: ${project.practiceCount}회'),
+                                ],
+                              ),
                             ),
                           ),
                         );
@@ -147,6 +158,35 @@ class _WorkPageState extends State<WorkPage> {
                   ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ProjectDetailPage extends StatelessWidget {
+  final Project project;
+
+  const ProjectDetailPage({super.key, required this.project});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(project.title),
+        backgroundColor: Colors.purple,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('제목: ${project.title}', style: const TextStyle(fontSize: 20)),
+            const SizedBox(height: 8),
+            Text('생성일: ${DateFormat('yyyy-MM-dd').format(project.createdAt)}'),
+            const SizedBox(height: 8),
+            Text('연습 횟수: ${project.practiceCount}회'),
+          ],
+        ),
       ),
     );
   }

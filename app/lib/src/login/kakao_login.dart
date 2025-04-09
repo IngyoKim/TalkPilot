@@ -1,11 +1,18 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:talk_pilot/src/login/custom_token_service.dart';
 import 'package:talk_pilot/src/login/social_login.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 
 /// Kakao Login을 수행
 class KakaoLogin implements SocialLogin {
+  // Firebase 인증 객체
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  // Firebase 커스텀 토큰 생성에 필요한 클래스
+  final CustomTokenService _customTokenService = CustomTokenService();
   @override
   Future<User?> login() async {
     try {
@@ -33,9 +40,34 @@ class KakaoLogin implements SocialLogin {
         }
       }
 
-      /// 이곳에 firebase auth와 연동 코드 추가 예정정
+      /// Retrieve Kakao user information
+      final user = await kakao.UserApi.instance.me();
 
-      return null; // 여기에 firebase auth를 통해 받은 유저 return 예정
+      /// Request Firebase custom token creation
+      final response = await _customTokenService.createCustomToken({
+        'uid': user.id.toString(),
+        'displayName': user.kakaoAccount?.profile?.nickname ?? '',
+        'email': user.kakaoAccount?.email ?? '',
+        'photoURL': user.kakaoAccount?.profile?.profileImageUrl ?? '',
+      });
+      //Firebase로부터 받은 json 응답에서 토큰 추출
+      final tokenData = jsonDecode(response);
+      final customToken = tokenData['token'] ?? '';
+
+      if (customToken.isEmpty) {
+        //커스텀 토큰 생성
+        debugPrint("Failed to retrieve custom token.");
+        return null;
+      }
+
+      /// Firebase login
+      UserCredential userCredential = await _auth.signInWithCustomToken(
+        customToken,
+      );
+      await _auth.currentUser?.reload(); //Firebase 인증 상태 갱신
+
+      /// Update user information
+      return userCredential.user;
     } catch (error) {
       //로그인 프로세스 중 오류 발생
       debugPrint("Kakao login failed. $error");

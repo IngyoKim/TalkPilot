@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:talk_pilot/src/pages/schedule_page.dart';
+import 'package:talk_pilot/src/pages/work_page.dart';
+import 'package:talk_pilot/src/pages/profile_page.dart';
 
-class MyWidget extends StatefulWidget {
-  const MyWidget({super.key});
+class BottomBar extends StatefulWidget {
+  const BottomBar({super.key});
 
   @override
-  State<MyWidget> createState() => _MyWidgetState();
+  State<BottomBar> createState() => _BottomBarState();
 }
 
-class _MyWidgetState extends State<MyWidget>
+class _BottomBarState extends State<BottomBar>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -28,7 +31,7 @@ class _MyWidgetState extends State<MyWidget>
     return Scaffold(
       body: TabBarView(
         controller: _tabController,
-        children: [], // 이곳에 페이지들 연결 예정정
+        children: [const SchedulePage(), WorkPage(), const ProfilePage()],
       ),
       bottomNavigationBar: Container(
         color: Colors.white,
@@ -37,7 +40,14 @@ class _MyWidgetState extends State<MyWidget>
           indicatorColor: Colors.black,
           labelColor: Colors.black,
           unselectedLabelColor: Colors.grey,
-          tabs: [], // 이곳에 페이지로 연결할 탭(버튼) 구성 예정정
+          tabs: [
+            Tab(
+              icon: Icon(Icons.calendar_month_rounded, size: 24),
+              text: "Schedule",
+            ),
+            Tab(icon: Icon(Icons.work_rounded, size: 24), text: "Work"),
+            Tab(icon: Icon(Icons.person_rounded, size: 24), text: "Profile"),
+          ],
         ),
       ),
     );

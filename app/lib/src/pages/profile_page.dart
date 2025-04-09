@@ -14,7 +14,16 @@ class _ProfilePageState extends State<ProfilePage> {
   double averageScore = 87.5;
   int averageCPM = 220;
 
+  bool isEditingNickname = false;
+  final TextEditingController nicknameController = TextEditingController();
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  void dispose() {
+    nicknameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,73 +119,110 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          /// 프로필 카드
-          Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            elevation: 3,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// 닉네임 & 수정
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '닉네임: $nickname',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          debugPrint('닉네임 수정 버튼 클릭');
-                        },
-                        child: const Text('수정'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text('이름: $realName', style: const TextStyle(fontSize: 16)),
-                ],
+      body: GestureDetector(
+        onTap: () {
+          if (isEditingNickname) {
+            setState(() {
+              isEditingNickname = false;
+              nickname = nicknameController.text;
+            });
+            FocusScope.of(context).unfocus();
+          }
+        },
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            /// 프로필 카드
+            Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              elevation: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    /// 닉네임 입력 or 표시
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: isEditingNickname
+                              ? TextField(
+                                  controller: nicknameController..text = nickname,
+                                  decoration: const InputDecoration(
+                                    hintText: '닉네임 입력',
+                                    border: OutlineInputBorder(),
+                                    isDense: true,
+                                  ),
+                                  autofocus: true,
+                                  onSubmitted: (value) {
+                                    setState(() {
+                                      nickname = value;
+                                      isEditingNickname = false;
+                                    });
+                                  },
+                                )
+                              : Text(
+                                  '닉네임: $nickname',
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                ),
+                        ),
+                        IconButton(
+                          icon: Icon(isEditingNickname ? Icons.close : Icons.edit),
+                          onPressed: () {
+                            setState(() {
+                              if (isEditingNickname) {
+                                isEditingNickname = false;
+                                FocusScope.of(context).unfocus();
+                              } else {
+                                isEditingNickname = true;
+                                nicknameController.text = nickname;
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text('이름: $realName', style: const TextStyle(fontSize: 16)),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-          /// 통계 카드
-          Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            elevation: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  StatRow(icon: Icons.check_circle, label: '완료한 발표 횟수', value: '$presentationCount'),
-                  const Divider(),
-                  StatRow(icon: Icons.star, label: '평균 발표 점수', value: '$averageScore'),
-                  const Divider(),
-                  StatRow(icon: Icons.speed, label: '평균 CPM', value: '$averageCPM'),
-                ],
+            /// 통계 카드
+            Card(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    StatRow(icon: Icons.check_circle, label: '완료한 발표 횟수', value: '$presentationCount'),
+                    const Divider(),
+                    StatRow(icon: Icons.star, label: '평균 발표 점수', value: '$averageScore'),
+                    const Divider(),
+                    StatRow(icon: Icons.speed, label: '평균 CPM', value: '$averageCPM'),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 30),
+            const SizedBox(height: 30),
 
-          /// 발표 기록 버튼
-          ElevatedButton.icon(
-            onPressed: () => debugPrint('발표 기록 보기 버튼 클릭'),
-            icon: const Icon(Icons.history, color: Colors.white),
-            label: const Text('발표 기록 보기', style: TextStyle(color: Colors.white)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple,
-              minimumSize: const Size.fromHeight(50),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            /// 발표 기록 버튼
+            ElevatedButton.icon(
+              onPressed: () => debugPrint('발표 기록 보기 버튼 클릭'),
+              icon: const Icon(Icons.history, color: Colors.white),
+              label: const Text('발표 기록 보기', style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

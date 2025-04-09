@@ -77,6 +77,24 @@ class KakaoLogin implements SocialLogin {
 
   @override
   Future<void> logout() async {
-    /// 카카오 로그아웃 구현 예정
+    try {
+      // 카카오 계정 연결 해제
+      debugPrint("Attempting to unlink Kakao account...");
+      await kakao.UserApi.instance.unlink();
+      debugPrint("Successfully unlinked Kakao account.");
+    } catch (error) {
+      // 카카오 계정 연결 해제 실패
+      debugPrint("Failed to unlink Kakao account: $error");
+    }
+
+    try {
+      // Firebase 로그아웃 처리
+      debugPrint("Attempting to sign out from Firebase...");
+      await _auth.signOut(); //Firebase 에서 로그아웃
+      debugPrint("Successfully signed out from Firebase.");
+    } catch (error) {
+      //Firebase 로그아웃 실패
+      debugPrint("Failed to sign out from Firebase: $error");
+    }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:talk_pilot/src/login/kakao_login.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
 
 class LoginPage extends StatefulWidget {
@@ -73,7 +74,10 @@ class _LoginPageState extends State<LoginPage> {
                         tryLogin(
                           context: context,
                           loginAction: () async {
-                            await Future.delayed(const Duration(seconds: 2));
+                            final user = await KakaoLogin().login();
+                            if (user == null) {
+                              throw Exception("Kakao login failed");
+                            }
                           },
                           setLoading: _setLoading,
                         );

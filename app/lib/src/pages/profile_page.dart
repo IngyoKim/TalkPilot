@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'about_page.dart';
+import 'help_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -79,7 +80,12 @@ class _ProfilePageState extends State<ProfilePage> {
             ListTile(
               leading: const Icon(Icons.help_outline),
               title: const Text('Help'),
-              onTap: () => debugPrint('Help 페이지로 이동'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HelpPage()),
+                );
+              }
             ),
             ListTile(
               leading: const Icon(Icons.question_answer),

@@ -78,7 +78,34 @@ class _ProfilePageState extends State<ProfilePage> {
                 '로그아웃',
                 style: TextStyle(color: Colors.redAccent),
               ),
-              onTap: () => debugPrint('로그아웃 시도'),
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('로그아웃 확인'),
+                    content: const Text('정말 로그아웃하시겠어요?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('취소'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          debugPrint('실제 로그아웃 처리');
+                          /// TODO: FirebaseAuth.instance.signOut();
+                          /// Navigator.pushReplacement(context,
+                          ///   MaterialPageRoute(builder: (_) => const LoginPage()));
+                        },
+                        child: const Text(
+                          '로그아웃',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ],
         ),

@@ -12,7 +12,24 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('프로필')),
+      appBar: AppBar(
+        title: const Text('프로필'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              debugPrint('🔄 새로고침');
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              // 설정 눌렀을 때 동작은 Step3에서 구현
+              debugPrint('⚙️ 설정 클릭');
+            },
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [

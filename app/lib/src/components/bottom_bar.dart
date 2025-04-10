@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:talk_pilot/src/pages/schedule_page.dart';
 import 'package:talk_pilot/src/pages/work_page.dart';
-import 'package:talk_pilot/src/pages/profile_page.dart';
+import 'package:talk_pilot/src/pages/profile_page/profile_page.dart';
 
 class BottomBar extends StatefulWidget {
   const BottomBar({super.key});

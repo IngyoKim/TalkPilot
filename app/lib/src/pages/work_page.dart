@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Project {
   final String title;
@@ -182,14 +183,51 @@ class _WorkPageState extends State<WorkPage> {
     );
   }
 }
-
-class ProjectDetailPage extends StatelessWidget {
+class ProjectDetailPage extends StatefulWidget {
   final Project project;
 
   const ProjectDetailPage({super.key, required this.project});
 
   @override
+  State<ProjectDetailPage> createState() => _ProjectDetailPageState();
+}
+
+class _ProjectDetailPageState extends State<ProjectDetailPage> {
+  late TextEditingController _memoController;
+  late SharedPreferences _prefs;
+
+  String get _memoKey => 'memo_${widget.project.title}';
+
+  @override
+  void initState() {
+    super.initState();
+    _memoController = TextEditingController();
+    _loadSavedMemo();
+
+    // 실시간 저장
+    _memoController.addListener(() {
+      _prefs.setString(_memoKey, _memoController.text);
+    });
+  }
+
+  Future<void> _loadSavedMemo() async {
+    _prefs = await SharedPreferences.getInstance();
+    final savedText = _prefs.getString(_memoKey) ?? '';
+    setState(() {
+      _memoController.text = savedText;
+    });
+  }
+
+  @override
+  void dispose() {
+    _memoController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final project = widget.project;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(project.title),
@@ -197,15 +235,15 @@ class ProjectDetailPage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('제목: ${project.title}', style: const TextStyle(fontSize: 20)),
-            const SizedBox(height: 8),
-            Text('생성일: ${DateFormat('yyyy-MM-dd').format(project.createdAt)}'),
-            const SizedBox(height: 8),
-            Text('연습 횟수: ${project.practiceCount}회'),
-          ],
+        child: TextField(
+          controller: _memoController,
+          maxLines: null,
+          keyboardType: TextInputType.multiline,
+          decoration: const InputDecoration(
+            hintText: '메모를 작성하세요...',
+            border: InputBorder.none,
+          ),
+          style: const TextStyle(fontSize: 16),
         ),
       ),
     );

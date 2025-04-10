@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:talk_pilot/src/pages/profile_page.dart';
+import 'stats_row.dart';
 
 class StatsCard extends StatelessWidget {
   final int presentationCount;

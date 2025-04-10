@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:talk_pilot/src/pages/profile_page/about_page.dart';
-import 'package:talk_pilot/src/pages/profile_page/faq_page.dart';
-import 'package:talk_pilot/src/pages/profile_page/help_page.dart';
+import 'package:talk_pilot/src/pages/profile_page/widgets/drawer/about_page.dart';
+import 'package:talk_pilot/src/pages/profile_page/widgets/drawer/faq_page.dart';
+import 'package:talk_pilot/src/pages/profile_page/widgets/drawer/help_page.dart';
 
 class ProfileDrawer extends StatelessWidget {
   const ProfileDrawer({super.key});
@@ -60,26 +60,27 @@ class ProfileDrawer extends StatelessWidget {
             onTap: () {
               showDialog(
                 context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('로그아웃 확인'),
-                  content: const Text('정말 로그아웃하시겠어요?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('취소'),
+                builder:
+                    (context) => AlertDialog(
+                      title: const Text('로그아웃 확인'),
+                      content: const Text('정말 로그아웃하시겠어요?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('취소'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            FirebaseAuth.instance.signOut();
+                          },
+                          child: const Text(
+                            '로그아웃',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
                     ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        FirebaseAuth.instance.signOut();
-                      },
-                      child: const Text(
-                        '로그아웃',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  ],
-                ),
               );
             },
           ),

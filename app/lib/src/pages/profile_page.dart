@@ -4,6 +4,7 @@ import 'package:talk_pilot/src/pages/profile_page/about_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/faq_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/help_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_card.dart';
+import 'package:talk_pilot/src/pages/profile_page/widgets/stats_card.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -70,26 +71,32 @@ class _ProfilePageState extends State<ProfilePage> {
             ListTile(
               leading: const Icon(Icons.info_outline),
               title: const Text('About'),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AboutPage()),
-              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AboutPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.help_outline),
               title: const Text('Help'),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HelpPage()),
-              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HelpPage()),
+                );
+              },
             ),
             ListTile(
               leading: const Icon(Icons.question_answer),
               title: const Text('FAQ'),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const FaqPage()),
-              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FaqPage()),
+                );
+              },
             ),
             const Divider(),
             ListTile(
@@ -140,7 +147,6 @@ class _ProfilePageState extends State<ProfilePage> {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            /// 분리된 프로필 카드
             ProfileCard(
               nickname: nickname,
               realName: realName,
@@ -164,41 +170,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
             const SizedBox(height: 20),
 
-            /// 🔹 통계 카드
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    StatRow(
-                      icon: Icons.check_circle,
-                      label: '완료한 발표 횟수',
-                      value: '$presentationCount',
-                    ),
-                    const Divider(),
-                    StatRow(
-                      icon: Icons.star,
-                      label: '평균 발표 점수',
-                      value: '$averageScore',
-                    ),
-                    const Divider(),
-                    StatRow(
-                      icon: Icons.speed,
-                      label: '평균 CPM',
-                      value: '$averageCPM',
-                    ),
-                  ],
-                ),
-              ),
+            StatsCard(
+              presentationCount: presentationCount,
+              averageScore: averageScore,
+              averageCPM: averageCPM,
             ),
 
             const SizedBox(height: 30),
 
-            /// 발표 기록 버튼
             ElevatedButton.icon(
               onPressed: () => debugPrint('발표 기록 보기 버튼 클릭'),
               icon: const Icon(Icons.history, color: Colors.white),
@@ -221,6 +200,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
+/// 통계 항목 한 줄
 class StatRow extends StatelessWidget {
   final IconData icon;
   final String label;

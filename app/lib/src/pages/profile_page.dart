@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:talk_pilot/src/pages/profile_page/about_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/faq_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/help_page.dart';
+import 'package:talk_pilot/src/pages/profile_page/widgets/profile_card.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -69,32 +70,26 @@ class _ProfilePageState extends State<ProfilePage> {
             ListTile(
               leading: const Icon(Icons.info_outline),
               title: const Text('About'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AboutPage()),
-                );
-              },
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutPage()),
+              ),
             ),
             ListTile(
               leading: const Icon(Icons.help_outline),
               title: const Text('Help'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HelpPage()),
-                );
-              },
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HelpPage()),
+              ),
             ),
             ListTile(
               leading: const Icon(Icons.question_answer),
               title: const Text('FAQ'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const FaqPage()),
-                );
-              },
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FaqPage()),
+              ),
             ),
             const Divider(),
             ListTile(
@@ -106,28 +101,26 @@ class _ProfilePageState extends State<ProfilePage> {
               onTap: () {
                 showDialog(
                   context: context,
-                  builder:
-                      (context) => AlertDialog(
-                        title: const Text('로그아웃 확인'),
-                        content: const Text('정말 로그아웃하시겠어요?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('취소'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              debugPrint('실제 로그아웃 처리');
-                              FirebaseAuth.instance.signOut();
-                            },
-                            child: const Text(
-                              '로그아웃',
-                              style: TextStyle(color: Colors.red),
-                            ),
-                          ),
-                        ],
+                  builder: (context) => AlertDialog(
+                    title: const Text('로그아웃 확인'),
+                    content: const Text('정말 로그아웃하시겠어요?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('취소'),
                       ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          FirebaseAuth.instance.signOut();
+                        },
+                        child: const Text(
+                          '로그아웃',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -147,75 +140,31 @@ class _ProfilePageState extends State<ProfilePage> {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            /// 프로필 카드
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              elevation: 3,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// 닉네임 입력 or 표시
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child:
-                              isEditingNickname
-                                  ? TextField(
-                                    controller:
-                                        nicknameController..text = nickname,
-                                    decoration: const InputDecoration(
-                                      hintText: '닉네임 입력',
-                                      border: OutlineInputBorder(),
-                                      isDense: true,
-                                    ),
-                                    autofocus: true,
-                                    onSubmitted: (value) {
-                                      setState(() {
-                                        nickname = value;
-                                        isEditingNickname = false;
-                                      });
-                                    },
-                                  )
-                                  : Text(
-                                    '닉네임: $nickname',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            isEditingNickname ? Icons.close : Icons.edit,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              if (isEditingNickname) {
-                                isEditingNickname = false;
-                                FocusScope.of(context).unfocus();
-                              } else {
-                                isEditingNickname = true;
-                                nicknameController.text = nickname;
-                              }
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Text('이름: $realName', style: const TextStyle(fontSize: 16)),
-                  ],
-                ),
-              ),
+            /// 분리된 프로필 카드
+            ProfileCard(
+              nickname: nickname,
+              realName: realName,
+              isEditing: isEditingNickname,
+              nicknameController: nicknameController,
+              onToggleEdit: () {
+                setState(() {
+                  isEditingNickname = !isEditingNickname;
+                  if (!isEditingNickname) {
+                    FocusScope.of(context).unfocus();
+                  }
+                });
+              },
+              onNicknameSubmit: (value) {
+                setState(() {
+                  nickname = value;
+                  isEditingNickname = false;
+                });
+              },
             ),
+
             const SizedBox(height: 20),
 
-            /// 통계 카드
+            /// 🔹 통계 카드
             Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
@@ -246,6 +195,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
+
             const SizedBox(height: 30),
 
             /// 발표 기록 버튼
@@ -271,7 +221,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-/// 통계 아이템 Row 위젯
 class StatRow extends StatelessWidget {
   final IconData icon;
   final String label;

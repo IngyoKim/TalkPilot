@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'about_page.dart';
-import 'help_page.dart';
-import 'faq_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:talk_pilot/src/pages/profile_page/about_page.dart';
+import 'package:talk_pilot/src/pages/profile_page/faq_page.dart';
+import 'package:talk_pilot/src/pages/profile_page/help_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -35,10 +36,7 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: Colors.deepPurple,
-        title: const Text(
-          '프로필',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('프로필', style: TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
@@ -76,7 +74,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   context,
                   MaterialPageRoute(builder: (context) => const AboutPage()),
                 );
-              }
+              },
             ),
             ListTile(
               leading: const Icon(Icons.help_outline),
@@ -86,7 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   context,
                   MaterialPageRoute(builder: (context) => const HelpPage()),
                 );
-              }
+              },
             ),
             ListTile(
               leading: const Icon(Icons.question_answer),
@@ -96,7 +94,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   context,
                   MaterialPageRoute(builder: (context) => const FaqPage()),
                 );
-              }
+              },
             ),
             const Divider(),
             ListTile(
@@ -108,29 +106,28 @@ class _ProfilePageState extends State<ProfilePage> {
               onTap: () {
                 showDialog(
                   context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('로그아웃 확인'),
-                    content: const Text('정말 로그아웃하시겠어요?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('취소'),
+                  builder:
+                      (context) => AlertDialog(
+                        title: const Text('로그아웃 확인'),
+                        content: const Text('정말 로그아웃하시겠어요?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('취소'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              debugPrint('실제 로그아웃 처리');
+                              FirebaseAuth.instance.signOut();
+                            },
+                            child: const Text(
+                              '로그아웃',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          debugPrint('실제 로그아웃 처리');
-                          /// TODO: FirebaseAuth.instance.signOut();
-                          /// Navigator.pushReplacement(context,
-                          ///   MaterialPageRoute(builder: (_) => const LoginPage()));
-                        },
-                        child: const Text(
-                          '로그아웃',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
-                  ),
                 );
               },
             ),
@@ -152,7 +149,9 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             /// 프로필 카드
             Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
               elevation: 3,
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -164,29 +163,36 @@ class _ProfilePageState extends State<ProfilePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: isEditingNickname
-                              ? TextField(
-                                  controller: nicknameController..text = nickname,
-                                  decoration: const InputDecoration(
-                                    hintText: '닉네임 입력',
-                                    border: OutlineInputBorder(),
-                                    isDense: true,
+                          child:
+                              isEditingNickname
+                                  ? TextField(
+                                    controller:
+                                        nicknameController..text = nickname,
+                                    decoration: const InputDecoration(
+                                      hintText: '닉네임 입력',
+                                      border: OutlineInputBorder(),
+                                      isDense: true,
+                                    ),
+                                    autofocus: true,
+                                    onSubmitted: (value) {
+                                      setState(() {
+                                        nickname = value;
+                                        isEditingNickname = false;
+                                      });
+                                    },
+                                  )
+                                  : Text(
+                                    '닉네임: $nickname',
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                  autofocus: true,
-                                  onSubmitted: (value) {
-                                    setState(() {
-                                      nickname = value;
-                                      isEditingNickname = false;
-                                    });
-                                  },
-                                )
-                              : Text(
-                                  '닉네임: $nickname',
-                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                ),
                         ),
                         IconButton(
-                          icon: Icon(isEditingNickname ? Icons.close : Icons.edit),
+                          icon: Icon(
+                            isEditingNickname ? Icons.close : Icons.edit,
+                          ),
                           onPressed: () {
                             setState(() {
                               if (isEditingNickname) {
@@ -211,17 +217,31 @@ class _ProfilePageState extends State<ProfilePage> {
 
             /// 통계 카드
             Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
               elevation: 2,
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    StatRow(icon: Icons.check_circle, label: '완료한 발표 횟수', value: '$presentationCount'),
+                    StatRow(
+                      icon: Icons.check_circle,
+                      label: '완료한 발표 횟수',
+                      value: '$presentationCount',
+                    ),
                     const Divider(),
-                    StatRow(icon: Icons.star, label: '평균 발표 점수', value: '$averageScore'),
+                    StatRow(
+                      icon: Icons.star,
+                      label: '평균 발표 점수',
+                      value: '$averageScore',
+                    ),
                     const Divider(),
-                    StatRow(icon: Icons.speed, label: '평균 CPM', value: '$averageCPM'),
+                    StatRow(
+                      icon: Icons.speed,
+                      label: '평균 CPM',
+                      value: '$averageCPM',
+                    ),
                   ],
                 ),
               ),
@@ -232,11 +252,16 @@ class _ProfilePageState extends State<ProfilePage> {
             ElevatedButton.icon(
               onPressed: () => debugPrint('발표 기록 보기 버튼 클릭'),
               icon: const Icon(Icons.history, color: Colors.white),
-              label: const Text('발표 기록 보기', style: TextStyle(color: Colors.white)),
+              label: const Text(
+                '발표 기록 보기',
+                style: TextStyle(color: Colors.white),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
                 minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ],
@@ -265,10 +290,11 @@ class StatRow extends StatelessWidget {
       children: [
         Icon(icon, color: Colors.deepPurple),
         const SizedBox(width: 10),
-        Expanded(
-          child: Text(label, style: const TextStyle(fontSize: 16)),
+        Expanded(child: Text(label, style: const TextStyle(fontSize: 16))),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
       ],
     );
   }

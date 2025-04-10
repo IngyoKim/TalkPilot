@@ -33,7 +33,7 @@ class _WorkPageState extends State<WorkPage> {
         content: TextField(
           controller: _controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: '대본본 제목'),
+          decoration: const InputDecoration(hintText: '대본 제목'),
         ),
         actions: [
           TextButton(
@@ -82,9 +82,7 @@ class _WorkPageState extends State<WorkPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () {
-              debugPrint('설정 클릭');
-            },
+            onPressed: () => debugPrint('설정 클릭'),
           ),
         ],
       ),
@@ -156,6 +154,28 @@ class _WorkPageState extends State<WorkPage> {
                       },
                     ),
                   ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 1,
+        onTap: (index) {
+          if (index == 0) debugPrint('Schedule 눌림');
+          if (index == 1) debugPrint('Script 눌림');
+          if (index == 2) debugPrint('Profile 눌림');
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Schedule',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.work),
+            label: 'Script',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
           ),
         ],
       ),

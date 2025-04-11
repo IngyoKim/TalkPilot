@@ -23,18 +23,18 @@ class WorkPage extends StatefulWidget {
 
 class _WorkPageState extends State<WorkPage> {
   List<Project> projects = [];
-
+  
   void _showAddProjectDialog() {
     final TextEditingController _controller = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('새 대본 추가'),
+        title: const Text('새 프로젝트 추가'),
         content: TextField(
           controller: _controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: '대본 제목'),
+          decoration: const InputDecoration(hintText: '프로젝트 제목'),
         ),
         actions: [
           TextButton(
@@ -78,7 +78,7 @@ class _WorkPageState extends State<WorkPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('대본'),
+        title: const Text('프로젝트'),
         backgroundColor: Colors.purple,
         actions: [
           IconButton(
@@ -90,94 +90,75 @@ class _WorkPageState extends State<WorkPage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                ElevatedButton.icon(
-                  onPressed: _showAddProjectDialog,
-                  icon: const Icon(Icons.add),
-                  label: const Text('대본 추가'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+  padding: const EdgeInsets.all(16.0),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      ElevatedButton.icon(
+        onPressed: _showAddProjectDialog,
+        icon: const Icon(Icons.add),
+        label: const Text('프로젝트 추가'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.purple,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+Expanded(
+  child: projects.isEmpty
+      ? const Center(child: Text('등록된 프로젝트가 없습니다.'))
+      : Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: GridView.builder(
+            itemCount: projects.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 1.5,
+            ),
+            itemBuilder: (context, index) {
+              final sortedProjects = projects.toList()
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+              final project = sortedProjects[index];
+
+              return GestureDetector(
+                onTap: () => _openProjectDetail(project),
+                child: Card(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          project.title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+                        Text('생성일: ${DateFormat('yyyy-MM-dd').format(project.createdAt)}'),
+                        Text('연습 횟수: ${project.practiceCount}회'),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
-          Expanded(
-            child: projects.isEmpty
-                ? const Center(child: Text('등록된 대본이 없습니다.'))
-                : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: GridView.builder(
-                      itemCount: projects.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                        childAspectRatio: 3 / 2,
-                      ),
-                      itemBuilder: (context, index) {
-                        final project = projects[index];
-                        return GestureDetector(
-                          onTap: () => _openProjectDetail(project),
-                          child: Card(
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    project.title,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text('생성일: ${DateFormat('yyyy-MM-dd').format(project.createdAt)}'),
-                                  Text('연습 횟수: ${project.practiceCount}회'),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
-        onTap: (index) {
-          if (index == 0) debugPrint('Schedule 눌림');
-          if (index == 1) debugPrint('Script 눌림');
-          if (index == 2) debugPrint('Profile 눌림');
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Schedule',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.work),
-            label: 'Script',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+        ),
+),
         ],
       ),
     );
@@ -230,7 +211,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(project.title),
+        title: Text(project.title,style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.purple,
       ),
       body: Padding(
@@ -240,7 +221,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
           maxLines: null,
           keyboardType: TextInputType.multiline,
           decoration: const InputDecoration(
-            hintText: '메모를 작성하세요...',
+            hintText: '내용을 작성하세요...',
             border: InputBorder.none,
           ),
           style: const TextStyle(fontSize: 16),

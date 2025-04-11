@@ -78,11 +78,11 @@ class _WorkPageState extends State<WorkPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('프로젝트'),
-        backgroundColor: Colors.purple,
+        title: const Text('프로젝트',style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.deepPurple,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.settings,color: Colors.white),
             onPressed: () => debugPrint('설정 클릭'),
           ),
         ],
@@ -99,7 +99,8 @@ class _WorkPageState extends State<WorkPage> {
         icon: const Icon(Icons.add),
         label: const Text('프로젝트 추가'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.purple,
+          backgroundColor: Colors.deepPurple,
+          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
@@ -116,10 +117,10 @@ Expanded(
           child: GridView.builder(
             itemCount: projects.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+              crossAxisCount: 1,
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
-              childAspectRatio: 1.5,
+              childAspectRatio: 3.5,
             ),
             itemBuilder: (context, index) {
               final sortedProjects = projects.toList()
@@ -148,7 +149,7 @@ Expanded(
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
-                        Text('생성일: ${DateFormat('yyyy-MM-dd').format(project.createdAt)}'),
+                        Text('생성일: ${DateFormat('yyyy-MM-dd / hh:mm:ss a').format(project.createdAt)}'),
                         Text('연습 횟수: ${project.practiceCount}회'),
                       ],
                     ),
@@ -212,7 +213,8 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(project.title,style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.purple,
+        backgroundColor: Colors.deepPurple,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),

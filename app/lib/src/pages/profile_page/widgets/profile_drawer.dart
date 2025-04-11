@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+
+import 'package:talk_pilot/src/provider/login_provider.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/drawer/about_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/drawer/faq_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/drawer/help_page.dart';
@@ -70,14 +72,13 @@ class ProfileDrawer extends StatelessWidget {
                           child: const Text('취소'),
                         ),
                         TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            FirebaseAuth.instance.signOut();
+                          onPressed: () async {
+                            Navigator.of(context).pop(); // 먼저 다이얼로그 닫고
+                            await context
+                                .read<LoginProvider>()
+                                .logout(); // 프로바이더 통해 로그아웃
                           },
-                          child: const Text(
-                            '로그아웃',
-                            style: TextStyle(color: Colors.red),
-                          ),
+                          child: Text('로그아웃'),
                         ),
                       ],
                     ),

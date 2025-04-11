@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/stats_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_drawer.dart';
+import 'package:talk_pilot/src/provider/login_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -11,15 +14,12 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String nickname = '테스트 닉네임';
-  String realName = '테스트 이름';
   int presentationCount = 12;
   double averageScore = 87.5;
   int averageCPM = 220;
-
   bool isEditingNickname = false;
-  final TextEditingController nicknameController = TextEditingController();
 
+  final TextEditingController nicknameController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -30,6 +30,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<LoginProvider>().user;
+
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFF5F6FA),
@@ -60,7 +62,6 @@ class _ProfilePageState extends State<ProfilePage> {
           if (isEditingNickname) {
             setState(() {
               isEditingNickname = false;
-              nickname = nicknameController.text;
             });
             FocusScope.of(context).unfocus();
           }
@@ -69,8 +70,9 @@ class _ProfilePageState extends State<ProfilePage> {
           padding: const EdgeInsets.all(20),
           children: [
             ProfileCard(
-              nickname: nickname,
-              realName: realName,
+              nickname: user?.displayName ?? 'Guest',
+              realName: user?.email ?? 'No Email',
+              profileImageUrl: user?.photoURL,
               isEditing: isEditingNickname,
               nicknameController: nicknameController,
               onToggleEdit: () {
@@ -81,24 +83,22 @@ class _ProfilePageState extends State<ProfilePage> {
                   }
                 });
               },
-              onNicknameSubmit: (value) {
+              onNicknameSubmit: (value) async {
+                await FirebaseAuth.instance.currentUser?.updateDisplayName(
+                  value,
+                );
                 setState(() {
-                  nickname = value;
                   isEditingNickname = false;
                 });
               },
             ),
-
             const SizedBox(height: 20),
-
             StatsCard(
               presentationCount: presentationCount,
               averageScore: averageScore,
               averageCPM: averageCPM,
             ),
-
             const SizedBox(height: 30),
-
             ElevatedButton.icon(
               onPressed: () => debugPrint('발표 기록 보기 버튼 클릭'),
               icon: const Icon(Icons.history, color: Colors.white),

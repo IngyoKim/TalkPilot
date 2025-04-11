@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class ProfileCard extends StatelessWidget {
   final String nickname;
   final String realName;
+  final String? profileImageUrl;
   final bool isEditing;
   final TextEditingController nicknameController;
   final VoidCallback onToggleEdit;
@@ -12,6 +13,7 @@ class ProfileCard extends StatelessWidget {
     super.key,
     required this.nickname,
     required this.realName,
+    required this.profileImageUrl,
     required this.isEditing,
     required this.nicknameController,
     required this.onToggleEdit,
@@ -21,44 +23,64 @@ class ProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 3,
       child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.all(24),
+        child: Row(
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: isEditing
-                      ? TextField(
-                          controller: nicknameController..text = nickname,
-                          decoration: const InputDecoration(
-                            hintText: '닉네임 입력',
-                            border: OutlineInputBorder(),
-                            isDense: true,
-                          ),
-                          autofocus: true,
-                          onSubmitted: onNicknameSubmit,
-                        )
-                      : Text(
-                          '닉네임: $nickname',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                ),
-                IconButton(
-                  icon: Icon(isEditing ? Icons.close : Icons.edit),
-                  onPressed: onToggleEdit,
-                ),
-              ],
+            CircleAvatar(
+              radius: 45,
+              backgroundImage:
+                  profileImageUrl != null
+                      ? NetworkImage(profileImageUrl!)
+                      : null,
+              child:
+                  profileImageUrl == null
+                      ? const Icon(Icons.person, size: 45)
+                      : null,
             ),
-            const SizedBox(height: 10),
-            Text('이름: $realName', style: const TextStyle(fontSize: 16)),
+            const SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  isEditing
+                      ? TextField(
+                        controller: nicknameController..text = nickname,
+                        decoration: const InputDecoration(
+                          hintText: '닉네임 입력',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                        autofocus: true,
+                        onSubmitted: onNicknameSubmit,
+                      )
+                      : Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              nickname.isNotEmpty ? nickname : '닉네임 없음',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(isEditing ? Icons.close : Icons.edit),
+                            onPressed: onToggleEdit,
+                          ),
+                        ],
+                      ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Email: $realName',
+                    style: const TextStyle(fontSize: 15, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

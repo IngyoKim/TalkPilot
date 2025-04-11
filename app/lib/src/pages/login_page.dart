@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:talk_pilot/src/login/kakao_login.dart';
 import 'package:talk_pilot/src/login/google_login.dart';
+import 'package:talk_pilot/src/provider/login_provider.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
 
 class LoginPage extends StatefulWidget {
@@ -49,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
                     Column(
                       children: [
                         Image.asset(
-                          'assets/login/logo.png', // 로고 사진 추가하기기
+                          'assets/login/logo.png',
                           height: 200,
                           width: 200,
                         ),
@@ -70,16 +72,16 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                     const SizedBox(height: 40),
+
+                    /// Kakao Login
                     GestureDetector(
                       onTap: () {
-                        // 카카오 로그인 로직 구현
                         tryLogin(
                           context: context,
                           loginAction: () async {
-                            final user = await KakaoLogin().login();
-                            if (user == null) {
-                              throw Exception("Kakao login failed");
-                            }
+                            await context.read<LoginProvider>().login(
+                              KakaoLogin(),
+                            );
                           },
                           setLoading: _setLoading,
                         );
@@ -96,14 +98,14 @@ class _LoginPageState extends State<LoginPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              'assets/login/kakao.png', // 카카오 로고 추가하기
+                              'assets/login/kakao.png',
                               height: 32,
                               width: 32,
                             ),
                             const SizedBox(width: 10),
-                            Text(
+                            const Text(
                               'Continue with Kakao',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.black,
                               ),
@@ -113,15 +115,16 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
+
+                    /// Google Login
                     GestureDetector(
                       onTap: () {
                         tryLogin(
                           context: context,
                           loginAction: () async {
-                            final user = await GoogleLogin().login();
-                            if (user == null) {
-                              throw Exception("Google login failed");
-                            }
+                            await context.read<LoginProvider>().login(
+                              GoogleLogin(),
+                            );
                           },
                           setLoading: _setLoading,
                         );
@@ -138,14 +141,14 @@ class _LoginPageState extends State<LoginPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              'assets/login/google.png', // 구글 로고 추가하기
+                              'assets/login/google.png',
                               height: 32,
                               width: 32,
                             ),
                             const SizedBox(width: 10),
-                            Text(
+                            const Text(
                               'Continue with Google',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.black,
                               ),
@@ -155,7 +158,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 50),
-                    Text(
+                    const Text(
                       'CBNU Department of Computer Engineering, 2025',
                       style: TextStyle(fontSize: 12, color: Colors.grey),
                       textAlign: TextAlign.center,

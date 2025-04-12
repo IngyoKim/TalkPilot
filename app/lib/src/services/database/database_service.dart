@@ -35,6 +35,18 @@ class DatabaseService {
     }
   }
 
+  /// Update data at [path]
+  Future<void> updateDB(String path, Map<String, dynamic> updates) async {
+    final ref = _database.ref(path);
+    try {
+      await ref.update(updates);
+      _log("[UPDATE] $path", updates);
+    } catch (e) {
+      _error("[UPDATE] $path", e);
+      rethrow;
+    }
+  }
+
   /// Delete data at [path]
   Future<void> deleteDB(String path) async {
     final ref = _database.ref(path);
@@ -43,6 +55,35 @@ class DatabaseService {
       debugPrint("[DELETE] $path - success");
     } catch (e) {
       _error("[DELETE] $path", e);
+      rethrow;
+    }
+  }
+
+  /// Fetch multiple child nodes from [path] and map to list of [T] using [fromMap]
+  Future<List<T>> fetchDB<T>({
+    required String path,
+    required T Function(Map<String, dynamic>) fromMap,
+    Query? query,
+  }) async {
+    try {
+      final snapshot = await (query ?? _database.ref(path)).get();
+
+      if (snapshot.exists) {
+        final data =
+            snapshot.children
+                .map(
+                  (child) =>
+                      fromMap(Map<String, dynamic>.from(child.value as Map)),
+                )
+                .toList();
+        _log("[FETCH] $path", data);
+        return data;
+      } else {
+        debugPrint("[FETCH] $path - no data");
+        return [];
+      }
+    } catch (e) {
+      _error("[FETCH] $path", e);
       rethrow;
     }
   }

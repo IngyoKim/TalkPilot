@@ -8,6 +8,8 @@ class UserModel {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final List<String>? projectIds;
+  final double? averageScore; // 평균 발표 점수
+  final double? targetScore; // 목표 점수
 
   UserModel({
     required this.uid,
@@ -19,6 +21,8 @@ class UserModel {
     this.createdAt,
     this.updatedAt,
     this.projectIds,
+    this.averageScore,
+    this.targetScore,
   });
 
   factory UserModel.fromMap(String uid, Map<String, dynamic> map) {
@@ -35,6 +39,14 @@ class UserModel {
           map['updatedAt'] != null ? DateTime.tryParse(map['updatedAt']) : null,
       projectIds:
           map['projectIds'] != null ? List<String>.from(map['projectIds']) : [],
+      averageScore:
+          map['averageScore'] != null
+              ? (map['averageScore'] as num).toDouble()
+              : null,
+      targetScore:
+          map['targetScore'] != null
+              ? (map['targetScore'] as num).toDouble()
+              : null,
     );
   }
 
@@ -48,6 +60,8 @@ class UserModel {
       if (createdAt != null) "createdAt": createdAt!.toIso8601String(),
       if (updatedAt != null) "updatedAt": updatedAt!.toIso8601String(),
       if (projectIds != null) "projectIds": projectIds,
+      if (averageScore != null) "averageScore": averageScore,
+      if (targetScore != null) "targetScore": targetScore,
     };
   }
 }

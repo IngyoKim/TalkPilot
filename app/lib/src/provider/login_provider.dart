@@ -18,22 +18,32 @@ class LoginProvider with ChangeNotifier {
     });
   }
 
-  /// 로그인 수행 (SocialLogin 객체를 받음음)
+  /// 로그인 수행 (SocialLogin 객체를 받음)
   Future<void> login(SocialLogin loginProvider) async {
-    final user = await loginProvider.login();
-    if (user != null) {
-      _user = user;
-      _loginMethod = loginProvider;
-      notifyListeners();
+    try {
+      final user = await loginProvider.login();
+      if (user != null) {
+        _user = user;
+        _loginMethod = loginProvider;
+        notifyListeners();
+      } else {
+        throw Exception("로그인 실패: 유저 정보가 null입니다.");
+      }
+    } catch (e) {
+      debugPrint("[LoginProvider] 로그인 중 오류 발생: $e");
+      rethrow;
     }
   }
 
-  /// 로그아웃은 이전에 사용한 provider로 수행
+  /// 로그아웃은 이전에 받은 provider로 수행
   Future<void> logout() async {
-    await _loginMethod?.logout();
-    await _auth.signOut(); // safety
-    _user = null;
-    _loginMethod = null;
-    notifyListeners();
+    try {
+      await _loginMethod?.logout();
+      await _auth.signOut();
+    } finally {
+      _user = null;
+      _loginMethod = null;
+      notifyListeners();
+    }
   }
 }

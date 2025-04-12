@@ -97,8 +97,9 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 20),
             StatsCard(
               presentationCount: presentationCount,
-              averageScore: averageScore,
+              averageScore: userModel?.averageScore ?? averageScore,
               averageCPM: averageCPM,
+              targetScore: userModel?.targetScore ?? 90.0,
             ),
             const SizedBox(height: 30),
             ElevatedButton.icon(

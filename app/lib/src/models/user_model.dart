@@ -4,12 +4,12 @@ class UserModel {
   final String email;
   final String nickname;
   final String? photoUrl;
-  final String? loginProvider;
+  final String? loginMethod; // 이름 변경
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final List<String>? projectIds;
-  final double? averageScore; // 평균 발표 점수
-  final double? targetScore; // 목표 점수
+  final Map<String, String>? projectStatuses; // 상태 매핑된 프로젝트 목록
+  final double? averageScore;
+  final double? targetScore;
 
   UserModel({
     required this.uid,
@@ -17,10 +17,10 @@ class UserModel {
     required this.email,
     required this.nickname,
     this.photoUrl,
-    this.loginProvider,
+    this.loginMethod,
     this.createdAt,
     this.updatedAt,
-    this.projectIds,
+    this.projectStatuses,
     this.averageScore,
     this.targetScore,
   });
@@ -32,13 +32,15 @@ class UserModel {
       email: map['email'] ?? '',
       nickname: map['nickname'] ?? '',
       photoUrl: map['photoUrl'],
-      loginProvider: map['loginProvider'],
+      loginMethod: map['loginMethod'],
       createdAt:
           map['createdAt'] != null ? DateTime.tryParse(map['createdAt']) : null,
       updatedAt:
           map['updatedAt'] != null ? DateTime.tryParse(map['updatedAt']) : null,
-      projectIds:
-          map['projectIds'] != null ? List<String>.from(map['projectIds']) : [],
+      projectStatuses:
+          map['projectStatuses'] != null
+              ? Map<String, String>.from(map['projectStatuses'])
+              : null,
       averageScore:
           map['averageScore'] != null
               ? (map['averageScore'] as num).toDouble()
@@ -56,10 +58,10 @@ class UserModel {
       "email": email,
       "nickname": nickname,
       if (photoUrl != null) "photoUrl": photoUrl,
-      if (loginProvider != null) "loginProvider": loginProvider,
+      if (loginMethod != null) "loginMethod": loginMethod,
       if (createdAt != null) "createdAt": createdAt!.toIso8601String(),
       if (updatedAt != null) "updatedAt": updatedAt!.toIso8601String(),
-      if (projectIds != null) "projectIds": projectIds,
+      if (projectStatuses != null) "projectStatuses": projectStatuses,
       if (averageScore != null) "averageScore": averageScore,
       if (targetScore != null) "targetScore": targetScore,
     };
@@ -70,10 +72,10 @@ class UserModel {
     String? email,
     String? nickname,
     String? photoUrl,
-    String? loginProvider,
+    String? loginMethod,
     DateTime? createdAt,
     DateTime? updatedAt,
-    List<String>? projectIds,
+    Map<String, String>? projectStatuses,
     double? averageScore,
     double? targetScore,
   }) {
@@ -83,10 +85,10 @@ class UserModel {
       email: email ?? this.email,
       nickname: nickname ?? this.nickname,
       photoUrl: photoUrl ?? this.photoUrl,
-      loginProvider: loginProvider ?? this.loginProvider,
+      loginMethod: loginMethod ?? this.loginMethod,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      projectIds: projectIds ?? this.projectIds,
+      projectStatuses: projectStatuses ?? this.projectStatuses,
       averageScore: averageScore ?? this.averageScore,
       targetScore: targetScore ?? this.targetScore,
     );

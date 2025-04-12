@@ -22,13 +22,19 @@ class DatabaseService {
     final ref = _database.ref(path);
     try {
       final snapshot = await ref.get();
-      if (snapshot.exists && snapshot.value != null) {
-        _log("[READ] $path", snapshot.value);
-        return snapshot.value as T;
-      } else {
+      if (!snapshot.exists || snapshot.value == null) {
         debugPrint("[READ] $path - no data");
         return null;
       }
+
+      final raw = snapshot.value!;
+
+      // T가 Map<String, dynamic>인 경우 강제 변환
+      if (T == Map<String, dynamic>) {
+        return Map<String, dynamic>.from(raw as Map) as T;
+      }
+
+      return raw as T;
     } catch (e) {
       _error("[READ] $path", e);
       rethrow;

@@ -11,7 +11,7 @@ class UserProvider with ChangeNotifier {
   bool get hasUser => _currentUser != null;
 
   Future<void> loadUser(String uid) async {
-    final user = await _userService.getUser(uid);
+    final user = await _userService.readUser(uid);
     if (user != null) {
       _currentUser = user;
     } else {
@@ -24,7 +24,7 @@ class UserProvider with ChangeNotifier {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      await _userService.saveUser(_currentUser!);
+      await _userService.writeUser(_currentUser!);
     }
     notifyListeners();
   }

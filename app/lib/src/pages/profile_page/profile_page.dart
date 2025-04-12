@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/stats_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_drawer.dart';
-import 'package:talk_pilot/src/provider/login_provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -30,7 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<LoginProvider>().user;
+    final userModel = context.watch<UserProvider>().currentUser;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -70,9 +70,9 @@ class _ProfilePageState extends State<ProfilePage> {
           padding: const EdgeInsets.all(20),
           children: [
             ProfileCard(
-              nickname: user?.displayName ?? 'Guest',
-              realName: user?.email ?? 'No Email',
-              profileImageUrl: user?.photoURL,
+              nickname: userModel?.nickname ?? 'Guest',
+              realName: userModel?.email ?? 'No Email',
+              profileImageUrl: userModel?.photoUrl,
               isEditing: isEditingNickname,
               nicknameController: nicknameController,
               onToggleEdit: () {
@@ -84,12 +84,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 });
               },
               onNicknameSubmit: (value) async {
-                await FirebaseAuth.instance.currentUser?.updateDisplayName(
-                  value,
-                );
-                setState(() {
-                  isEditingNickname = false;
-                });
+                if (userModel != null) {
+                  final updated = userModel.copyWith(
+                    nickname: value,
+                    updatedAt: DateTime.now(),
+                  );
+                  await context.read<UserProvider>().updateUser(updated);
+                  setState(() => isEditingNickname = false);
+                }
               },
             ),
             const SizedBox(height: 20),

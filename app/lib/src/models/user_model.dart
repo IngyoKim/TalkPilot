@@ -64,4 +64,31 @@ class UserModel {
       if (targetScore != null) "targetScore": targetScore,
     };
   }
+
+  UserModel copyWith({
+    String? name,
+    String? email,
+    String? nickname,
+    String? photoUrl,
+    String? loginProvider,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    List<String>? projectIds,
+    double? averageScore,
+    double? targetScore,
+  }) {
+    return UserModel(
+      uid: uid,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      nickname: nickname ?? this.nickname,
+      photoUrl: photoUrl ?? this.photoUrl,
+      loginProvider: loginProvider ?? this.loginProvider,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      projectIds: projectIds ?? this.projectIds,
+      averageScore: averageScore ?? this.averageScore,
+      targetScore: targetScore ?? this.targetScore,
+    );
+  }
 }

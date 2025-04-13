@@ -46,11 +46,10 @@ class UserService {
       loginMethod: loginMethod,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
-
-      // 기본값 설정
       averageScore: 0.0,
       targetScore: 90.0,
-      projectStatuses: {}, // 빈 Map으로 초기화
+      projectStatuses: {},
+      cpm: 0.0,
     );
 
     await writeUser(userModel, onlyIfAbsent: true);

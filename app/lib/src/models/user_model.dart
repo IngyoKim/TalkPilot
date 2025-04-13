@@ -4,12 +4,13 @@ class UserModel {
   final String email;
   final String nickname;
   final String? photoUrl;
-  final String? loginMethod; // 이름 변경
+  final String? loginMethod;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final Map<String, String>? projectStatuses; // 상태 매핑된 프로젝트 목록
+  final Map<String, String>? projectStatuses;
   final double? averageScore;
   final double? targetScore;
+  final double? cpm;
 
   UserModel({
     required this.uid,
@@ -23,6 +24,7 @@ class UserModel {
     this.projectStatuses,
     this.averageScore,
     this.targetScore,
+    this.cpm,
   });
 
   factory UserModel.fromMap(String uid, Map<String, dynamic> map) {
@@ -49,6 +51,7 @@ class UserModel {
           map['targetScore'] != null
               ? (map['targetScore'] as num).toDouble()
               : null,
+      cpm: map['cpm'] != null ? (map['cpm'] as num).toDouble() : null,
     );
   }
 
@@ -64,6 +67,7 @@ class UserModel {
       if (projectStatuses != null) "projectStatuses": projectStatuses,
       if (averageScore != null) "averageScore": averageScore,
       if (targetScore != null) "targetScore": targetScore,
+      if (cpm != null) "cpm": cpm,
     };
   }
 
@@ -78,6 +82,7 @@ class UserModel {
     Map<String, String>? projectStatuses,
     double? averageScore,
     double? targetScore,
+    double? cpm,
   }) {
     return UserModel(
       uid: uid,
@@ -91,6 +96,7 @@ class UserModel {
       projectStatuses: projectStatuses ?? this.projectStatuses,
       averageScore: averageScore ?? this.averageScore,
       targetScore: targetScore ?? this.targetScore,
+      cpm: cpm ?? this.cpm,
     );
   }
 }

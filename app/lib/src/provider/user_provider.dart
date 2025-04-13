@@ -29,6 +29,15 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> refreshUser() async {
+    if (_currentUser == null) return;
+    final latest = await _userService.readUser(_currentUser!.uid);
+    if (latest != null) {
+      _currentUser = latest;
+      notifyListeners();
+    }
+  }
+
   Future<void> updateUser(UserModel updatedUser) async {
     _currentUser = updatedUser;
     await _userService.updateUser(updatedUser);

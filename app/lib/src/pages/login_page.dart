@@ -89,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                             if (user != null) {
                               await UserService().initUserFromAuth(
                                 user,
-                                loginMethod: 'kakao',
+                                loginMethod: 'Kakao',
                               );
                             }
                           },
@@ -139,7 +139,7 @@ class _LoginPageState extends State<LoginPage> {
                             if (user != null) {
                               await UserService().initUserFromAuth(
                                 user,
-                                loginMethod: 'kakao',
+                                loginMethod: 'Google',
                               );
                             }
                           },

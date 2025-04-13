@@ -43,8 +43,9 @@ class _ProfilePageState extends State<ProfilePage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: '새로고침',
-            onPressed: () {
-              debugPrint('새로고침 실행');
+            onPressed: () async {
+              final userProvider = context.read<UserProvider>();
+              await userProvider.refreshUser();
             },
           ),
           IconButton(

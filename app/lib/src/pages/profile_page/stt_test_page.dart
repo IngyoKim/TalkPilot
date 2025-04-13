@@ -12,6 +12,7 @@ class _SttTestPageState extends State<SttTestPage> {
   final SttService _sttService = SttService();
   String _text = '';
   bool _isListening = false;
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -25,14 +26,26 @@ class _SttTestPageState extends State<SttTestPage> {
   }
 
   void _toggleListening() async {
+    if (_isProcessing) return;
+
+    setState(() => _isProcessing = true);
+
     if (_sttService.isListening) {
       await _sttService.stopListening();
+
+      await Future.delayed(const Duration(milliseconds: 100));
+
       setState(() {
         _isListening = false;
+        _isProcessing = false;
       });
     } else {
-      setState(() => _isListening = true);
-      await _sttService.startListening((resultText) {
+      setState(() {
+        _isListening = true;
+        _isProcessing = false;
+      });
+
+      _sttService.startListening((resultText) {
         setState(() {
           _text = resultText;
         });
@@ -58,7 +71,7 @@ class _SttTestPageState extends State<SttTestPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ElevatedButton.icon(
-              onPressed: _toggleListening,
+              onPressed: _isProcessing ? null : _toggleListening,
               icon: Icon(
                 _isListening ? Icons.stop : Icons.mic,
                 color: Colors.white,
@@ -86,7 +99,9 @@ class _SttTestPageState extends State<SttTestPage> {
                 ),
                 child: SingleChildScrollView(
                   child: Text(
-                    _text.isEmpty ? '여기에 인식된 텍스트가 표시됩니다.' : _text,
+                    _text.isEmpty
+                        ? '여기에 인식된 텍스트가 표시됩니다.'
+                        : _text,
                     style: const TextStyle(fontSize: 18, color: Colors.black87),
                   ),
                 ),

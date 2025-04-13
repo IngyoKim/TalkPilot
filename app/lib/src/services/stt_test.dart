@@ -13,15 +13,15 @@ class SttService {
     );
   }
 
-  Future<void> startListening(Function(String) onResult) async {
-    if (_isAvailable && !_speech.isListening) {
-      await _speech.listen(
-        onResult: (result) {
-          onResult(result.recognizedWords);
-        },
-      );
-    }
+  void startListening(Function(String) onResult) {
+  if (_isAvailable && !_speech.isListening) {
+    _speech.listen(
+      onResult: (result) {
+        onResult(result.recognizedWords);
+      },
+    );
   }
+}
 
   Future<void> stopListening() async {
     await _speech.stop();

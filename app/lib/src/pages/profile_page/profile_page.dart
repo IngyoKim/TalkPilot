@@ -6,6 +6,8 @@ import 'package:talk_pilot/src/pages/profile_page/widgets/profile_drawer.dart';
 import 'package:talk_pilot/src/provider/login_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:talk_pilot/src/pages/profile_page/stt_test_page.dart';
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -108,6 +110,27 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SttTestPage()),
+                );
+              },
+              icon: const Icon(Icons.mic, color: Colors.white),
+              label: const Text(
+                '임시 STT 테스트 페이지',
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurpleAccent,
                 minimumSize: const Size.fromHeight(50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

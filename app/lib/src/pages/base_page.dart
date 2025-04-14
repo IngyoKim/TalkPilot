@@ -25,7 +25,7 @@ class _BasePageState extends State<BasePage> {
         child: StreamBuilder<User?>(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (context, snapshot) {
-            /// 로그인 여부에 따라 login_page or work_page로 이동
+            /// 로그인 여부에 따라 login_page or bottom_bar로 이동
             return !snapshot.hasData ? const LoginPage() : const BottomBar();
           },
         ),

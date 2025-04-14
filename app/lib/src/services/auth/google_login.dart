@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:talk_pilot/src/login/social_login.dart';
+import 'package:talk_pilot/src/services/auth/social_login.dart';
 
 /// Google Login을 수행
 class GoogleLogin implements SocialLogin {

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import 'package:talk_pilot/src/login/kakao_login.dart';
-import 'package:talk_pilot/src/login/google_login.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:talk_pilot/src/services/auth/kakao_login.dart';
+import 'package:talk_pilot/src/services/auth/google_login.dart';
 import 'package:talk_pilot/src/provider/login_provider.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
+import 'package:talk_pilot/src/services/database/user_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -79,9 +82,16 @@ class _LoginPageState extends State<LoginPage> {
                         tryLogin(
                           context: context,
                           loginAction: () async {
-                            await context.read<LoginProvider>().login(
-                              KakaoLogin(),
-                            );
+                            final loginProvider = context.read<LoginProvider>();
+                            await loginProvider.login(KakaoLogin());
+
+                            final user = FirebaseAuth.instance.currentUser;
+                            if (user != null) {
+                              await UserService().initUserFromAuth(
+                                user,
+                                loginMethod: 'Kakao',
+                              );
+                            }
                           },
                           setLoading: _setLoading,
                         );
@@ -122,9 +132,16 @@ class _LoginPageState extends State<LoginPage> {
                         tryLogin(
                           context: context,
                           loginAction: () async {
-                            await context.read<LoginProvider>().login(
-                              GoogleLogin(),
-                            );
+                            final loginProvider = context.read<LoginProvider>();
+                            await loginProvider.login(GoogleLogin());
+
+                            final user = FirebaseAuth.instance.currentUser;
+                            if (user != null) {
+                              await UserService().initUserFromAuth(
+                                user,
+                                loginMethod: 'Google',
+                              );
+                            }
                           },
                           setLoading: _setLoading,
                         );

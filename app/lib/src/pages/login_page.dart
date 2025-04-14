@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:talk_pilot/src/login/kakao_login.dart';
-import 'package:talk_pilot/src/login/google_login.dart';
+import 'package:talk_pilot/src/services/auth/kakao_login.dart';
+import 'package:talk_pilot/src/services/auth/google_login.dart';
 import 'package:talk_pilot/src/provider/login_provider.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';

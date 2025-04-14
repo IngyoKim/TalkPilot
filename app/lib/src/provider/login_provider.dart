@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:talk_pilot/src/login/social_login.dart';
+import 'package:talk_pilot/src/services/auth/social_login.dart';
 
 class LoginProvider with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;

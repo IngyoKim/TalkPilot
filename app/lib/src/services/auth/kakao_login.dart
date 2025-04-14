@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:talk_pilot/src/login/custom_token_service.dart';
-import 'package:talk_pilot/src/login/social_login.dart';
+import 'package:talk_pilot/src/services/auth/custom_token_service.dart';
+import 'package:talk_pilot/src/services/auth/social_login.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 
 /// Kakao Login을 수행

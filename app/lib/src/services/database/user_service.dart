@@ -46,9 +46,9 @@ class UserService {
       loginMethod: loginMethod,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
+      projectIds: {},
       averageScore: 0.0,
       targetScore: 90.0,
-      projectStatuses: {},
       cpm: 0.0,
     );
 

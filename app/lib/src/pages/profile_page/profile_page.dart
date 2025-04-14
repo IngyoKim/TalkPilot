@@ -14,13 +14,9 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  int presentationCount = 12;
-  double averageScore = 87.5;
-  int averageCPM = 220;
-  bool isEditingNickname = false;
-
   final TextEditingController nicknameController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool isEditingNickname = false;
 
   @override
   void dispose() {
@@ -97,10 +93,14 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 20),
             StatsCard(
-              presentationCount: presentationCount,
-              averageScore: userModel?.averageScore ?? averageScore,
-              averageCPM: averageCPM,
-              targetScore: userModel?.targetScore ?? 90.0,
+              presentationCount:
+                  userModel?.projectIds?.values
+                      .where((v) => v == 'Completed')
+                      .length ??
+                  0,
+              averageScore: userModel?.averageScore ?? 0,
+              averageCPM: userModel?.cpm?.round() ?? 0,
+              targetScore: userModel?.targetScore ?? 0,
             ),
             const SizedBox(height: 30),
             ElevatedButton.icon(

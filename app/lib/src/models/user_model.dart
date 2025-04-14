@@ -7,7 +7,7 @@ class UserModel {
   final String? loginMethod;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final Map<String, String>? projectStatuses;
+  final Map<String, String>? projectIds;
   final double? averageScore;
   final double? targetScore;
   final double? cpm;
@@ -21,7 +21,7 @@ class UserModel {
     this.loginMethod,
     this.createdAt,
     this.updatedAt,
-    this.projectStatuses,
+    this.projectIds,
     this.averageScore,
     this.targetScore,
     this.cpm,
@@ -39,9 +39,9 @@ class UserModel {
           map['createdAt'] != null ? DateTime.tryParse(map['createdAt']) : null,
       updatedAt:
           map['updatedAt'] != null ? DateTime.tryParse(map['updatedAt']) : null,
-      projectStatuses:
-          map['projectStatuses'] != null
-              ? Map<String, String>.from(map['projectStatuses'])
+      projectIds:
+          map['projectIds'] != null
+              ? Map<String, String>.from(map['projectIds'])
               : null,
       averageScore:
           map['averageScore'] != null
@@ -64,7 +64,7 @@ class UserModel {
       if (loginMethod != null) "loginMethod": loginMethod,
       if (createdAt != null) "createdAt": createdAt!.toIso8601String(),
       if (updatedAt != null) "updatedAt": updatedAt!.toIso8601String(),
-      if (projectStatuses != null) "projectStatuses": projectStatuses,
+      if (projectIds != null) "projectIds": projectIds,
       if (averageScore != null) "averageScore": averageScore,
       if (targetScore != null) "targetScore": targetScore,
       if (cpm != null) "cpm": cpm,
@@ -79,7 +79,7 @@ class UserModel {
     String? loginMethod,
     DateTime? createdAt,
     DateTime? updatedAt,
-    Map<String, String>? projectStatuses,
+    Map<String, String>? projectIds,
     double? averageScore,
     double? targetScore,
     double? cpm,
@@ -93,7 +93,7 @@ class UserModel {
       loginMethod: loginMethod ?? this.loginMethod,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      projectStatuses: projectStatuses ?? this.projectStatuses,
+      projectIds: projectIds ?? this.projectIds,
       averageScore: averageScore ?? this.averageScore,
       targetScore: targetScore ?? this.targetScore,
       cpm: cpm ?? this.cpm,

@@ -33,7 +33,7 @@ android {
 
         // manifestPlaceholders
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] =
-            project.findProperty("KAKAO_NATIVE_APP_KEY") as String? ?: ""
+            rootProject.extra["KAKAO_NATIVE_APP_KEY"] as? String ?: ""
     }
 
     buildTypes {

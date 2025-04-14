@@ -1,13 +1,19 @@
-def dotenvFile = rootProject.file(".env")
+def dotenvFile = file("../../.env")
 def env = [:]
 
 if (dotenvFile.exists()) {
     dotenvFile.eachLine { line ->
         if (line && line.contains('=')) {
-            def (key, value) = line.split('=')
-            env[key.trim()] = value.trim()
+            def keyValue = line.split('=', 2)
+            def key = keyValue[0].trim()
+            def value = keyValue[1].trim()
+            env[key] = value
         }
     }
+    /// set()을 이용해야지만 kts에서 읽을 수 있음
+    rootProject.ext.set("env", env)
+    rootProject.ext.set("KAKAO_NATIVE_APP_KEY", env["KAKAO_NATIVE_APP_KEY"])
+    // println "[dotenv.gradle] KAKAO_NATIVE_APP_KEY loaded: ${env["KAKAO_NATIVE_APP_KEY"]}"
+} else {
+    println "[dotenv.gradle] .env file not found at ${dotenvFile.path}"
 }
-
-ext.env = env

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/stats_card.dart';
@@ -88,6 +89,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   );
                   await context.read<UserProvider>().updateUser(updated);
                   setState(() => isEditingNickname = false);
+                   ToastMessage.show("닉네임이 변경되었습니다.");
                 }
               },
             ),

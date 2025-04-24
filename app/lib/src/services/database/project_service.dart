@@ -41,7 +41,11 @@ class ProjectService {
   }
 
   Future<void> updateProject(String id, Map<String, dynamic> updates) async {
-    await _db.updateDB('$basePath/$id', updates);
+    final fullUpdates = {
+      ...updates,
+      'updatedAt': DateTime.now().toIso8601String(),
+    };
+    await _db.updateDB('$basePath/$id', fullUpdates);
   }
 
   Future<void> deleteProject(String id) async {

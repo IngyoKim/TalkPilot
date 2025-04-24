@@ -21,6 +21,7 @@ class ProjectProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// 프로젝트 리스트 불러오기
   Future<void> loadProjects(String uid) async {
     final allProjects = await _projectService.fetchProjects(uid);
     final userProjects =
@@ -31,6 +32,7 @@ class ProjectProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// 프로젝트 생성
   Future<void> createProject({
     required String title,
     required String description,
@@ -58,6 +60,7 @@ class ProjectProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// 프로젝트 새로고침
   Future<void> refreshProject() async {
     if (_selectedProject == null) return;
     final latest = await _projectService.readProject(_selectedProject!.id);
@@ -69,6 +72,7 @@ class ProjectProvider with ChangeNotifier {
     }
   }
 
+  /// 프로젝트 업데이트
   Future<void> updateProject(Map<ProjectField, dynamic> updates) async {
     if (_selectedProject == null) return;
     final updateMap = {
@@ -79,6 +83,7 @@ class ProjectProvider with ChangeNotifier {
     await refreshProject(); // 업데이트한 정보로 갱신
   }
 
+  /// 프로젝트 삭제
   Future<void> deleteProject() async {
     if (_selectedProject == null) return;
     await _projectService.deleteProject(_selectedProject!.id);

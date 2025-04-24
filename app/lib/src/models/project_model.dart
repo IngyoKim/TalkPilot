@@ -74,4 +74,29 @@ class ProjectModel {
       if (score != null) "score": score,
     };
   }
+
+  ProjectModel copyWith({
+    String? title,
+    String? description,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? ownerUid,
+    Map<String, String>? participants,
+    String? status,
+    int? estimatedTime,
+    double? score,
+  }) {
+    return ProjectModel(
+      id: id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      ownerUid: ownerUid ?? this.ownerUid,
+      participants: participants ?? this.participants,
+      status: status ?? this.status,
+      estimatedTime: estimatedTime ?? this.estimatedTime,
+      score: score ?? this.score,
+    );
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:talk_pilot/src/models/user_model.dart';
 
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_card.dart';
@@ -82,11 +83,13 @@ class _ProfilePageState extends State<ProfilePage> {
               },
               onNicknameSubmit: (value) async {
                 if (userModel != null) {
-                  final updated = userModel.copyWith(
-                    nickname: value,
-                    updatedAt: DateTime.now(),
-                  );
-                  await context.read<UserProvider>().updateUser(updated);
+                  // final updated = userModel.copyWith(
+                  //   nickname: value,
+                  //   updatedAt: DateTime.now(),
+                  // );
+                  await context.read<UserProvider>().updateUser({
+                    UserField.nickname: value,
+                  });
                   setState(() => isEditingNickname = false);
                 }
               },

@@ -39,12 +39,10 @@ class ProjectProvider with ChangeNotifier {
       newProject.id: newProject.status,
     };
 
-    final updatedUser = currentUser.copyWith(
-      projectIds: updatedProjectIds,
-      updatedAt: DateTime.now(),
-    );
-
-    await _userService.updateUser(updatedUser);
+    await _userService.updateUser(currentUser.uid, {
+      "projectIds": updatedProjectIds,
+      "updatedAt": DateTime.now().toIso8601String(),
+    });
 
     _projects.insert(0, newProject);
     notifyListeners();
@@ -54,12 +52,18 @@ class ProjectProvider with ChangeNotifier {
     String projectId,
     Map<String, dynamic> updates,
   ) async {
-    await _projectService.updateProject(projectId, updates);
+    final fullUpdates = {
+      ...updates,
+      'updatedAt': DateTime.now().toIso8601String(), // 자동으로 updateAt 갱신
+    };
+
+    await _projectService.updateProject(projectId, fullUpdates);
+
     final index = _projects.indexWhere((p) => p.id == projectId);
     if (index != -1) {
       final updated = ProjectModel.fromMap(projectId, {
         ..._projects[index].toMap(),
-        ...updates,
+        ...fullUpdates,
       });
       _projects[index] = updated;
       notifyListeners();

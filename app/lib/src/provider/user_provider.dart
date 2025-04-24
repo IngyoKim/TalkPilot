@@ -38,10 +38,16 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  Future<void> updateUser(UserModel updatedUser) async {
-    _currentUser = updatedUser;
-    await _userService.updateUser(updatedUser);
-    notifyListeners();
+  Future<void> updateUser(Map<UserField, dynamic> updates) async {
+    if (_currentUser == null) return;
+
+    final updateMap = {
+      for (final entry in updates.entries) entry.key.key: entry.value,
+    };
+
+    await _userService.updateUser(_currentUser!.uid, updateMap);
+
+    await refreshUser(); // 업데이트한 정보로 갱신
   }
 
   void clearUser() {

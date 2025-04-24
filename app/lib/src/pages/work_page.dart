@@ -1,7 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+
 import 'package:talk_pilot/src/pages/project.dart';
-import 'project_detail_page.dart';
+import 'package:talk_pilot/src/components/toast_message.dart';
+import 'package:talk_pilot/src/pages/project_detail_page.dart';
+
 
 class WorkPage extends StatefulWidget {
   const WorkPage({super.key});
@@ -45,6 +48,7 @@ class _WorkPageState extends State<WorkPage> {
                         ),
                       );
                     });
+                    ToastMessage.show("새 프로젝트를 추가했습니다.", backgroundColor: Colors.green);
                   }
                   Navigator.pop(context);
                 },

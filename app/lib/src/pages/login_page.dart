@@ -8,7 +8,8 @@ import 'package:talk_pilot/src/services/auth/google_login.dart';
 import 'package:talk_pilot/src/provider/login_provider.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
-import 'package:talk_pilot/src/components/toast_message.dart'; // ✅ ToastMessage import
+
+import 'package:talk_pilot/src/components/toast_message.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -37,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
     } catch (error) {
       debugPrint("로그인에 실패했습니다: $error");
 
-      ToastMessage.showLoginFailed(); // ✅ 로그인 실패 시 토스트 메시지
+      ToastMessage.show("로그인에 실패했습니다: $error");
     } finally {
       setLoading(false);
     }
@@ -93,9 +94,8 @@ class _LoginPageState extends State<LoginPage> {
                               user,
                               loginMethod: 'Kakao',
                             );
-
-                            ToastMessage.showLoginSuccess();  // ✅ 성공 메시지
-                            ToastMessage.showUserInfoLoaded(); // ✅ 유저 정보 불러옴 메시지
+                            ToastMessage.show("로그인에 성공했습니다.");
+                            ToastMessage.show("유저 정보를 불러옵니다.");
                           }
                         },
                         setLoading: _setLoading,
@@ -146,9 +146,8 @@ class _LoginPageState extends State<LoginPage> {
                               user,
                               loginMethod: 'Google',
                             );
-
-                            ToastMessage.showLoginSuccess();  // ✅ 성공 메시지
-                            ToastMessage.showUserInfoLoaded(); // ✅ 유저 정보 불러옴 메시지
+                            ToastMessage.show("로그인에 성공했습니다.");
+                            ToastMessage.show("유저 정보를 불러옵니다.");
                           }
                         },
                         setLoading: _setLoading,

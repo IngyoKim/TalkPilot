@@ -14,19 +14,8 @@ class UserProvider with ChangeNotifier {
     final user = await _userService.readUser(uid);
     if (user != null) {
       _currentUser = user;
-    } else {
-      // 최초 로그인 시 기본 UserModel 생성
-      _currentUser = UserModel(
-        uid: uid,
-        name: '',
-        email: '',
-        nickname: '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-      await _userService.writeUser(_currentUser!);
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   Future<void> refreshUser() async {

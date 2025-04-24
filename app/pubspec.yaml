@@ -48,6 +48,8 @@ dependencies:
   firebase_database: ^11.3.5
   uuid: ^4.5.1
 
+  fluttertoast: ^8.2.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

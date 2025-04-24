@@ -7,6 +7,7 @@ import 'package:talk_pilot/src/pages/work_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/profile_page.dart';
 
 import 'package:talk_pilot/src/provider/user_provider.dart';
+import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
 
 class BottomBar extends StatefulWidget {
@@ -32,6 +33,7 @@ class _BottomBarState extends State<BottomBar>
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       await context.read<UserProvider>().loadUser(user.uid);
+      ToastMessage.show("${user.displayName}님 환영합니다.");
     }
     if (mounted) {
       setState(() => _isUserLoaded = true);

@@ -10,28 +10,24 @@ class ProjectProvider with ChangeNotifier {
   final ProjectService _projectService = ProjectService();
   final UserService _userService = UserService();
 
-  List<ProjectModel> _projects = [];
+  final List<ProjectModel> _projects = [];
   ProjectModel? _selectedProject;
 
   List<ProjectModel> get projects => List.unmodifiable(_projects);
   ProjectModel? get selectedProject => _selectedProject;
 
-  Future<void> loadUserProjects(String uid) async {
+  set selectedProject(ProjectModel? project) {
+    _selectedProject = project;
+    notifyListeners();
+  }
+
+  Future<void> loadProjects(String uid) async {
     final allProjects = await _projectService.fetchProjects(uid);
     final userProjects =
         allProjects.where((p) => p.participants.containsKey(uid)).toList();
     _projects
       ..clear()
       ..addAll(userProjects);
-    notifyListeners();
-  }
-
-  void selectProject(String projectId) {
-    try {
-      _selectedProject = _projects.firstWhere((p) => p.id == projectId);
-    } catch (_) {
-      _selectedProject = null;
-    }
     notifyListeners();
   }
 

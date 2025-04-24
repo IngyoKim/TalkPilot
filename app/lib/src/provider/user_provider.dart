@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:talk_pilot/src/models/user_model.dart';
+import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
 
 class UserProvider with ChangeNotifier {
@@ -34,6 +35,7 @@ class UserProvider with ChangeNotifier {
     final latest = await _userService.readUser(_currentUser!.uid);
     if (latest != null) {
       _currentUser = latest;
+      ToastMessage.show("유저 정보를 다시 불러옵니다.");
       notifyListeners();
     }
   }

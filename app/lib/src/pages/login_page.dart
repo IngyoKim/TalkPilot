@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:talk_pilot/src/components/loading_indicator.dart';
+
+import 'package:talk_pilot/src/provider/login_provider.dart';
 import 'package:talk_pilot/src/services/auth/kakao_login.dart';
 import 'package:talk_pilot/src/services/auth/google_login.dart';
-import 'package:talk_pilot/src/provider/login_provider.dart';
-import 'package:talk_pilot/src/components/loading_indicator.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
 
-import 'package:talk_pilot/src/components/toast_message.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -37,8 +37,6 @@ class _LoginPageState extends State<LoginPage> {
       await loginAction();
     } catch (error) {
       debugPrint("로그인에 실패했습니다: $error");
-
-      ToastMessage.show("로그인에 실패했습니다: $error");
     } finally {
       setLoading(false);
     }
@@ -94,8 +92,6 @@ class _LoginPageState extends State<LoginPage> {
                               user,
                               loginMethod: 'Kakao',
                             );
-                            ToastMessage.show("로그인에 성공했습니다.");
-                            ToastMessage.show("유저 정보를 불러옵니다.");
                           }
                         },
                         setLoading: _setLoading,
@@ -146,8 +142,6 @@ class _LoginPageState extends State<LoginPage> {
                               user,
                               loginMethod: 'Google',
                             );
-                            ToastMessage.show("로그인에 성공했습니다.");
-                            ToastMessage.show("유저 정보를 불러옵니다.");
                           }
                         },
                         setLoading: _setLoading,

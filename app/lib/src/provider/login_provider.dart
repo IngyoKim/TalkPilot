@@ -27,7 +27,6 @@ class LoginProvider with ChangeNotifier {
       if (user != null) {
         _user = user;
         _loginMethod = loginProvider;
-        ToastMessage.show("${user.displayName}님 환영합니다.");
         notifyListeners();
       } else {
         ToastMessage.show("로그인 실패: 유저 정보가 null입니다.");

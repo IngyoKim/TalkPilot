@@ -1,13 +1,35 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:uuid/uuid.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/services/database/database_service.dart';
 
 class ProjectService {
   final DatabaseService _db = DatabaseService();
   final String basePath = 'projects';
+  final _uuid = const Uuid();
 
-  Future<void> writeProject(ProjectModel project) async {
-    await _db.writeDB('$basePath/${project.id}', project.toMap());
+  Future<ProjectModel> writeProject({
+    required String name,
+    required String description,
+    required String ownerUid,
+    required List<String> participantUids,
+  }) async {
+    final now = DateTime.now();
+    final id = _uuid.v4();
+
+    final project = ProjectModel(
+      id: id,
+      name: name,
+      description: description,
+      createdAt: now,
+      updatedAt: now,
+      ownerUid: ownerUid,
+      participantUids: participantUids,
+      status: 'preparing',
+    );
+
+    await _db.writeDB('$basePath/$id', project.toMap());
+    return project;
   }
 
   Future<ProjectModel?> readProject(String id) async {
@@ -24,14 +46,18 @@ class ProjectService {
     await _db.deleteDB('$basePath/$id');
   }
 
-  Future<List<ProjectModel>> fetchUserProjects(String uid) async {
-    return await _db.fetchDB<ProjectModel>(
-      path: basePath,
-      fromMap: (map) => ProjectModel.fromMap(map['id'], map),
-      query: FirebaseDatabase.instance
-          .ref(basePath)
-          .orderByChild('participants/$uid')
-          .equalTo(true),
-    );
+  Future<List<ProjectModel>> fetchProjects(String uid) async {
+    final snapshot = await FirebaseDatabase.instance.ref(basePath).get();
+
+    if (!snapshot.exists) return [];
+
+    return snapshot.children
+        .map((child) {
+          final map = Map<String, dynamic>.from(child.value as Map);
+          final project = ProjectModel.fromMap(child.key!, map);
+          return project;
+        })
+        .where((project) => project.participantUids.contains(uid))
+        .toList();
   }
 }

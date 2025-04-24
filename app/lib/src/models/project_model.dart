@@ -1,3 +1,18 @@
+/// 변경 가능한 필드들만 정의
+enum ProjectField {
+  title,
+  description,
+  ownerUid,
+  participants,
+  status,
+  estimatedTime,
+  score,
+}
+
+extension ProjectFieldExt on ProjectField {
+  String get key => toString().split('.').last;
+}
+
 class ProjectModel {
   final String id;
   final String title;

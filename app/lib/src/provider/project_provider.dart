@@ -9,16 +9,29 @@ import 'package:talk_pilot/src/services/database/project_service.dart';
 class ProjectProvider with ChangeNotifier {
   final ProjectService _projectService = ProjectService();
   final UserService _userService = UserService();
-  final List<ProjectModel> _projects = [];
+
+  List<ProjectModel> _projects = [];
+  ProjectModel? _selectedProject;
 
   List<ProjectModel> get projects => List.unmodifiable(_projects);
+  ProjectModel? get selectedProject => _selectedProject;
+
   Future<void> loadUserProjects(String uid) async {
-    final projects = await _projectService.fetchProjects(uid);
+    final allProjects = await _projectService.fetchProjects(uid);
     final userProjects =
-        projects.where((p) => p.participants.containsValue(uid)).toList();
+        allProjects.where((p) => p.participants.containsKey(uid)).toList();
     _projects
       ..clear()
       ..addAll(userProjects);
+    notifyListeners();
+  }
+
+  void selectProject(String projectId) {
+    try {
+      _selectedProject = _projects.firstWhere((p) => p.id == projectId);
+    } catch (_) {
+      _selectedProject = null;
+    }
     notifyListeners();
   }
 
@@ -45,34 +58,36 @@ class ProjectProvider with ChangeNotifier {
     });
 
     _projects.insert(0, newProject);
+    _selectedProject = newProject;
     notifyListeners();
   }
 
-  Future<void> updateProject(
-    String projectId,
-    Map<String, dynamic> updates,
-  ) async {
-    final fullUpdates = {
-      ...updates,
-      'updatedAt': DateTime.now().toIso8601String(), // 자동으로 updateAt 갱신
-    };
-
-    await _projectService.updateProject(projectId, fullUpdates);
-
-    final index = _projects.indexWhere((p) => p.id == projectId);
-    if (index != -1) {
-      final updated = ProjectModel.fromMap(projectId, {
-        ..._projects[index].toMap(),
-        ...fullUpdates,
-      });
-      _projects[index] = updated;
+  Future<void> refreshProject() async {
+    if (_selectedProject == null) return;
+    final latest = await _projectService.readProject(_selectedProject!.id);
+    if (latest != null) {
+      final index = _projects.indexWhere((p) => p.id == latest.id);
+      if (index != -1) _projects[index] = latest;
+      _selectedProject = latest;
       notifyListeners();
     }
   }
 
-  Future<void> deleteProject(String projectId) async {
-    await _projectService.deleteProject(projectId);
-    _projects.removeWhere((p) => p.id == projectId);
+  Future<void> updateProject(Map<ProjectField, dynamic> updates) async {
+    if (_selectedProject == null) return;
+    final updateMap = {
+      for (final e in updates.entries) e.key.key: e.value,
+      'updatedAt': DateTime.now().toIso8601String(),
+    };
+    await _projectService.updateProject(_selectedProject!.id, updateMap);
+    await refreshProject(); // 업데이트한 정보로 갱신
+  }
+
+  Future<void> deleteProject() async {
+    if (_selectedProject == null) return;
+    await _projectService.deleteProject(_selectedProject!.id);
+    _projects.removeWhere((p) => p.id == _selectedProject!.id);
+    _selectedProject = null;
     notifyListeners();
   }
 }

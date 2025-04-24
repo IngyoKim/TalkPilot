@@ -8,23 +8,25 @@ class ProjectService {
   final String basePath = 'projects';
   final _uuid = const Uuid();
 
+  /// user쪽에도 [projectId]를 업데이트 해야함.
+  /// projectModel을 return.
   Future<ProjectModel> writeProject({
-    required String name,
+    required String title,
     required String description,
     required String ownerUid,
-    required List<String> participantUids,
+    required Map<String, String> participants,
   }) async {
     final now = DateTime.now();
     final id = _uuid.v4();
 
     final project = ProjectModel(
       id: id,
-      name: name,
+      title: title,
       description: description,
       createdAt: now,
       updatedAt: now,
       ownerUid: ownerUid,
-      participantUids: participantUids,
+      participants: participants,
       status: 'preparing',
     );
 
@@ -57,7 +59,7 @@ class ProjectService {
           final project = ProjectModel.fromMap(child.key!, map);
           return project;
         })
-        .where((project) => project.participantUids.contains(uid))
+        .where((project) => project.participants.containsKey(uid))
         .toList();
   }
 }

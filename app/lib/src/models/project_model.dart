@@ -1,23 +1,23 @@
 class ProjectModel {
   final String id;
-  final String name;
+  final String title;
   final String description;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String ownerUid;
-  final List<String> participantUids;
+  final Map<String, String> participants; // "uid : role" 형식으로 저장장
   final String status; // e.g. "preparing", "completed"
   final int? estimatedTime; // 발표 예상 시간 (단위: 초)
   final double? score; // 프로젝트 점수
 
   ProjectModel({
     required this.id,
-    required this.name,
+    required this.title,
     required this.description,
     this.createdAt,
     this.updatedAt,
     required this.ownerUid,
-    required this.participantUids,
+    required this.participants,
     required this.status,
     this.estimatedTime,
     this.score,
@@ -26,17 +26,17 @@ class ProjectModel {
   factory ProjectModel.fromMap(String id, Map<String, dynamic> map) {
     return ProjectModel(
       id: id,
-      name: map['name'] ?? '',
+      title: map['title'] ?? '',
       description: map['description'] ?? '',
       createdAt:
           map['createdAt'] != null ? DateTime.tryParse(map['createdAt']) : null,
       updatedAt:
           map['updatedAt'] != null ? DateTime.tryParse(map['updatedAt']) : null,
       ownerUid: map['ownerUid'] ?? '',
-      participantUids:
-          map['participantUids'] != null
-              ? List<String>.from(map['participantUids'])
-              : [],
+      participants:
+          map['participants'] != null
+              ? Map<String, String>.from(map['participants'])
+              : {},
       status: map['status'] ?? 'preparing',
       estimatedTime:
           map['estimatedTime'] != null
@@ -48,12 +48,12 @@ class ProjectModel {
 
   Map<String, dynamic> toMap() {
     return {
-      "name": name,
+      "title": title,
       "description": description,
       if (createdAt != null) "createdAt": createdAt!.toIso8601String(),
       if (updatedAt != null) "updatedAt": updatedAt!.toIso8601String(),
       "ownerUid": ownerUid,
-      "participantUids": participantUids,
+      "participants": participants,
       "status": status,
       if (estimatedTime != null) "estimatedTime": estimatedTime,
       if (score != null) "score": score,

@@ -15,7 +15,7 @@ class ProjectProvider with ChangeNotifier {
   Future<void> loadUserProjects(String uid) async {
     final projects = await _projectService.fetchProjects(uid);
     final userProjects =
-        projects.where((p) => p.participantUids.contains(uid)).toList();
+        projects.where((p) => p.participants.containsValue(uid)).toList();
     _projects
       ..clear()
       ..addAll(userProjects);
@@ -23,15 +23,15 @@ class ProjectProvider with ChangeNotifier {
   }
 
   Future<void> createProject({
-    required String name,
+    required String title,
     required String description,
     required UserModel currentUser,
   }) async {
     final newProject = await _projectService.writeProject(
-      name: name,
+      title: title,
       description: description,
       ownerUid: currentUser.uid,
-      participantUids: [currentUser.uid],
+      participants: {currentUser.uid: "Owner"},
     );
 
     final updatedProjectIds = {

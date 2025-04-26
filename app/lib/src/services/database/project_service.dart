@@ -1,5 +1,5 @@
-import 'package:firebase_database/firebase_database.dart';
 import 'package:uuid/uuid.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/services/database/database_service.dart';
 
@@ -31,6 +31,8 @@ class ProjectService {
     );
 
     await _db.writeDB('$basePath/$id', project.toMap());
+
+    /// createProject()에서 유저랑 연동하기 위함
     return project;
   }
 
@@ -43,7 +45,7 @@ class ProjectService {
   Future<void> updateProject(String id, Map<String, dynamic> updates) async {
     final fullUpdates = {
       ...updates,
-      'updatedAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(), // 자동으로 updateAt 갱신
     };
     await _db.updateDB('$basePath/$id', fullUpdates);
   }

@@ -55,6 +55,8 @@ class ProjectProvider with ChangeNotifier {
       "updatedAt": DateTime.now().toIso8601String(),
     });
 
+    /// 로컬에 추가된 프로젝트 반영
+    /// refresh 필요 없음
     _projects.insert(0, newProject);
     _selectedProject = newProject;
     notifyListeners();

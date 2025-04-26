@@ -20,7 +20,7 @@ class LoginProvider with ChangeNotifier {
     });
   }
 
-  /// 로그인 수행 (SocialLogin 객체를 받음)
+  /// 로그인 수행 [SocialLogin]
   Future<void> login(SocialLogin loginProvider) async {
     try {
       final user = await loginProvider.login();

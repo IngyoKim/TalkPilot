@@ -19,8 +19,12 @@ class UserService {
     return UserModel.fromMap(uid, map);
   }
 
-  Future<void> updateUser(UserModel user) async {
-    await _db.updateDB("users/${user.uid}", user.toMap());
+  Future<void> updateUser(String uid, Map<String, dynamic> updates) async {
+    final fullUpdates = {
+      ...updates,
+      'updatedAt': DateTime.now().toIso8601String(), // 자동으로 updateAt 갱신
+    };
+    await _db.updateDB("users/$uid", fullUpdates);
   }
 
   Future<void> deleteUser(String uid) async {

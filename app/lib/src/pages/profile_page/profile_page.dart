@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:talk_pilot/src/models/user_model.dart';
 
 import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
@@ -20,6 +21,16 @@ class _ProfilePageState extends State<ProfilePage> {
   bool isEditingNickname = false;
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      // ignore: use_build_context_synchronously
+      final userProvider = context.read<UserProvider>();
+      userProvider.refreshUser();
+    });
+  }
+
+  @override
   void dispose() {
     nicknameController.dispose();
     super.dispose();
@@ -37,14 +48,6 @@ class _ProfilePageState extends State<ProfilePage> {
         title: const Text('프로필', style: TextStyle(color: Colors.white)),
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: '새로고침',
-            onPressed: () async {
-              final userProvider = context.read<UserProvider>();
-              await userProvider.refreshUser();
-            },
-          ),
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: '설정',
@@ -83,11 +86,13 @@ class _ProfilePageState extends State<ProfilePage> {
               },
               onNicknameSubmit: (value) async {
                 if (userModel != null) {
-                  final updated = userModel.copyWith(
-                    nickname: value,
-                    updatedAt: DateTime.now(),
-                  );
-                  await context.read<UserProvider>().updateUser(updated);
+                  // final updated = userModel.copyWith(
+                  //   nickname: value,
+                  //   updatedAt: DateTime.now(),
+                  // );
+                  await context.read<UserProvider>().updateUser({
+                    UserField.nickname: value,
+                  });
                   setState(() => isEditingNickname = false);
                    ToastMessage.show("닉네임이 변경되었습니다.");
                 }

@@ -1,3 +1,19 @@
+/// 변경 가능한 필드들만 정의
+enum UserField {
+  email,
+  nickname,
+  photoUrl,
+  projectIds,
+  averageScore,
+  targetScore,
+  cpm,
+}
+
+extension UserFieldExt on UserField {
+  String get key => toString().split('.').last;
+}
+
+/// user의 형식 정의
 class UserModel {
   final String uid;
   final String name;

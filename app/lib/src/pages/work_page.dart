@@ -1,10 +1,12 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'package:talk_pilot/src/pages/project.dart';
-import 'package:talk_pilot/src/components/toast_message.dart';
+import 'package:talk_pilot/src/provider/user_provider.dart';
+import 'package:talk_pilot/src/provider/project_provider.dart';
+
+import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/pages/project_detail_page.dart';
-
 
 class WorkPage extends StatefulWidget {
   const WorkPage({super.key});
@@ -14,20 +16,39 @@ class WorkPage extends StatefulWidget {
 }
 
 class _WorkPageState extends State<WorkPage> {
-  final List<Project> projects = [];
+  @override
+  void initState() {
+    super.initState();
+    final user = context.read<UserProvider>().currentUser;
+    if (user != null) {
+      context.read<ProjectProvider>().loadProjects(user.uid);
+    }
+  }
 
   void _showAddProjectDialog() {
-    final TextEditingController controller = TextEditingController();
+    final TextEditingController titleController = TextEditingController();
+    final TextEditingController descriptionController = TextEditingController();
 
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
             title: const Text('새 프로젝트 추가'),
-            content: TextField(
-              controller: controller,
-              autofocus: true,
-              decoration: const InputDecoration(hintText: '프로젝트 제목'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  autofocus: true,
+                  decoration: const InputDecoration(hintText: '프로젝트 제목'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(hintText: '프로젝트 설명 (선택)'),
+                  maxLines: 3,
+                ),
+              ],
             ),
             actions: [
               TextButton(
@@ -35,22 +56,20 @@ class _WorkPageState extends State<WorkPage> {
                 child: const Text('취소'),
               ),
               TextButton(
-                onPressed: () {
-                  final title = controller.text.trim();
-                  if (title.isNotEmpty) {
-                    setState(() {
-                      projects.insert(
-                        0,
-                        Project(
-                          title: title,
-                          createdAt: DateTime.now(),
-                          practiceCount: 0,
-                        ),
-                      );
-                    });
-                    ToastMessage.show("새 프로젝트를 추가했습니다.", backgroundColor: Colors.green);
-                  }
+                onPressed: () async {
+                  final title = titleController.text.trim();
+                  final description = descriptionController.text.trim();
+                  final user = context.read<UserProvider>().currentUser;
+
                   Navigator.pop(context);
+
+                  if (title.isNotEmpty && user != null) {
+                    await context.read<ProjectProvider>().createProject(
+                      title: title,
+                      description: description,
+                      currentUser: user,
+                    );
+                  }
                 },
                 child: const Text('추가'),
               ),
@@ -59,7 +78,8 @@ class _WorkPageState extends State<WorkPage> {
     );
   }
 
-  void _openProjectDetail(Project project) {
+  void _openProjectDetail(ProjectModel project) {
+    context.read<ProjectProvider>().selectedProject = project;
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => ProjectDetailPage(project: project)),
@@ -68,19 +88,14 @@ class _WorkPageState extends State<WorkPage> {
 
   @override
   Widget build(BuildContext context) {
+    final projects = context.watch<ProjectProvider>().projects;
     final sortedProjects = [...projects]
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      ..sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('프로젝트', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.deepPurple,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
-            onPressed: () => debugPrint('설정 클릭'),
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -126,27 +141,47 @@ class _WorkPageState extends State<WorkPage> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      project.title,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                              child: Stack(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          project.title,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          '생성일: ${DateFormat('yyyy-MM-dd / hh:mm:ss a').format(project.createdAt!)}',
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                        Text(
+                                          '참여자 수: ${project.participants.length}',
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      '생성일: ${DateFormat('yyyy-MM-dd / hh:mm:ss a').format(project.createdAt)}',
+                                  ),
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: PopupMenuButton<String>(
+                                      onSelected: (value) {
+                                        // 아직 아무 기능 연결하지 않음
+                                      },
+                                      itemBuilder: (context) => [],
+                                      icon: const Icon(Icons.more_vert),
                                     ),
-                                    Text('연습 횟수: ${project.practiceCount}회'),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
                           );

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:talk_pilot/src/pages/project.dart';
+import 'package:talk_pilot/src/models/project_model.dart';
 
 class ProjectDetailPage extends StatefulWidget {
-  final Project project;
+  final ProjectModel project;
 
   const ProjectDetailPage({super.key, required this.project});
 

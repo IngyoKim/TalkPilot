@@ -78,6 +78,32 @@ class _WorkPageState extends State<WorkPage> {
     );
   }
 
+  void _showDeleteProjectDialog(ProjectModel project) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('프로젝트 삭제'),
+            content: Text('"${project.title}" 프로젝트를 삭제하시겠습니까?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('취소'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await context.read<ProjectProvider>().deleteProject(
+                    project.id,
+                  );
+                  Navigator.pop(context);
+                },
+                child: const Text('삭제', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+    );
+  }
+
   void _openProjectDetail(ProjectModel project) {
     context.read<ProjectProvider>().selectedProject = project;
     Navigator.push(
@@ -175,9 +201,17 @@ class _WorkPageState extends State<WorkPage> {
                                     right: 8,
                                     child: PopupMenuButton<String>(
                                       onSelected: (value) {
-                                        // 아직 아무 기능 연결하지 않음
+                                        if (value == 'delete') {
+                                          _showDeleteProjectDialog(project);
+                                        }
                                       },
-                                      itemBuilder: (context) => [],
+                                      itemBuilder:
+                                          (context) => [
+                                            const PopupMenuItem(
+                                              value: 'delete',
+                                              child: Text('삭제'),
+                                            ),
+                                          ],
                                       icon: const Icon(Icons.more_vert),
                                     ),
                                   ),

@@ -7,15 +7,37 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Node
+node_modules/
+dist/
+dist-ssr/
 *.local
+
+# Vite/Parcel Cache
+.parcel-cache/
+
+# Environment files
+.env
+.env.*
+
+# Coverage
+coverage/
+
+# SSL keys
+*.pem
+*.key
+*.crt
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*

@@ -108,6 +108,31 @@ class _WorkPageState extends State<WorkPage> {
                 ),
               ],
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('취소'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final newTitle = titleController.text.trim();
+                  final newDescription = descriptionController.text.trim();
+
+                  if (newTitle.isNotEmpty &&
+                      (newTitle != project.title ||
+                          newDescription != project.description)) {
+                    final projectProvider = context.read<ProjectProvider>();
+                    projectProvider.selectedProject = project;
+                    await projectProvider.updateProject({
+                      ProjectField.title: newTitle,
+                      ProjectField.description: newDescription,
+                    });
+                  }
+                  Navigator.pop(context);
+                },
+                child: const Text('수정 완료'),
+              ),
+            ],
           ),
     );
   }

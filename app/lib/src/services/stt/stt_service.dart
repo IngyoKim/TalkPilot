@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class SttService {
@@ -8,8 +9,8 @@ class SttService {
 
   Future<void> init() async {
     _isAvailable = await _speech.initialize(
-      onStatus: (status) => print('STT status: $status'),
-      onError: (error) => print('STT error: $error'),
+      onStatus: (status) => debugPrint('STT status: $status'),
+      onError: (error) => debugPrint('STT error: $error'),
     );
   }
 

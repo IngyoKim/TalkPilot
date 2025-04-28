@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:talk_pilot/src/services/stt_test.dart';
+import 'package:talk_pilot/src/services/stt/stt_service.dart';
 
 class SttTestPage extends StatefulWidget {
   const SttTestPage({super.key});
 
   @override
-  _SttTestPageState createState() => _SttTestPageState();
+  State<SttTestPage> createState() => _SttTestPageState();
 }
 
 class _SttTestPageState extends State<SttTestPage> {

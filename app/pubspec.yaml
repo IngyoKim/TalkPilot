@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   provider: ^6.1.4
+  speech_to_text: ^7.0.0
   flutter_dotenv: ^5.2.1
   shared_preferences: ^2.5.3
   

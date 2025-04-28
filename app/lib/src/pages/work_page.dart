@@ -145,7 +145,6 @@ class _WorkPageState extends State<WorkPage> {
       text: project.description,
     );
     showDialog(
-      //삭제
       context: context,
       builder:
           (context) => AlertDialog(
@@ -267,12 +266,18 @@ class _WorkPageState extends State<WorkPage> {
                                     right: 8,
                                     child: PopupMenuButton<String>(
                                       onSelected: (value) {
-                                        if (value == 'delete') {
+                                        if (value == 'edit') {
+                                          _showEditProjectDialog(project);
+                                        } else if (value == 'delete') {
                                           _showDeleteProjectDialog(project);
                                         }
                                       },
                                       itemBuilder:
                                           (context) => [
+                                            const PopupMenuItem(
+                                              value: 'edit',
+                                              child: Text('수정'),
+                                            ),
                                             const PopupMenuItem(
                                               value: 'delete',
                                               child: Text('삭제'),

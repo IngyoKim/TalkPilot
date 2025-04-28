@@ -78,8 +78,49 @@ class _WorkPageState extends State<WorkPage> {
     );
   }
 
-  void _showDeleteProjectDialog(ProjectModel project) {
+  void _showEditProjectDialog(ProjectModel project) {
+    final TextEditingController titleController = TextEditingController(
+      text: project.title,
+    );
+    final TextEditingController descriptionController = TextEditingController(
+      text: project.description,
+    );
     showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('프로젝트 정보 수정'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  autofocus: true,
+                  decoration: const InputDecoration(hintText: '새 프로젝트 이름 입력'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(
+                    hintText: '새 프로젝트 설명 입력 (선택사항)',
+                  ),
+                  maxLines: 3,
+                ),
+              ],
+            ),
+          ),
+    );
+  }
+
+  void _showDeleteProjectDialog(ProjectModel project) {
+    final TextEditingController titleController = TextEditingController(
+      text: project.title,
+    );
+    final TextEditingController descriptionController = TextEditingController(
+      text: project.description,
+    );
+    showDialog(
+      //삭제
       context: context,
       builder:
           (context) => AlertDialog(

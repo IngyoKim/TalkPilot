@@ -25,84 +25,39 @@ class _WorkPageState extends State<WorkPage> {
     }
   }
 
-  void _showAddProjectDialog() {
-    final TextEditingController titleController = TextEditingController();
-    final TextEditingController descriptionController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('새 프로젝트 추가'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  autofocus: true,
-                  decoration: const InputDecoration(hintText: '프로젝트 제목'),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: descriptionController,
-                  decoration: const InputDecoration(hintText: '프로젝트 설명 (선택)'),
-                  maxLines: 3,
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('취소'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  final title = titleController.text.trim();
-                  final description = descriptionController.text.trim();
-                  final user = context.read<UserProvider>().currentUser;
-
-                  Navigator.pop(context);
-
-                  if (title.isNotEmpty && user != null) {
-                    await context.read<ProjectProvider>().createProject(
-                      title: title,
-                      description: description,
-                      currentUser: user,
-                    );
-                  }
-                },
-                child: const Text('추가'),
-              ),
-            ],
-          ),
+  void _openProjectDetail(ProjectModel project) {
+    context.read<ProjectProvider>().selectedProject = project;
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ProjectDetailPage(project: project)),
     );
   }
 
-  void _showEditProjectDialog(ProjectModel project) {
-    final TextEditingController titleController = TextEditingController(
-      text: project.title,
+  void _showProjectDialog({ProjectModel? project}) {
+    final isEditMode = project != null;
+    final titleController = TextEditingController(text: project?.title ?? '');
+    final descriptionController = TextEditingController(
+      text: project?.description ?? '',
     );
-    final TextEditingController descriptionController = TextEditingController(
-      text: project.description,
-    );
+
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('프로젝트 정보 수정'),
+            title: Text(isEditMode ? '프로젝트 정보 수정' : '새 프로젝트 추가'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: titleController,
                   autofocus: true,
-                  decoration: const InputDecoration(hintText: '새 프로젝트 이름 입력'),
+                  decoration: const InputDecoration(hintText: '프로젝트 제목 입력'),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: descriptionController,
                   decoration: const InputDecoration(
-                    hintText: '새 프로젝트 설명 입력 (선택사항)',
+                    hintText: '프로젝트 설명 입력 (선택사항)',
                   ),
                   maxLines: 3,
                 ),
@@ -117,20 +72,28 @@ class _WorkPageState extends State<WorkPage> {
                 onPressed: () async {
                   final newTitle = titleController.text.trim();
                   final newDescription = descriptionController.text.trim();
+                  if (newTitle.isEmpty) return;
 
-                  if (newTitle.isNotEmpty &&
-                      (newTitle != project.title ||
-                          newDescription != project.description)) {
+                  if (isEditMode) {
                     final projectProvider = context.read<ProjectProvider>();
                     projectProvider.selectedProject = project;
                     await projectProvider.updateProject({
                       ProjectField.title: newTitle,
                       ProjectField.description: newDescription,
                     });
+                  } else {
+                    final user = context.read<UserProvider>().currentUser;
+                    if (user != null) {
+                      await context.read<ProjectProvider>().createProject(
+                        title: newTitle,
+                        description: newDescription,
+                        currentUser: user,
+                      );
+                    }
                   }
                   Navigator.pop(context);
                 },
-                child: const Text('수정 완료'),
+                child: Text(isEditMode ? '수정 완료' : '추가'),
               ),
             ],
           ),
@@ -138,14 +101,9 @@ class _WorkPageState extends State<WorkPage> {
   }
 
   void _showDeleteProjectDialog(ProjectModel project) {
-    final TextEditingController titleController = TextEditingController(
-      text: project.title,
-    );
-    final TextEditingController descriptionController = TextEditingController(
-      text: project.description,
-    );
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder:
           (context) => AlertDialog(
             title: const Text('프로젝트 삭제'),
@@ -153,7 +111,7 @@ class _WorkPageState extends State<WorkPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('취소'),
+                child: const Text('아니요'),
               ),
               TextButton(
                 onPressed: () async {
@@ -162,18 +120,10 @@ class _WorkPageState extends State<WorkPage> {
                   );
                   Navigator.pop(context);
                 },
-                child: const Text('삭제', style: TextStyle(color: Colors.red)),
+                child: const Text('예', style: TextStyle(color: Colors.red)),
               ),
             ],
           ),
-    );
-  }
-
-  void _openProjectDetail(ProjectModel project) {
-    context.read<ProjectProvider>().selectedProject = project;
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => ProjectDetailPage(project: project)),
     );
   }
 
@@ -191,11 +141,11 @@ class _WorkPageState extends State<WorkPage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             child: Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton.icon(
-                onPressed: _showAddProjectDialog,
+                onPressed: () => _showProjectDialog(),
                 icon: const Icon(Icons.add),
                 label: const Text('프로젝트 추가'),
                 style: ElevatedButton.styleFrom(
@@ -251,7 +201,7 @@ class _WorkPageState extends State<WorkPage> {
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          '생성일: ${DateFormat('yyyy-MM-dd / hh:mm:ss a').format(project.createdAt!)}',
+                                          '생성일: ${DateFormat('yyyy-MM-dd / hh:mm a').format(project.createdAt!)}',
                                           style: const TextStyle(fontSize: 12),
                                         ),
                                         Text(
@@ -267,7 +217,7 @@ class _WorkPageState extends State<WorkPage> {
                                     child: PopupMenuButton<String>(
                                       onSelected: (value) {
                                         if (value == 'edit') {
-                                          _showEditProjectDialog(project);
+                                          _showProjectDialog(project: project);
                                         } else if (value == 'delete') {
                                           _showDeleteProjectDialog(project);
                                         }

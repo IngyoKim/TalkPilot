@@ -34,6 +34,19 @@ class _WorkPageState extends State<WorkPage> {
     );
   }
 
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'preparing':
+        return const Color(0xFF4CAF50); // 초록
+      case 'paused':
+        return const Color(0xFFFFEB3B); // 노랑
+      case 'completed':
+        return const Color(0xFFF44336); // 빨강
+      default:
+        return Colors.grey; // 정의되지 않은 경우 회색
+    }
+  }
+
   void _showProjectDialog({ProjectModel? project}) {
     final isEditMode = project != null;
     final titleController = TextEditingController(text: project?.title ?? '');
@@ -58,7 +71,7 @@ class _WorkPageState extends State<WorkPage> {
                 TextField(
                   controller: descriptionController,
                   decoration: const InputDecoration(
-                    hintText: '프로젝트 설명 입력 (최대 50자)',
+                    hintText: '프로젝트 설명 입력 (최대 30자)',
                     counterText: '',
                   ),
                   maxLength: 30,
@@ -86,7 +99,7 @@ class _WorkPageState extends State<WorkPage> {
                     });
                     ToastMessage.show(
                       '프로젝트 정보가 수정되었습니다.',
-                      backgroundColor: const Color(0xFFFFEB3B),
+                      backgroundColor: const Color.fromARGB(255, 170, 158, 52),
                     );
                   } else {
                     final user = context.read<UserProvider>().currentUser;
@@ -241,26 +254,135 @@ class _WorkPageState extends State<WorkPage> {
                                   Positioned(
                                     top: 8,
                                     right: 8,
-                                    child: PopupMenuButton<String>(
-                                      onSelected: (value) {
-                                        if (value == 'edit') {
-                                          _showProjectDialog(project: project);
-                                        } else if (value == 'delete') {
-                                          _showDeleteProjectDialog(project);
-                                        }
-                                      },
-                                      itemBuilder:
-                                          (context) => [
-                                            const PopupMenuItem(
-                                              value: 'edit',
-                                              child: Text('수정'),
+                                    child: Row(
+                                      children: [
+                                        // 상태 변경 버튼 (색 원)
+                                        PopupMenuButton<String>(
+                                          onSelected: (value) async {
+                                            context
+                                                .read<ProjectProvider>()
+                                                .selectedProject = project;
+                                            await context
+                                                .read<ProjectProvider>()
+                                                .updateProject({
+                                                  ProjectField.status: value,
+                                                });
+                                            ToastMessage.show(
+                                              '프로젝트 상태가 변경되었습니다.',
+                                              backgroundColor: const Color(
+                                                0xFF4CAF50,
+                                              ),
+                                            );
+                                          },
+                                          itemBuilder:
+                                              (context) => [
+                                                PopupMenuItem(
+                                                  value: 'preparing',
+                                                  child: Row(
+                                                    children: [
+                                                      Container(
+                                                        width: 10,
+                                                        height: 10,
+                                                        decoration:
+                                                            const BoxDecoration(
+                                                              color: Color(
+                                                                0xFF4CAF50,
+                                                              ),
+                                                              shape:
+                                                                  BoxShape
+                                                                      .circle,
+                                                            ),
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      const Text('진행 중'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                PopupMenuItem(
+                                                  value: 'paused',
+                                                  child: Row(
+                                                    children: [
+                                                      Container(
+                                                        width: 10,
+                                                        height: 10,
+                                                        decoration:
+                                                            const BoxDecoration(
+                                                              color: Color(
+                                                                0xFFFFEB3B,
+                                                              ),
+                                                              shape:
+                                                                  BoxShape
+                                                                      .circle,
+                                                            ),
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      const Text('보류'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                PopupMenuItem(
+                                                  value: 'completed',
+                                                  child: Row(
+                                                    children: [
+                                                      Container(
+                                                        width: 10,
+                                                        height: 10,
+                                                        decoration:
+                                                            const BoxDecoration(
+                                                              color: Color(
+                                                                0xFFF44336,
+                                                              ),
+                                                              shape:
+                                                                  BoxShape
+                                                                      .circle,
+                                                            ),
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      const Text('끝'),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                          child: Container(
+                                            width: 16,
+                                            height: 16,
+                                            margin: const EdgeInsets.only(
+                                              right: 12,
                                             ),
-                                            const PopupMenuItem(
-                                              value: 'delete',
-                                              child: Text('삭제'),
+                                            decoration: BoxDecoration(
+                                              color: _getStatusColor(
+                                                project.status,
+                                              ),
+                                              shape: BoxShape.circle,
                                             ),
-                                          ],
-                                      icon: const Icon(Icons.more_vert),
+                                          ),
+                                        ),
+
+                                        // 점 세개 버튼 (수정/삭제)
+                                        PopupMenuButton<String>(
+                                          onSelected: (value) {
+                                            if (value == 'edit') {
+                                              _showProjectDialog(
+                                                project: project,
+                                              );
+                                            } else if (value == 'delete') {
+                                              _showDeleteProjectDialog(project);
+                                            }
+                                          },
+                                          itemBuilder:
+                                              (context) => [
+                                                const PopupMenuItem(
+                                                  value: 'edit',
+                                                  child: Text('수정'),
+                                                ),
+                                                const PopupMenuItem(
+                                                  value: 'delete',
+                                                  child: Text('삭제'),
+                                                ),
+                                              ],
+                                          icon: const Icon(Icons.more_vert),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],

@@ -7,6 +7,7 @@ import 'package:talk_pilot/src/provider/project_provider.dart';
 
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/pages/project_detail_page.dart';
+import 'package:talk_pilot/src/components/toast_message.dart';
 
 class WorkPage extends StatefulWidget {
   const WorkPage({super.key});
@@ -57,8 +58,10 @@ class _WorkPageState extends State<WorkPage> {
                 TextField(
                   controller: descriptionController,
                   decoration: const InputDecoration(
-                    hintText: '프로젝트 설명 입력 (선택사항)',
+                    hintText: '프로젝트 설명 입력 (최대 50자)',
+                    counterText: '',
                   ),
+                  maxLength: 30,
                   maxLines: 3,
                 ),
               ],
@@ -81,6 +84,10 @@ class _WorkPageState extends State<WorkPage> {
                       ProjectField.title: newTitle,
                       ProjectField.description: newDescription,
                     });
+                    ToastMessage.show(
+                      '프로젝트 정보가 수정되었습니다.',
+                      backgroundColor: const Color(0xFFFFEB3B),
+                    );
                   } else {
                     final user = context.read<UserProvider>().currentUser;
                     if (user != null) {
@@ -88,6 +95,10 @@ class _WorkPageState extends State<WorkPage> {
                         title: newTitle,
                         description: newDescription,
                         currentUser: user,
+                      );
+                      ToastMessage.show(
+                        '프로젝트가 추가되었습니다.',
+                        backgroundColor: const Color(0xFF4CAF50),
                       );
                     }
                   }
@@ -119,6 +130,10 @@ class _WorkPageState extends State<WorkPage> {
                     project.id,
                   );
                   Navigator.pop(context);
+                  ToastMessage.show(
+                    '프로젝트가 삭제되었습니다.',
+                    backgroundColor: const Color(0xFFF44336),
+                  );
                 },
                 child: const Text('예', style: TextStyle(color: Colors.red)),
               ),
@@ -171,7 +186,7 @@ class _WorkPageState extends State<WorkPage> {
                               crossAxisCount: 1,
                               mainAxisSpacing: 16,
                               crossAxisSpacing: 16,
-                              childAspectRatio: 3.5,
+                              childAspectRatio: 2.5,
                             ),
                         itemBuilder: (context, index) {
                           final project = sortedProjects[index];
@@ -197,6 +212,18 @@ class _WorkPageState extends State<WorkPage> {
                                             fontWeight: FontWeight.bold,
                                           ),
                                           maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          project.description.isNotEmpty
+                                              ? project.description
+                                              : '설명 없음',
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.grey,
+                                          ),
+                                          maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                         const SizedBox(height: 8),

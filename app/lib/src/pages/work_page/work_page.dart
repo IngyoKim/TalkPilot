@@ -4,12 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:talk_pilot/src/pages/work_page/functions/project_detail_page.dart';
 import 'package:talk_pilot/src/pages/work_page/functions/work_dialogs.dart';
 import 'package:talk_pilot/src/pages/work_page/functions/work_project_card.dart';
-import 'package:talk_pilot/src/pages/work_page/functions/work_helpers.dart';
 
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
-import 'package:talk_pilot/src/components/toast_message.dart';
 
 class WorkPage extends StatefulWidget {
   const WorkPage({super.key});
@@ -38,6 +36,9 @@ class _WorkPageState extends State<WorkPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     final projects = context.watch<ProjectProvider>().projects;
     final sortedProjects = [...projects]
       ..sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
@@ -50,7 +51,7 @@ class _WorkPageState extends State<WorkPage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(screenWidth * 0.04),
             child: Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton.icon(
@@ -75,13 +76,12 @@ class _WorkPageState extends State<WorkPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: GridView.builder(
                         itemCount: sortedProjects.length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 1,
-                              mainAxisSpacing: 16,
-                              crossAxisSpacing: 16,
-                              childAspectRatio: 2.5,
-                            ),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 1,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: (screenWidth / screenHeight) * 3.5,
+                        ),
                         itemBuilder: (context, index) {
                           final project = sortedProjects[index];
                           return WorkProjectCard(

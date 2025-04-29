@@ -21,6 +21,8 @@ class WorkProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return GestureDetector(
       onTap: onTap,
       child: Card(
@@ -35,8 +37,8 @@ class WorkProjectCard extends StatelessWidget {
                 children: [
                   Text(
                     project.title,
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.045,
                       fontWeight: FontWeight.bold,
                     ),
                     maxLines: 1,

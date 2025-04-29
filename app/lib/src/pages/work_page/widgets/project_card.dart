@@ -1,23 +1,19 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 
 import 'package:talk_pilot/src/models/project_model.dart';
+import 'package:talk_pilot/src/pages/work_page/widgets/work_dialogs.dart';
+import 'package:talk_pilot/src/pages/work_page/widgets/work_helpers.dart';
+
 import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
 
-import 'work_helpers.dart';
-import 'work_dialogs.dart';
-
-class WorkProjectCard extends StatelessWidget {
+class ProjectCard extends StatelessWidget {
   final ProjectModel project;
   final VoidCallback onTap;
 
-  const WorkProjectCard({
-    super.key,
-    required this.project,
-    required this.onTap,
-  });
+  const ProjectCard({super.key, required this.project, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

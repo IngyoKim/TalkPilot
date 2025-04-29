@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:talk_pilot/src/pages/work_page/functions/project_detail_page.dart';
-import 'package:talk_pilot/src/pages/work_page/functions/work_dialogs.dart';
-import 'package:talk_pilot/src/pages/work_page/functions/work_project_card.dart';
+import 'package:talk_pilot/src/pages/work_page/widgets/project_detail_page.dart';
+import 'package:talk_pilot/src/pages/work_page/widgets/work_dialogs.dart';
+import 'package:talk_pilot/src/pages/work_page/widgets/project_card.dart';
 
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/provider/project_provider.dart';
@@ -84,7 +84,7 @@ class _WorkPageState extends State<WorkPage> {
                         ),
                         itemBuilder: (context, index) {
                           final project = sortedProjects[index];
-                          return WorkProjectCard(
+                          return ProjectCard(
                             project: project,
                             onTap: () => _openProjectDetail(project),
                           );

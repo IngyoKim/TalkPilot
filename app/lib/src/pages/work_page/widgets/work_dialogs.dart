@@ -6,6 +6,7 @@ import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
 
+// ignore_for_file: use_build_context_synchronously
 void showProjectDialog(BuildContext context, {ProjectModel? project}) {
   final isEditMode = project != null;
   final titleController = TextEditingController(text: project?.title ?? '');

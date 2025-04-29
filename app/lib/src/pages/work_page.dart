@@ -43,7 +43,22 @@ class _WorkPageState extends State<WorkPage> {
       case 'completed':
         return const Color(0xFFF44336); // 빨강
       default:
-        return Colors.grey; // 정의되지 않은 경우 회색
+        return const Color(0xFF4CAF50); // 정의되지 않은 경우 회색
+    }
+  }
+
+  String _formatElapsedTime(DateTime createdAt) {
+    final now = DateTime.now();
+    final difference = now.difference(createdAt);
+
+    if (difference.inSeconds < 60) {
+      return '${difference.inSeconds}초 전';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}분 전';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}시간 전';
+    } else {
+      return '${difference.inDays}일 전';
     }
   }
 
@@ -239,6 +254,18 @@ class _WorkPageState extends State<WorkPage> {
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                         ),
+                                        if (project.updatedAt != null) ...[
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            _formatElapsedTime(
+                                              project.updatedAt!,
+                                            ),
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
                                         const SizedBox(height: 8),
                                         Text(
                                           '생성일: ${DateFormat('yyyy-MM-dd / hh:mm a').format(project.createdAt!)}',

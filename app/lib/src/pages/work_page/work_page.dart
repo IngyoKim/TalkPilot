@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
+
+import 'package:talk_pilot/src/pages/work_page/functions/project_detail_page.dart';
+import 'package:talk_pilot/src/pages/work_page/functions/work_dialogs.dart';
+import 'package:talk_pilot/src/pages/work_page/functions/work_project_card.dart';
+import 'package:talk_pilot/src/pages/work_page/functions/work_helpers.dart';
 
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
-import 'package:talk_pilot/src/pages/project_detail_page.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
-
-import 'work_helpers.dart';
-import 'work_dialogs.dart';
-import 'work_project_card.dart';
 
 class WorkPage extends StatefulWidget {
   const WorkPage({super.key});

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:talk_pilot/src/pages/schedule_page.dart';
-import 'package:talk_pilot/src/pages/work_page.dart';
+import 'package:talk_pilot/src/pages/work_page/work_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/profile_page.dart';
 
 import 'package:talk_pilot/src/provider/user_provider.dart';

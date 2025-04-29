@@ -31,11 +31,13 @@ void showProjectDialog(BuildContext context, {ProjectModel? project}) {
               TextField(
                 controller: descriptionController,
                 decoration: const InputDecoration(
-                  hintText: '프로젝트 설명 입력 (최대 30자)',
+                  hintText: '프로젝트 설명 입력 (최대 100자)',
                   counterText: '',
                 ),
-                maxLength: 30,
+                maxLength: 100,
+                minLines: 1,
                 maxLines: 3,
+                keyboardType: TextInputType.multiline,
               ),
             ],
           ),

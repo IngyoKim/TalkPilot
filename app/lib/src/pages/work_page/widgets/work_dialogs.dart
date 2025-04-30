@@ -174,10 +174,8 @@ class _ProjectCardState extends State<ProjectCard> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  '참여자 수: ${project.participants.length}',
+                  '참여자 수: ${project.participants.length} / 만든 사람: ',
                   style: const TextStyle(fontSize: 12),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

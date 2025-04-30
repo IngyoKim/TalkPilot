@@ -13,6 +13,9 @@ void showProjectDialog(BuildContext context, {ProjectModel? project}) {
   final descriptionController = TextEditingController(
     text: project?.description ?? '',
   );
+  final estimatedTimeController = TextEditingController(
+    text: project?.estimatedTime?.toString() ?? '',
+  );
 
   showDialog(
     context: context,
@@ -39,6 +42,14 @@ void showProjectDialog(BuildContext context, {ProjectModel? project}) {
                 maxLines: 3,
                 keyboardType: TextInputType.multiline,
               ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: estimatedTimeController,
+                decoration: const InputDecoration(
+                  hintText: '목표 발표 시간 입력 (초 단위)',
+                ),
+                keyboardType: TextInputType.number,
+              ),
             ],
           ),
           actions: [
@@ -50,6 +61,10 @@ void showProjectDialog(BuildContext context, {ProjectModel? project}) {
               onPressed: () async {
                 final newTitle = titleController.text.trim();
                 final newDescription = descriptionController.text.trim();
+                final newEstimatedTime = int.tryParse(
+                  estimatedTimeController.text.trim(),
+                );
+
                 if (newTitle.isEmpty) return;
 
                 if (isEditMode) {
@@ -58,6 +73,8 @@ void showProjectDialog(BuildContext context, {ProjectModel? project}) {
                   await projectProvider.updateProject({
                     ProjectField.title: newTitle,
                     ProjectField.description: newDescription,
+                    if (newEstimatedTime != null)
+                      ProjectField.estimatedTime: newEstimatedTime,
                   });
                   ToastMessage.show(
                     '프로젝트 정보가 수정되었습니다.',

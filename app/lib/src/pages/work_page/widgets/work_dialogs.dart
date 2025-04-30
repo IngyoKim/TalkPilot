@@ -73,15 +73,45 @@ class _ProjectCardState extends State<ProjectCard> {
                           (context) => [
                             const PopupMenuItem(
                               value: 'preparing',
-                              child: Text('진행 중'),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.circle,
+                                    size: 10,
+                                    color: Colors.green,
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text('진행 중'),
+                                ],
+                              ),
                             ),
                             const PopupMenuItem(
                               value: 'paused',
-                              child: Text('보류'),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.circle,
+                                    size: 10,
+                                    color: Colors.yellow,
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text('보류'),
+                                ],
+                              ),
                             ),
                             const PopupMenuItem(
                               value: 'completed',
-                              child: Text('끝'),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.circle,
+                                    size: 10,
+                                    color: Colors.red,
+                                  ),
+                                  SizedBox(width: 6),
+                                  Text('끝'),
+                                ],
+                              ),
                             ),
                           ],
                     ),

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:talk_pilot/src/services/cpm/cpm_calculate_service.dart';
 
 class CpmCalculatePage extends StatelessWidget {
-  const CpmCalculatePage({Key? key}) : super(key: key);
+  const CpmCalculatePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class CpmCalculatePage extends StatelessWidget {
 }
 
 class _CpmCalculateView extends StatelessWidget {
-  const _CpmCalculateView({super.key});
+  const _CpmCalculateView();
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +26,7 @@ class _CpmCalculateView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.deepPurple,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          'CPM 계산',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('CPM 계산', style: TextStyle(color: Colors.white)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -48,14 +45,14 @@ class _CpmCalculateView extends StatelessWidget {
             const SizedBox(height: 40),
             ElevatedButton(
               onPressed: service.toggleTimer,
-              child: Text(
-                service.isRunning ? '종료' : '시작',
-                style: const TextStyle(color: Colors.white),
-              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor:
                     service.isRunning ? Colors.indigo : Colors.deepPurple,
                 minimumSize: const Size.fromHeight(50),
+              ),
+              child: Text(
+                service.isRunning ? '종료' : '시작',
+                style: const TextStyle(color: Colors.white),
               ),
             ),
             const SizedBox(height: 30),

@@ -7,6 +7,8 @@ enum ProjectField {
   status,
   estimatedTime,
   score,
+  script,
+  presentationDate,
 }
 
 extension ProjectFieldExt on ProjectField {
@@ -24,6 +26,8 @@ class ProjectModel {
   final String status; // e.g. "preparing", "completed"
   final int? estimatedTime; // 발표 예상 시간 (단위: 초)
   final double? score; // 프로젝트 점수
+  final String? script; // 대본
+  final DateTime? presentationDate; // 발표 일자
 
   ProjectModel({
     required this.id,
@@ -36,6 +40,8 @@ class ProjectModel {
     required this.status,
     this.estimatedTime,
     this.score,
+    this.script,
+    this.presentationDate,
   });
 
   factory ProjectModel.fromMap(String id, Map<String, dynamic> map) {
@@ -58,6 +64,11 @@ class ProjectModel {
               ? (map['estimatedTime'] as num).toInt()
               : null,
       score: map['score'] != null ? (map['score'] as num).toDouble() : null,
+      script: map['script'],
+      presentationDate:
+          map['presentationDate'] != null
+              ? DateTime.tryParse(map['presentationDate'])
+              : null,
     );
   }
 
@@ -72,6 +83,9 @@ class ProjectModel {
       "status": status,
       if (estimatedTime != null) "estimatedTime": estimatedTime,
       if (score != null) "score": score,
+      if (script != null) "script": script,
+      if (presentationDate != null)
+        "presentationDate": presentationDate!.toIso8601String(),
     };
   }
 
@@ -85,6 +99,8 @@ class ProjectModel {
     String? status,
     int? estimatedTime,
     double? score,
+    String? script,
+    DateTime? presentationDate,
   }) {
     return ProjectModel(
       id: id,
@@ -97,6 +113,8 @@ class ProjectModel {
       status: status ?? this.status,
       estimatedTime: estimatedTime ?? this.estimatedTime,
       score: score ?? this.score,
+      script: script ?? this.script,
+      presentationDate: presentationDate ?? this.presentationDate,
     );
   }
 }

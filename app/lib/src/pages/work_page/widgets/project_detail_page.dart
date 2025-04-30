@@ -119,8 +119,6 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 8),
-            Text(project.title, style: const TextStyle(fontSize: 18)),
             const SizedBox(height: 24),
             Text(
               '⏱ 목표 발표 시간',

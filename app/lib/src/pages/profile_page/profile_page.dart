@@ -7,6 +7,7 @@ import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/stats_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_drawer.dart';
+import 'package:talk_pilot/src/pages/profile_page/cpm_calculate_page.dart';
 
 import 'package:talk_pilot/src/pages/profile_page/stt_test_page.dart';
 
@@ -96,7 +97,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     UserField.nickname: value,
                   });
                   setState(() => isEditingNickname = false);
-                   ToastMessage.show("닉네임이 변경되었습니다.");
+                  ToastMessage.show("닉네임이 변경되었습니다.");
                 }
               },
             ),
@@ -142,6 +143,29 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurpleAccent,
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CpmCalculatePage(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.calculate, color: Colors.white),
+              label: const Text(
+                'CPM 계산 페이지',
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.indigo,
                 minimumSize: const Size.fromHeight(50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

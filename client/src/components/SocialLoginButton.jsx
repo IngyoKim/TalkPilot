@@ -1,4 +1,3 @@
-// src/components/SocialLoginButton.jsx
 import React from "react";
 
 export default function SocialLoginButton({ provider, onClick }) {
@@ -7,14 +6,14 @@ export default function SocialLoginButton({ provider, onClick }) {
             backgroundColor: "#ffffff",
             color: "#000000",
             border: "1px solid #dddddd",
-            logo: "/assets/logo/google_logo.png",
+            logo: "../assets/logo/google_logo.png",
             text: "구글 계정으로 로그인",
         },
         kakao: {
             backgroundColor: "#FEE500",
             color: "#000000",
             border: "none",
-            logo: "/assets/logo/kakao_logo.png",
+            logo: "../assets/logo/kakao_logo.png",
             text: "카카오 계정으로 로그인",
         },
     };

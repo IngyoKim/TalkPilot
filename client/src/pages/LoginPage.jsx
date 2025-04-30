@@ -3,12 +3,12 @@ import SocialLoginButton from "../components/SocialLoginButton";
 
 export default function LoginPage() {
     const handleGoogleLogin = () => {
-        /// 구글 로그인 로직 구현 예정정
+        /// 구글 로그인 로직 구현 예정
         console.log("구글 로그인 클릭");
     };
 
     const handleKakaoLogin = () => {
-        /// 카카오 로그인 로직 구현 예정정
+        /// 카카오 로그인 로직 구현 예정
         console.log("카카오 로그인 클릭");
     };
 

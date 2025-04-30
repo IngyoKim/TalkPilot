@@ -28,11 +28,11 @@ class ProjectService {
       ownerUid: ownerUid,
       participants: participants,
       status: 'preparing',
+      presentationDate: null,
+      script: '',
     );
 
     await _db.writeDB('$basePath/$id', project.toMap());
-
-    /// createProject()에서 유저랑 연동하기 위함
     return project;
   }
 

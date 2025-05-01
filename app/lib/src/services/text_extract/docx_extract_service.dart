@@ -9,10 +9,10 @@ class DocxExtractService {
     try {
       final bytes = await file.readAsBytes();
 
-      // .docx는 ZIP 파일이다
+      /// .docx는 ZIP 파일
       final archive = ZipDecoder().decodeBytes(bytes);
 
-      // document.xml 파일 찾기 (본문 내용이 들어 있음)
+      /// document.xml 파일 찾기 (본문 내용이 들어 있음)
       final xmlFile = archive.files.firstWhere(
         (f) => f.name == 'word/document.xml',
         orElse: () => throw Exception('word/document.xml not found in DOCX'),
@@ -21,7 +21,7 @@ class DocxExtractService {
       final xmlContent = utf8.decode(xmlFile.content as List<int>);
       final document = XmlDocument.parse(xmlContent);
 
-      // 실제 텍스트는 <w:t> 태그에 들어 있음
+      /// 실제 텍스트는 <w:t> 태그에 들어 있음
       final textElements = document.findAllElements('w:t');
       final extracted = textElements.map((e) => e.text).join(' ');
 

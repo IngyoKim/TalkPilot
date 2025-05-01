@@ -61,7 +61,6 @@ class ProjectProvider with ChangeNotifier {
 
     await _userService.updateUser(currentUser.uid, {
       "projectIds": updatedProjectIds,
-      "updatedAt": DateTime.now().toIso8601String(),
     });
 
     /// 로컬에 추가된 프로젝트 반영

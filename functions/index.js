@@ -34,27 +34,27 @@ admin.initializeApp({
 exports.createCustomToken = functions.https.onRequest(async (request, response) => {
     const user = request.body;
 
-    const uid = `kakao_${user.uid}`; // UID 형식 준수
+    const uid = `kakao_${user.uid}`; // uid 형식 준수
 
-    // 필수로 받을 정보만 남기고, 선택 사항은 조건부로 포함
+    /// 필수로 받을 정보만 남기고, 선택 사항은 조건부로 포함
     const updateParams = {};
     if (user.email) updateParams.email = user.email;
     if (user.photoURL) updateParams.photoURL = user.photoURL;
     if (user.displayName) updateParams.displayName = user.displayName;
 
     try {
-        // 사용자 업데이트 또는 생성
+        /// 사용자 업데이트 또는 생성
         try {
             await admin.auth().updateUser(uid, updateParams);
             console.log("User updated:", uid);
         } catch (error) {
-            // 사용자가 없으면 새로 생성
+            /// 사용자가 없으면 새로 생성
             updateParams["uid"] = uid;
             await admin.auth().createUser(updateParams);
             console.log("User created:", uid);
         }
 
-        // 커스텀 토큰 생성
+        /// 커스텀 토큰 생성
         const token = await admin.auth().createCustomToken(uid);
         response.json({ token });
     } catch (error) {

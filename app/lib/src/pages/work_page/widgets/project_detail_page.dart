@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
@@ -74,6 +75,85 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
     super.dispose();
   }
 
+  Widget _infoRow(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            ),
+          ),
+          Expanded(
+            child: Text(value ?? '없음', style: const TextStyle(fontSize: 14)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(ProjectModel project) {
+    final createdAtFormatted =
+        project.createdAt != null
+            ? DateFormat('yyyy-MM-dd / HH:mm').format(project.createdAt!)
+            : '없음';
+    final updatedAtFormatted =
+        project.updatedAt != null
+            ? DateFormat('yyyy-MM-dd / HH:mm').format(project.updatedAt!)
+            : '없음';
+
+    return Card(
+      elevation: 2,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            _infoRow('프로젝트 ID', project.id),
+            _infoRow('설명', project.description),
+            _infoRow('생성일', createdAtFormatted),
+            _infoRow('수정일', updatedAtFormatted),
+            _infoRow('생성자 UID', project.ownerUid),
+            _infoRow('참여자 수', '${project.participants.length}명'),
+            _infoRow('상태', project.status),
+            _infoRow(
+              '예상 시간',
+              project.estimatedTime != null
+                  ? '${project.estimatedTime! ~/ 60}분 ${project.estimatedTime! % 60}초'
+                  : '미정',
+            ),
+            _infoRow(
+              '점수',
+              project.score != null ? project.score!.toStringAsFixed(1) : '없음',
+            ),
+            Row(
+              children: [
+                const Text(
+                  '상태 색상',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: getStatusColor(project.status),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final project = widget.project;
@@ -84,83 +164,36 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
         backgroundColor: Colors.deepPurple,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: SingleChildScrollView(
+      body: ListView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.deepPurple.shade50,
+        children: [
+          const Text(
+            '프로젝트 정보',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          _buildInfoCard(project),
+          const SizedBox(height: 32),
+          const Text(
+            '대본 메모',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _memoController,
+            maxLines: null,
+            keyboardType: TextInputType.multiline,
+            decoration: InputDecoration(
+              hintText: '내용을 작성하세요...',
+              border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      project.description ?? '',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 14,
-                    height: 14,
-                    margin: const EdgeInsets.only(top: 4),
-                    decoration: BoxDecoration(
-                      color: getStatusColor(project.status),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ],
-              ),
+              filled: true,
+              fillColor: Colors.grey.shade100,
             ),
-            const SizedBox(height: 24),
-            Text(
-              '⏱ 목표 발표 시간',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              project.estimatedTime != null
-                  ? '${project.estimatedTime! ~/ 60}분 ${project.estimatedTime! % 60}초'
-                  : '미정',
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              '👥 참여자 수',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${project.participants.length}명',
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              '📝 대본',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _memoController,
-              maxLines: null,
-              keyboardType: TextInputType.multiline,
-              decoration: InputDecoration(
-                hintText: '내용을 작성하세요...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              style: const TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
+            style: const TextStyle(fontSize: 14),
+          ),
+        ],
       ),
     );
   }

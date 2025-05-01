@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -120,10 +121,16 @@ class _ProjectCardState extends State<ProjectCard> {
                       icon: const Icon(Icons.more_vert, size: 20),
                       onSelected: (value) async {
                         if (!context.mounted) return;
+
                         if (value == 'edit') {
                           showProjectDialog(context, project: project);
                         } else if (value == 'delete') {
                           showDeleteProjectDialog(context, project);
+                        } else if (value == 'copy_id') {
+                          await Clipboard.setData(
+                            ClipboardData(text: project.id),
+                          );
+                          ToastMessage.show('프로젝트 ID가 복사되었습니다.');
                         }
                       },
                       itemBuilder:
@@ -135,6 +142,10 @@ class _ProjectCardState extends State<ProjectCard> {
                             const PopupMenuItem(
                               value: 'delete',
                               child: Text('삭제'),
+                            ),
+                            const PopupMenuItem(
+                              value: 'copy_id',
+                              child: Text('ID 복사'),
                             ),
                           ],
                     ),

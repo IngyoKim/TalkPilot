@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
@@ -129,4 +130,9 @@ void showDeleteProjectDialog(BuildContext context, ProjectModel project) {
           ],
         ),
   );
+}
+
+void copyProjectId(BuildContext context, ProjectModel project) async {
+  await Clipboard.setData(ClipboardData(text: project.id));
+  ToastMessage.show('프로젝트 ID가 복사되었습니다.');
 }

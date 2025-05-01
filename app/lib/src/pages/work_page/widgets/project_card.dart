@@ -1,12 +1,13 @@
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:talk_pilot/src/models/project_model.dart';
+import 'package:talk_pilot/src/components/toast_message.dart';
+import 'package:talk_pilot/src/provider/project_provider.dart';
+
 import 'package:talk_pilot/src/pages/work_page/widgets/work_dialogs.dart';
 import 'package:talk_pilot/src/pages/work_page/widgets/work_helpers.dart';
-import 'package:talk_pilot/src/provider/project_provider.dart';
-import 'package:talk_pilot/src/components/toast_message.dart';
 
 class ProjectCard extends StatefulWidget {
   final ProjectModel project;
@@ -131,7 +132,7 @@ class _ProjectCardState extends State<ProjectCard> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  '참여자 수: ${project.participants.length}',
+                  '만든 사람:  / 참여자 수: ${project.participants.length}', // Owner 추후 추가 예정
                   style: const TextStyle(fontSize: 12),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

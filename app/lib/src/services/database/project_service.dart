@@ -72,34 +72,30 @@ class ProjectService {
   /// 프로젝트의 누락된 필드 초기화
   /// 변경이 불가한 필드는 에러 유발이 가능하니 수정의 유의할 것
   Future<void> initProject(ProjectModel project) async {
-    final existing = await readProject(project.id);
-    if (existing == null) return;
+    final existingMap = await _db.readDB<Map<String, dynamic>>(
+      '$basePath/${project.id}',
+    );
+    if (existingMap == null) return;
 
-    final existingMap = existing.toMap();
     final updateMap = <String, dynamic>{};
 
-    if (!existingMap.containsKey('estimatedTime') &&
-        project.estimatedTime != null) {
-      updateMap['estimatedTime'] = project.estimatedTime;
+    // 특정 필드가 DB에 없고, 프로젝트에 값이 존재하면 추가
+    void setIfMissing(String key, dynamic value) {
+      final isMissing =
+          !existingMap.containsKey(key) || existingMap[key] == null;
+      if (isMissing && value != null) {
+        updateMap[key] = value;
+      }
     }
 
-    if (!existingMap.containsKey('score') && project.score != null) {
-      updateMap['score'] = project.score;
-    }
-
-    if (!existingMap.containsKey('status')) {
-      updateMap['status'] = project.status;
-    }
-
-    if (!existingMap.containsKey('presentationDate') &&
-        project.presentationDate != null) {
-      updateMap['presentationDate'] =
-          project.presentationDate!.toIso8601String();
-    }
-
-    if (!existingMap.containsKey('script') && project.script!.isNotEmpty) {
-      updateMap['script'] = project.script;
-    }
+    setIfMissing('estimatedTime', project.estimatedTime);
+    setIfMissing('score', project.score);
+    setIfMissing('status', project.status);
+    setIfMissing('script', project.script);
+    setIfMissing(
+      'presentationDate',
+      project.presentationDate?.toIso8601String(),
+    );
 
     if (updateMap.isNotEmpty) {
       await updateProject(project.id, updateMap);

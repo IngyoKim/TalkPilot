@@ -1,3 +1,4 @@
+// src/App.jsx
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './Contexts/AuthContext';
 import { UserProvider } from './Contexts/UserContext';
@@ -6,15 +7,15 @@ import Router from './Router';
 
 function App() {
   return (
-    <AuthProvider>
-      <UserProvider>
-        <ProjectProvider>
-          <BrowserRouter>
+    <BrowserRouter>
+      <AuthProvider>
+        <UserProvider>
+          <ProjectProvider>
             <Router />
-          </BrowserRouter>
-        </ProjectProvider>
-      </UserProvider>
-    </AuthProvider>
+          </ProjectProvider>
+        </UserProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

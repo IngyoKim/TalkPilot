@@ -45,6 +45,7 @@ class ProjectProvider with ChangeNotifier {
     required String title,
     required String description,
     required UserModel currentUser,
+    int? estimatedTime,
   }) async {
     final newProject = await _projectService.writeProject(
       title: title,
@@ -94,11 +95,12 @@ class ProjectProvider with ChangeNotifier {
   }
 
   /// 프로젝트 삭제
-  Future<void> deleteProject() async {
-    if (_selectedProject == null) return;
-    await _projectService.deleteProject(_selectedProject!.id);
-    _projects.removeWhere((p) => p.id == _selectedProject!.id);
-    _selectedProject = null;
+  Future<void> deleteProject(String projectId) async {
+    await _projectService.deleteProject(projectId);
+    _projects.removeWhere((p) => p.id == projectId);
+    if (_selectedProject?.id == projectId) {
+      _selectedProject = null;
+    }
     notifyListeners();
   }
 }

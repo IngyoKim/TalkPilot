@@ -23,7 +23,7 @@ class DocxExtractService {
 
       /// 실제 텍스트는 <w:t> 태그에 들어 있음
       final textElements = document.findAllElements('w:t');
-      final extracted = textElements.map((e) => e.text).join(' ');
+      final extracted = textElements.map((XmlElement e) => e.innerText).join(' ');
 
       return extracted;
     } catch (e) {

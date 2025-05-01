@@ -59,7 +59,7 @@ class _DocxTextPageState extends State<DocxTextPage> {
                 : extractedText.isEmpty
                 ? const Center(
                   child: Text(
-                    '📤 위쪽 업로드 아이콘을 눌러 파일을 업로드해주세요.',
+                    '위쪽 업로드 아이콘을 눌러 파일을 업로드해주세요.',
                     style: TextStyle(fontSize: 16),
                     textAlign: TextAlign.center,
                   ),

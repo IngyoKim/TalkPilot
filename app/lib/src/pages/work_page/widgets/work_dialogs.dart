@@ -4,10 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'package:talk_pilot/src/models/project_model.dart';
-import 'package:talk_pilot/src/pages/work_page/widgets/project_card.dart';
-import 'package:talk_pilot/src/pages/work_page/widgets/work_helpers.dart';
 import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
+import 'package:talk_pilot/src/pages/work_page/widgets/project_card.dart';
+import 'package:talk_pilot/src/pages/work_page/widgets/work_helpers.dart';
 
 class ProjectCard extends StatefulWidget {
   final ProjectModel project;

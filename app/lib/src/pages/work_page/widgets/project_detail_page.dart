@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import 'package:talk_pilot/src/models/project_model.dart';
@@ -76,7 +75,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
     super.dispose();
   }
 
-  String getStatusLabel(String status) {
+  String _getStatusLabel(String status) {
     switch (status) {
       case 'preparing':
         return '진행 중';
@@ -89,7 +88,11 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
     }
   }
 
-  Widget _infoRow(String label, String? value) {
+  String _formatDate(DateTime? date) {
+    return date != null ? DateFormat('yyyy-MM-dd / HH:mm').format(date) : '없음';
+  }
+
+  Widget _infoRow(String label, Widget child) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -102,24 +105,13 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
             ),
           ),
-          Expanded(
-            child: Text(value ?? '없음', style: const TextStyle(fontSize: 14)),
-          ),
+          Expanded(child: child),
         ],
       ),
     );
   }
 
-  Widget _buildInfoCard(ProjectModel project) {
-    final createdAtFormatted =
-        project.createdAt != null
-            ? DateFormat('yyyy-MM-dd / HH:mm').format(project.createdAt!)
-            : '없음';
-    final updatedAtFormatted =
-        project.updatedAt != null
-            ? DateFormat('yyyy-MM-dd / HH:mm').format(project.updatedAt!)
-            : '없음';
-
+  Widget _buildProjectInfo(ProjectModel project) {
     return Card(
       elevation: 2,
       margin: EdgeInsets.zero,
@@ -128,56 +120,76 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _infoRow('프로젝트 ID', project.id),
-            _infoRow('설명', project.description),
-            _infoRow('생성일', createdAtFormatted),
-            _infoRow('수정일', updatedAtFormatted),
-            _infoRow('생성자 UID', project.ownerUid),
-            _infoRow('참여자 수', '${project.participants.length}명'),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            _infoRow('프로젝트 ID', Text(project.id)),
+            _infoRow('설명', Text(project.description ?? '없음')),
+            _infoRow('생성일', Text(_formatDate(project.createdAt))),
+            _infoRow('수정일', Text(_formatDate(project.updatedAt))),
+
+            // TODO: ownerUid를 이름 등으로 변환하여 표시해야 함 (DB 연결 필요)
+            _infoRow('생성자 UID', Text(project.ownerUid)),
+
+            _infoRow('참여자 수', Text('${project.participants.length}명')),
+            _infoRow(
+              '상태',
+              Row(
                 children: [
-                  const SizedBox(
-                    width: 120,
-                    child: Text(
-                      '상태',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
                   Container(
                     width: 14,
                     height: 14,
-                    margin: const EdgeInsets.only(top: 3, right: 8),
+                    margin: const EdgeInsets.only(right: 8),
                     decoration: BoxDecoration(
                       color: getStatusColor(project.status),
                       shape: BoxShape.circle,
                     ),
                   ),
-                  Text(
-                    getStatusLabel(project.status),
-                    style: const TextStyle(fontSize: 14),
-                  ),
+                  Text(_getStatusLabel(project.status)),
                 ],
               ),
             ),
             _infoRow(
               '예상 시간',
-              project.estimatedTime != null
-                  ? '${project.estimatedTime! ~/ 60}분 ${project.estimatedTime! % 60}초'
-                  : '미정',
+              Text(
+                project.estimatedTime != null
+                    ? '${project.estimatedTime! ~/ 60}분 ${project.estimatedTime! % 60}초'
+                    : '미정',
+              ),
             ),
             _infoRow(
               '점수',
-              project.score != null ? project.score!.toStringAsFixed(1) : '없음',
+              Text(
+                project.score != null
+                    ? project.score!.toStringAsFixed(1)
+                    : '없음',
+              ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMemoEditor() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '대본 메모',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _memoController,
+          maxLines: null,
+          keyboardType: TextInputType.multiline,
+          decoration: InputDecoration(
+            hintText: '내용을 작성하세요...',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            filled: true,
+            fillColor: Colors.grey.shade100,
+          ),
+          style: const TextStyle(fontSize: 14),
+        ),
+      ],
     );
   }
 
@@ -199,27 +211,9 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          _buildInfoCard(project),
+          _buildProjectInfo(project),
           const SizedBox(height: 32),
-          const Text(
-            '대본 메모',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _memoController,
-            maxLines: null,
-            keyboardType: TextInputType.multiline,
-            decoration: InputDecoration(
-              hintText: '내용을 작성하세요...',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              filled: true,
-              fillColor: Colors.grey.shade100,
-            ),
-            style: const TextStyle(fontSize: 14),
-          ),
+          _buildMemoEditor(),
         ],
       ),
     );

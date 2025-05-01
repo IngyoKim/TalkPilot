@@ -2,45 +2,78 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:talk_pilot/src/services/database/database_service.dart';
 
+enum CpmStage { ready, timing, finished }
+
 class CpmCalculateService extends ChangeNotifier {
-  final String sentence = '본인의 발표 속도대로 문장을 읽어주세요.';
-  DateTime? _startTime;
-  double? _cpmResult;
-  bool _isRunning = false;
+  final List<String> _sentences = [
+    '안녕하세요, 오늘 발표를 시작하겠습니다.',
+    '이 프로젝트는 지난 몇 개월 동안 진행되었습니다.',
+    '주요 목표는 사용자의 편의성을 높이는 것이었습니다.',
+    '다음으로는 구현 과정에 대해 설명드리겠습니다.',
+    '경청해 주셔서 감사합니다.',
+  ];
 
   final _db = DatabaseService();
   final _auth = FirebaseAuth.instance;
 
-  String get displayedSentence => sentence;
+  int _currentIndex = 0;
+  DateTime? _startTime;
+  double? _cpmResult;
+  List<double> _cpmList = [];
+  CpmStage _stage = CpmStage.ready;
+
+  String get currentSentence => _sentences[_currentIndex];
   double? get cpmResult => _cpmResult;
-  bool get isRunning => _isRunning;
+  double? get averageCpm => _cpmList.isEmpty ? null : _cpmList.reduce((a, b) => a + b) / _cpmList.length;
+  String get buttonText {
+    switch (_stage) {
+      case CpmStage.ready:
+        return '시작';
+      case CpmStage.timing:
+        return '종료';
+      case CpmStage.finished:
+        return isLast ? '완료' : '다음 문장';
+    }
+  }
 
-  void toggleTimer() async {
-    if (!_isRunning) {
-      _startTime = DateTime.now();
-      _cpmResult = null;
-      _isRunning = true;
-    } else {
-      final endTime = DateTime.now();
-      final seconds = endTime.difference(_startTime!).inMilliseconds / 1000.0;
-      final int charCount = sentence.length;
-      _cpmResult = (charCount / seconds) * 60;
-      _isRunning = false;
+  CpmStage get stage => _stage;
+  bool get isLast => _currentIndex == _sentences.length - 1;
 
-      notifyListeners();
+  void onButtonPressed() async {
+    switch (_stage) {
+      case CpmStage.ready:
+        _startTime = DateTime.now();
+        _cpmResult = null;
+        _stage = CpmStage.timing;
+        break;
 
-      if (_cpmResult != null) {
-        final user = _auth.currentUser;
-        if (user != null) {
-          final uid = user.uid;
+      case CpmStage.timing:
+        final endTime = DateTime.now();
+        final seconds = endTime.difference(_startTime!).inMilliseconds / 1000.0;
+        final chars = currentSentence.length;
+        final cpm = (chars / seconds) * 60;
+        _cpmResult = cpm;
+        _cpmList.add(cpm);
+        _stage = CpmStage.finished;
+        break;
 
-          /// 유저 문서에 cpm 값만 업데이트
-          await _db.updateDB("users/$uid", {
-            'cpm': _cpmResult,
-            'updatedAt': DateTime.now().toIso8601String(),
-          });
+      case CpmStage.finished:
+        if (isLast) {
+          // 평균 계산 및 업데이트
+          final avg = averageCpm;
+          final user = _auth.currentUser;
+          if (user != null && avg != null) {
+            await _db.updateDB("users/${user.uid}", {
+              'cpm': avg,
+              'updatedAt': DateTime.now().toIso8601String(),
+            });
+          }
+        } else {
+          _currentIndex++;
+          _cpmResult = null;
+          _stage = CpmStage.ready;
         }
-      }
+        break;
     }
 
     notifyListeners();

@@ -34,7 +34,7 @@ class _CpmCalculateView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              service.displayedSentence,
+              service.currentSentence,
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -44,14 +44,13 @@ class _CpmCalculateView extends StatelessWidget {
             ),
             const SizedBox(height: 40),
             ElevatedButton(
-              onPressed: service.toggleTimer,
+              onPressed: service.onButtonPressed,
               style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    service.isRunning ? Colors.indigo : Colors.deepPurple,
+                backgroundColor: Colors.deepPurple,
                 minimumSize: const Size.fromHeight(50),
               ),
               child: Text(
-                service.isRunning ? '종료' : '시작',
+                service.buttonText,
                 style: const TextStyle(color: Colors.white),
               ),
             ),
@@ -60,6 +59,11 @@ class _CpmCalculateView extends StatelessWidget {
               Text(
                 '당신의 CPM: ${service.cpmResult!.toStringAsFixed(1)}',
                 style: const TextStyle(fontSize: 18, color: Colors.black87),
+              ),
+            if (service.averageCpm != null)
+              Text(
+                '현재까지 평균 CPM: ${service.averageCpm!.toStringAsFixed(1)}',
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
           ],
         ),

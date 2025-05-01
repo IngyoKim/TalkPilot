@@ -1,14 +1,10 @@
-import { Routes, Route } from 'react-router-dom';
-// import LoginPage from './pages/LoginPage';
-// import AuthGate from './pages/AuthGate';
+import { Routes, Route } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
 
-function Router() {
+export default function Router() {
     return (
         <Routes>
-            {/* <Route path="/login" element={<LoginPage />} />
-            <Route path="/*" element={<AuthGate />} /> */}
+            <Route path="/" element={<LoginPage />} />
         </Routes>
     );
 }
-
-export default Router;

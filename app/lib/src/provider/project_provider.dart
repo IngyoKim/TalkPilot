@@ -37,6 +37,7 @@ class ProjectProvider with ChangeNotifier {
     required String title,
     required String description,
     required UserModel currentUser,
+    int? estimatedTime,
   }) async {
     final newProject = await _projectService.writeProject(
       title: title,

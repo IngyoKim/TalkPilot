@@ -21,6 +21,14 @@ class ProjectProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// 프로젝트 초기화
+  Future<void> initAllProjects(String uid) async {
+    final allProjects = await _projectService.fetchProjects(uid);
+    for (final project in allProjects) {
+      await _projectService.initProject(project);
+    }
+  }
+
   /// 프로젝트 리스트 불러오기
   Future<void> loadProjects(String uid) async {
     final allProjects = await _projectService.fetchProjects(uid);

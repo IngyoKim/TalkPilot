@@ -68,4 +68,29 @@ class ProjectService {
         .where((project) => project.participants.containsKey(uid))
         .toList();
   }
+
+  /// 프로젝트의 누락된 필드 초기화
+  /// 변경이 불가한 필드는 에러 유발이 가능하니 수정의 유의할 것
+  Future<void> initProject(ProjectModel project) async {
+    final existing = await readProject(project.id);
+    if (existing == null) return;
+
+    final existingMap = existing.toMap();
+    final updateMap = <String, dynamic>{};
+
+    if (!existingMap.containsKey('estimatedTime') &&
+        project.estimatedTime != null) {
+      updateMap['estimatedTime'] = project.estimatedTime;
+    }
+    if (!existingMap.containsKey('score') && project.score != null) {
+      updateMap['score'] = project.score;
+    }
+    if (!existingMap.containsKey('status')) {
+      updateMap['status'] = project.status;
+    }
+
+    if (updateMap.isNotEmpty) {
+      await updateProject(project.id, updateMap);
+    }
+  }
 }

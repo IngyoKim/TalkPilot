@@ -8,7 +8,8 @@ enum ProjectField {
   estimatedTime,
   score,
   script,
-  presentationDate,
+  scheduledDate,
+  memo,
 }
 
 extension ProjectFieldExt on ProjectField {
@@ -27,7 +28,8 @@ class ProjectModel {
   final int? estimatedTime; // 발표 예상 시간 (단위: 초)
   final double? score; // 프로젝트 점수
   final String? script; // 대본
-  final DateTime? presentationDate; // 발표 일자
+  final DateTime? scheduledDate; // 발표 일자
+  final String? memo; // 메모
 
   ProjectModel({
     required this.id,
@@ -41,7 +43,8 @@ class ProjectModel {
     this.estimatedTime,
     this.score,
     this.script,
-    this.presentationDate,
+    this.scheduledDate,
+    this.memo,
   });
 
   factory ProjectModel.fromMap(String id, Map<String, dynamic> map) {
@@ -65,10 +68,11 @@ class ProjectModel {
               : null,
       score: map['score'] != null ? (map['score'] as num).toDouble() : null,
       script: map['script'],
-      presentationDate:
-          map['presentationDate'] != null
-              ? DateTime.tryParse(map['presentationDate'])
+      scheduledDate:
+          map['scheduledDate'] != null
+              ? DateTime.tryParse(map['scheduledDate'])
               : null,
+      memo: map['memo'],
     );
   }
 
@@ -84,8 +88,9 @@ class ProjectModel {
       if (estimatedTime != null) "estimatedTime": estimatedTime,
       if (score != null) "score": score,
       if (script != null) "script": script,
-      if (presentationDate != null)
-        "presentationDate": presentationDate!.toIso8601String(),
+      if (scheduledDate != null)
+        "scheduledDate": scheduledDate!.toIso8601String(),
+      if (memo != null) "memo": memo,
     };
   }
 
@@ -100,7 +105,8 @@ class ProjectModel {
     int? estimatedTime,
     double? score,
     String? script,
-    DateTime? presentationDate,
+    DateTime? scheduledDate,
+    String? memo,
   }) {
     return ProjectModel(
       id: id,
@@ -114,7 +120,8 @@ class ProjectModel {
       estimatedTime: estimatedTime ?? this.estimatedTime,
       score: score ?? this.score,
       script: script ?? this.script,
-      presentationDate: presentationDate ?? this.presentationDate,
+      scheduledDate: scheduledDate ?? this.scheduledDate,
+      memo: memo ?? this.memo,
     );
   }
 }

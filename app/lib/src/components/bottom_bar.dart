@@ -10,6 +10,7 @@ import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
+import 'package:talk_pilot/src/services/database/user_service.dart';
 
 class BottomBar extends StatefulWidget {
   const BottomBar({super.key});
@@ -36,6 +37,7 @@ class _BottomBarState extends State<BottomBar>
       final userProvider = context.read<UserProvider>();
       final projectProvider = context.read<ProjectProvider>();
 
+      await UserService().initUser(user);
       await userProvider.loadUser(user.uid);
       await projectProvider.initAllProjects(user.uid);
 

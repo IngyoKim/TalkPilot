@@ -23,7 +23,12 @@ class _ProjectCardState extends State<ProjectCard> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final project = widget.project;
+
+    // ✅ 최신 project 객체를 provider에서 다시 가져옴
+    final project = context.watch<ProjectProvider>().projects.firstWhere(
+      (p) => p.id == widget.project.id,
+      orElse: () => widget.project,
+    );
 
     return GestureDetector(
       onTap: widget.onTap,
@@ -121,7 +126,6 @@ class _ProjectCardState extends State<ProjectCard> {
                       icon: const Icon(Icons.more_vert, size: 20),
                       onSelected: (value) async {
                         if (!context.mounted) return;
-
                         if (value == 'edit') {
                           showProjectDialog(context, project: project);
                         } else if (value == 'delete') {
@@ -185,7 +189,7 @@ class _ProjectCardState extends State<ProjectCard> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  ' 만든 사람:  / 참여자 수: ${project.participants.length}', //Owner 추후 추가 예정
+                  ' 만든 사람:  / 참여자 수: ${project.participants.length}', // Owner 추후 추가 예정
                   style: const TextStyle(fontSize: 12),
                 ),
               ],

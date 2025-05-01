@@ -8,8 +8,18 @@ import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
 
 // ignore_for_file: use_build_context_synchronously
+
+// 프로젝트 ID 복사
+void copyProjectId(BuildContext context, ProjectModel project) async {
+  await Clipboard.setData(ClipboardData(text: project.id));
+  ToastMessage.show('프로젝트 ID가 복사되었습니다.');
+}
+
+// 프로젝트 추가/수정 다이얼로그 표시
 void showProjectDialog(BuildContext context, {ProjectModel? project}) {
   final isEditMode = project != null;
+
+  // 컨트롤러 초기화
   final titleController = TextEditingController(text: project?.title ?? '');
   final descriptionController = TextEditingController(
     text: project?.description ?? '',
@@ -26,27 +36,18 @@ void showProjectDialog(BuildContext context, {ProjectModel? project}) {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: titleController,
-                autofocus: true,
-                decoration: const InputDecoration(hintText: '프로젝트 제목 입력'),
-              ),
+              _buildTextField(titleController, '프로젝트 제목 입력', autofocus: true),
               const SizedBox(height: 12),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(
-                  hintText: '프로젝트 설명 입력 (최대 100자)',
-                  counterText: '',
-                ),
+              _buildTextField(
+                descriptionController,
+                '프로젝트 설명 입력 (최대 100자)',
                 maxLength: 100,
-                minLines: 1,
                 maxLines: 3,
-                keyboardType: TextInputType.multiline,
               ),
               const SizedBox(height: 12),
-              TextField(
-                controller: estimatedTimeController,
-                decoration: const InputDecoration(hintText: '목표 발표 시간 (초 단위)'),
+              _buildTextField(
+                estimatedTimeController,
+                '목표 발표 시간 (초 단위)',
                 keyboardType: TextInputType.number,
               ),
             ],
@@ -57,45 +58,15 @@ void showProjectDialog(BuildContext context, {ProjectModel? project}) {
               child: const Text('취소'),
             ),
             TextButton(
-              onPressed: () async {
-                final newTitle = titleController.text.trim();
-                final newDescription = descriptionController.text.trim();
-                final newEstimatedTime = int.tryParse(
-                  estimatedTimeController.text.trim(),
-                );
-
-                if (newTitle.isEmpty) return;
-
-                if (isEditMode) {
-                  final projectProvider = context.read<ProjectProvider>();
-                  projectProvider.selectedProject = project;
-                  await projectProvider.updateProject({
-                    ProjectField.title: newTitle,
-                    ProjectField.description: newDescription,
-                    if (newEstimatedTime != null && newEstimatedTime > 0)
-                      ProjectField.estimatedTime: newEstimatedTime,
-                  });
-                  ToastMessage.show(
-                    '프로젝트 정보가 수정되었습니다.',
-                    backgroundColor: const Color.fromARGB(255, 170, 158, 52),
-                  );
-                } else {
-                  final user = context.read<UserProvider>().currentUser;
-                  if (user != null) {
-                    await context.read<ProjectProvider>().createProject(
-                      title: newTitle,
-                      description: newDescription,
-                      currentUser: user,
-                      estimatedTime: newEstimatedTime,
-                    );
-                    ToastMessage.show(
-                      '프로젝트가 추가되었습니다.',
-                      backgroundColor: const Color(0xFF4CAF50),
-                    );
-                  }
-                }
-                Navigator.pop(context);
-              },
+              onPressed:
+                  () async => _handleProjectSave(
+                    context,
+                    isEditMode,
+                    project,
+                    titleController,
+                    descriptionController,
+                    estimatedTimeController,
+                  ),
               child: Text(isEditMode ? '수정 완료' : '추가'),
             ),
           ],
@@ -103,6 +74,118 @@ void showProjectDialog(BuildContext context, {ProjectModel? project}) {
   );
 }
 
+// 텍스트 필드 빌더
+Widget _buildTextField(
+  TextEditingController controller,
+  String hint, {
+  int? maxLength,
+  int maxLines = 1,
+  bool autofocus = false,
+  TextInputType? keyboardType,
+}) {
+  return TextField(
+    controller: controller,
+    autofocus: autofocus,
+    decoration: InputDecoration(hintText: hint, counterText: ''),
+    maxLength: maxLength,
+    minLines: 1,
+    maxLines: maxLines,
+    keyboardType: keyboardType ?? TextInputType.text,
+  );
+}
+
+// 프로젝트 저장 로직 처리
+Future<void> _handleProjectSave(
+  BuildContext context,
+  bool isEditMode,
+  ProjectModel? project,
+  TextEditingController titleController,
+  TextEditingController descriptionController,
+  TextEditingController estimatedTimeController,
+) async {
+  final newTitle = titleController.text.trim();
+  final newDescription = descriptionController.text.trim();
+  final newEstimatedTime = int.tryParse(estimatedTimeController.text.trim());
+
+  if (newTitle.isEmpty) return;
+
+  final projectProvider = context.read<ProjectProvider>();
+
+  if (isEditMode) {
+    await _updateExistingProject(
+      projectProvider,
+      project!,
+      newTitle,
+      newDescription,
+      newEstimatedTime,
+    );
+  } else {
+    await _createNewProject(
+      context,
+      projectProvider,
+      newTitle,
+      newDescription,
+      newEstimatedTime,
+    );
+  }
+
+  Navigator.pop(context);
+}
+
+// 기존 프로젝트 업데이트 처리
+Future<void> _updateExistingProject(
+  ProjectProvider provider,
+  ProjectModel project,
+  String title,
+  String description,
+  int? estimatedTime,
+) async {
+  provider.selectedProject = project;
+  await provider.updateProject({
+    ProjectField.title: title,
+    ProjectField.description: description,
+    if (estimatedTime != null && estimatedTime >= 0)
+      ProjectField.estimatedTime: estimatedTime,
+  });
+
+  ToastMessage.show(
+    '프로젝트 정보가 수정되었습니다.',
+    backgroundColor: const Color.fromARGB(255, 170, 158, 52),
+  );
+}
+
+// 신규 프로젝트 생성 처리
+Future<void> _createNewProject(
+  BuildContext context,
+  ProjectProvider provider,
+  String title,
+  String description,
+  int? estimatedTime,
+) async {
+  final user = context.read<UserProvider>().currentUser;
+  if (user != null) {
+    await provider.createProject(
+      title: title,
+      description: description,
+      currentUser: user,
+      estimatedTime: estimatedTime,
+    );
+
+    final createdProject = provider.selectedProject;
+    if (createdProject != null && estimatedTime != null) {
+      await provider.updateProject({ProjectField.estimatedTime: estimatedTime});
+    }
+
+    ToastMessage.show(
+      '프로젝트가 추가되었습니다.',
+      backgroundColor: const Color(0xFF4CAF50),
+    );
+  } else {
+    // TODO: 사용자 정보가 없을 경우 처리
+  }
+}
+
+// 프로젝트 삭제 다이얼로그
 void showDeleteProjectDialog(BuildContext context, ProjectModel project) {
   showDialog(
     context: context,
@@ -130,9 +213,4 @@ void showDeleteProjectDialog(BuildContext context, ProjectModel project) {
           ],
         ),
   );
-}
-
-void copyProjectId(BuildContext context, ProjectModel project) async {
-  await Clipboard.setData(ClipboardData(text: project.id));
-  ToastMessage.show('프로젝트 ID가 복사되었습니다.');
 }

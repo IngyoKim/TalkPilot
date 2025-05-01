@@ -1,4 +1,5 @@
 import React from "react";
+import { signInWithGoogle } from "../firebase/googleLogin";
 import SocialLoginButton from "../components/SocialLoginButton";
 
 export default function LoginPage() {
@@ -7,8 +8,9 @@ export default function LoginPage() {
             const user = await signInWithGoogle();
             console.log("로그인된 사용자:", user.displayName);
             /// 로그인 상태 저장, 페이지 이동 등 추가해야함.
-        } catch (err) {
+        } catch (error) {
             alert("Google 로그인 실패");
+            console.error("Google 로그인 에러:", error);
         }
     };
 

@@ -82,11 +82,23 @@ class ProjectService {
         project.estimatedTime != null) {
       updateMap['estimatedTime'] = project.estimatedTime;
     }
+
     if (!existingMap.containsKey('score') && project.score != null) {
       updateMap['score'] = project.score;
     }
+
     if (!existingMap.containsKey('status')) {
       updateMap['status'] = project.status;
+    }
+
+    if (!existingMap.containsKey('presentationDate') &&
+        project.presentationDate != null) {
+      updateMap['presentationDate'] =
+          project.presentationDate!.toIso8601String();
+    }
+
+    if (!existingMap.containsKey('script') && project.script!.isNotEmpty) {
+      updateMap['script'] = project.script;
     }
 
     if (updateMap.isNotEmpty) {

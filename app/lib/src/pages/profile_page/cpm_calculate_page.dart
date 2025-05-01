@@ -44,7 +44,7 @@ class _CpmCalculateView extends StatelessWidget {
             ),
             const SizedBox(height: 40),
             ElevatedButton(
-              onPressed: service.onButtonPressed,
+              onPressed: () => service.onButtonPressed(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
                 minimumSize: const Size.fromHeight(50),

@@ -24,7 +24,10 @@ class CpmCalculateService extends ChangeNotifier {
 
   String get currentSentence => _sentences[_currentIndex];
   double? get cpmResult => _cpmResult;
-  double? get averageCpm => _cpmList.isEmpty ? null : _cpmList.reduce((a, b) => a + b) / _cpmList.length;
+  double? get averageCpm =>
+      _cpmList.isEmpty
+          ? null
+          : _cpmList.reduce((a, b) => a + b) / _cpmList.length;
   String get buttonText {
     switch (_stage) {
       case CpmStage.ready:
@@ -39,7 +42,7 @@ class CpmCalculateService extends ChangeNotifier {
   CpmStage get stage => _stage;
   bool get isLast => _currentIndex == _sentences.length - 1;
 
-  void onButtonPressed() async {
+  void onButtonPressed(BuildContext context) async {
     switch (_stage) {
       case CpmStage.ready:
         _startTime = DateTime.now();
@@ -59,7 +62,6 @@ class CpmCalculateService extends ChangeNotifier {
 
       case CpmStage.finished:
         if (isLast) {
-          // 평균 계산 및 업데이트
           final avg = averageCpm;
           final user = _auth.currentUser;
           if (user != null && avg != null) {
@@ -67,6 +69,11 @@ class CpmCalculateService extends ChangeNotifier {
               'cpm': avg,
               'updatedAt': DateTime.now().toIso8601String(),
             });
+          }
+
+          // 🔁 ProfilePage로 이동
+          if (context.mounted) {
+            Navigator.pop(context);
           }
         } else {
           _currentIndex++;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import 'package:talk_pilot/src/models/project_model.dart';
@@ -75,6 +76,19 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
     super.dispose();
   }
 
+  String getStatusLabel(String status) {
+    switch (status) {
+      case 'preparing':
+        return '진행 중';
+      case 'paused':
+        return '보류';
+      case 'completed':
+        return '끝';
+      default:
+        return '알 수 없음';
+    }
+  }
+
   Widget _infoRow(String label, String? value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -120,7 +134,37 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             _infoRow('수정일', updatedAtFormatted),
             _infoRow('생성자 UID', project.ownerUid),
             _infoRow('참여자 수', '${project.participants.length}명'),
-            _infoRow('상태', project.status),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(
+                    width: 120,
+                    child: Text(
+                      '상태',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 14,
+                    height: 14,
+                    margin: const EdgeInsets.only(top: 3, right: 8),
+                    decoration: BoxDecoration(
+                      color: getStatusColor(project.status),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  Text(
+                    getStatusLabel(project.status),
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
             _infoRow(
               '예상 시간',
               project.estimatedTime != null
@@ -130,23 +174,6 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             _infoRow(
               '점수',
               project.score != null ? project.score!.toStringAsFixed(1) : '없음',
-            ),
-            Row(
-              children: [
-                const Text(
-                  '상태 색상',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    color: getStatusColor(project.status),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ],
             ),
           ],
         ),

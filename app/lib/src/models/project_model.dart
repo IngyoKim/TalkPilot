@@ -46,7 +46,6 @@ class ProjectModel {
     this.scheduledDate,
     this.memo,
   });
-
   factory ProjectModel.fromMap(String id, Map<String, dynamic> map) {
     return ProjectModel(
       id: id,
@@ -65,14 +64,14 @@ class ProjectModel {
       estimatedTime:
           map['estimatedTime'] != null
               ? (map['estimatedTime'] as num).toInt()
-              : null,
-      score: map['score'] != null ? (map['score'] as num).toDouble() : null,
-      script: map['script'],
+              : 0,
+      score: map['score'] != null ? (map['score'] as num).toDouble() : 0.0,
+      script: map['script'] ?? '',
       scheduledDate:
           map['scheduledDate'] != null
               ? DateTime.tryParse(map['scheduledDate'])
               : null,
-      memo: map['memo'],
+      memo: map['memo'] ?? '',
     );
   }
 

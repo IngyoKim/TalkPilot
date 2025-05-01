@@ -28,11 +28,12 @@ class ProjectService {
       ownerUid: ownerUid,
       participants: participants,
       status: 'preparing',
+      scheduledDate: null,
+      script: '',
+      memo: '',
     );
 
     await _db.writeDB('$basePath/$id', project.toMap());
-
-    /// createProject()에서 유저랑 연동하기 위함
     return project;
   }
 
@@ -91,6 +92,9 @@ class ProjectService {
     setIfMissing('estimatedTime', project.estimatedTime);
     setIfMissing('score', project.score);
     setIfMissing('status', project.status);
+    setIfMissing('script', project.script);
+    setIfMissing('presentationDate', project.scheduledDate?.toIso8601String());
+    setIfMissing('memo', project.memo);
 
     if (updateMap.isNotEmpty) {
       await updateProject(project.id, updateMap);

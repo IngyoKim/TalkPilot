@@ -1,13 +1,18 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
 
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
+import 'package:talk_pilot/src/provider/project_provider.dart';
+
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/pages/work_page/widgets/work_helpers.dart';
 
+// ignore_for_file: use_build_context_synchronously
 class ProjectDetailPage extends StatefulWidget {
   final ProjectModel project;
 
@@ -32,7 +37,6 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
     super.initState();
     _memoController = TextEditingController();
     _initializeMemo();
-    _setupMemoListener();
   }
 
   Future<void> _initializeMemo() async {
@@ -40,37 +44,37 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
     final savedText = _prefs.getString(_memoKey) ?? '';
     _originalText = savedText;
     _memoController.text = savedText;
-    setState(() => _isInitialized = true);
+    _isInitialized = true;
+
+    _memoController.addListener(_onMemoChanged);
   }
 
-  void _setupMemoListener() {
-    _memoController.addListener(() async {
-      if (!_isInitialized) return;
+  void _onMemoChanged() async {
+    if (!_isInitialized) return;
 
-      final currentText = _memoController.text;
-      final hasChanged = currentText != _originalText;
+    final currentText = _memoController.text;
+    final hasChanged = currentText != _originalText;
 
-      if (_hasEdited != hasChanged) {
-        setState(() => _hasEdited = hasChanged);
-      }
+    if (_hasEdited != hasChanged) {
+      setState(() => _hasEdited = hasChanged);
+    }
 
-      _prefs.setString(_memoKey, currentText);
+    // 저장은 항상 반영
+    await _prefs.setString(_memoKey, currentText);
 
-      final uid =
-          Provider.of<UserProvider>(context, listen: false).currentUser?.uid;
-      if (uid == null) return;
-
+    // Project의 updatedAt만 갱신
+    final uid =
+        Provider.of<UserProvider>(context, listen: false).currentUser?.uid;
+    if (uid != null) {
       await ProjectService().updateProject(widget.project.id, {
         'updatedAt': DateTime.now().toIso8601String(),
       });
-    });
+    }
   }
 
   @override
   void dispose() {
-    if (_hasEdited) {
-      _prefs.setString(_memoKey, _memoController.text);
-    }
+    _memoController.removeListener(_onMemoChanged);
     _memoController.dispose();
     super.dispose();
   }
@@ -112,6 +116,10 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
   }
 
   Widget _buildProjectInfo(ProjectModel project) {
+    final TextEditingController descriptionController = TextEditingController(
+      text: project.description,
+    );
+
     return Card(
       elevation: 2,
       margin: EdgeInsets.zero,
@@ -120,14 +128,84 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _infoRow('프로젝트 ID', Text(project.id)),
-            _infoRow('설명', Text(project.description ?? '없음')),
+            // 프로젝트 ID: 복사 버튼 + 텍스트
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '프로젝트 ID',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.copy, size: 20),
+                        tooltip: 'ID 복사',
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: project.id));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('프로젝트 ID가 복사되었습니다'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                      ),
+                      Flexible(
+                        child: SelectableText(
+                          project.id,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // 설명 수정 가능
+            _infoRow(
+              '설명',
+              TextField(
+                controller: descriptionController,
+
+                minLines: 1,
+                maxLines: 10,
+                maxLength: 100,
+                inputFormatters: [LengthLimitingTextInputFormatter(100)],
+                decoration: InputDecoration(
+                  isDense: true,
+                  counterText: '',
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onChanged: (value) {
+                  context
+                      .read<ProjectProvider>()
+                      .updateProject({ProjectField.description: value})
+                      .then((_) {
+                        context.read<ProjectProvider>().refreshProject();
+                      });
+                },
+              ),
+            ),
+
             _infoRow('생성일', Text(_formatDate(project.createdAt))),
             _infoRow('수정일', Text(_formatDate(project.updatedAt))),
-
-            // TODO: ownerUid를 이름 등으로 변환하여 표시해야 함 (DB 연결 필요)
             _infoRow('생성자 UID', Text(project.ownerUid)),
-
             _infoRow('참여자 수', Text('${project.participants.length}명')),
             _infoRow(
               '상태',
@@ -199,6 +277,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(project.title, style: const TextStyle(color: Colors.white)),
         backgroundColor: Colors.deepPurple,
         iconTheme: const IconThemeData(color: Colors.white),

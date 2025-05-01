@@ -1,216 +1,147 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/services.dart';
 
-import 'package:talk_pilot/src/provider/project_provider.dart';
-import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
+import 'package:talk_pilot/src/provider/project_provider.dart';
 
-// ignore_for_file: use_build_context_synchronously
+import 'package:talk_pilot/src/pages/work_page/widgets/work_dialogs.dart';
+import 'package:talk_pilot/src/pages/work_page/widgets/work_helpers.dart';
 
-// 프로젝트 ID 복사
-void copyProjectId(BuildContext context, ProjectModel project) async {
-  await Clipboard.setData(ClipboardData(text: project.id));
-  ToastMessage.show('프로젝트 ID가 복사되었습니다.');
+class ProjectCard extends StatefulWidget {
+  final ProjectModel project;
+  final VoidCallback onTap;
+
+  const ProjectCard({super.key, required this.project, required this.onTap});
+
+  @override
+  State<ProjectCard> createState() => _ProjectCardState();
 }
 
-// 프로젝트 추가/수정 다이얼로그 표시
-void showProjectDialog(BuildContext context, {ProjectModel? project}) {
-  final isEditMode = project != null;
+class _ProjectCardState extends State<ProjectCard> {
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final project = widget.project;
 
-  // 컨트롤러 초기화
-  final titleController = TextEditingController(text: project?.title ?? '');
-  final descriptionController = TextEditingController(
-    text: project?.description ?? '',
-  );
-  final estimatedTimeController = TextEditingController(
-    text: project?.estimatedTime?.toString() ?? '',
-  );
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: IntrinsicHeight(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 타이틀 + 상태 원 + 점3개 메뉴
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        project.title,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.045,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    PopupMenuButton<String>(
+                      padding: EdgeInsets.zero,
+                      icon: Container(
+                        width: 12,
+                        height: 12,
+                        margin: const EdgeInsets.only(right: 8),
+                        decoration: BoxDecoration(
+                          color: getStatusColor(project.status),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      onSelected: (value) async {
+                        if (!context.mounted) return;
+                        context.read<ProjectProvider>().selectedProject =
+                            project;
+                        await context.read<ProjectProvider>().updateProject({
+                          ProjectField.status: value,
+                        });
+                        ToastMessage.show('프로젝트 상태가 변경되었습니다.');
+                      },
+                      itemBuilder:
+                          (context) => [
+                            const PopupMenuItem(
+                              value: 'preparing',
+                              child: Text('진행 중'),
+                            ),
+                            const PopupMenuItem(
+                              value: 'paused',
+                              child: Text('보류'),
+                            ),
+                            const PopupMenuItem(
+                              value: 'completed',
+                              child: Text('끝'),
+                            ),
+                          ],
+                    ),
+                    PopupMenuButton<String>(
+                      padding: EdgeInsets.zero,
+                      icon: const Icon(Icons.more_vert, size: 20),
+                      onSelected: (value) async {
+                        if (!context.mounted) return;
+                        if (value == 'edit') {
+                          showProjectDialog(context, project: project);
+                        } else if (value == 'delete') {
+                          showDeleteProjectDialog(context, project);
+                        }
+                      },
+                      itemBuilder:
+                          (context) => [
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Text('수정'),
+                            ),
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Text('삭제'),
+                            ),
+                          ],
+                    ),
+                  ],
+                ),
 
-  showDialog(
-    context: context,
-    builder:
-        (context) => AlertDialog(
-          title: Text(isEditMode ? '프로젝트 정보 수정' : '새 프로젝트 추가'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildTextField(titleController, '프로젝트 제목 입력', autofocus: true),
-              const SizedBox(height: 12),
-              _buildTextField(
-                descriptionController,
-                '프로젝트 설명 입력 (최대 100자)',
-                maxLength: 100,
-                maxLines: 3,
-              ),
-              const SizedBox(height: 12),
-              _buildTextField(
-                estimatedTimeController,
-                '목표 발표 시간 (초 단위)',
-                keyboardType: TextInputType.number,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('취소'),
-            ),
-            TextButton(
-              onPressed:
-                  () async => _handleProjectSave(
-                    context,
-                    isEditMode,
-                    project,
-                    titleController,
-                    descriptionController,
-                    estimatedTimeController,
+                const SizedBox(height: 4),
+
+                if (project.updatedAt != null)
+                  Text(
+                    formatElapsedTime(project.updatedAt!),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-              child: Text(isEditMode ? '수정 완료' : '추가'),
+                Text(
+                  '생성일: ${DateFormat('yyyy-MM-dd / hh:mm a').format(project.createdAt!)}',
+                  style: const TextStyle(fontSize: 12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  '만든 사람:  / 참여자 수: ${project.participants.length}', // Owner 추후 추가 예정
+                  style: const TextStyle(fontSize: 12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-  );
-}
-
-// 텍스트 필드 빌더
-Widget _buildTextField(
-  TextEditingController controller,
-  String hint, {
-  int? maxLength,
-  int maxLines = 1,
-  bool autofocus = false,
-  TextInputType? keyboardType,
-}) {
-  return TextField(
-    controller: controller,
-    autofocus: autofocus,
-    decoration: InputDecoration(hintText: hint, counterText: ''),
-    maxLength: maxLength,
-    minLines: 1,
-    maxLines: maxLines,
-    keyboardType: keyboardType ?? TextInputType.text,
-  );
-}
-
-// 프로젝트 저장 로직 처리
-Future<void> _handleProjectSave(
-  BuildContext context,
-  bool isEditMode,
-  ProjectModel? project,
-  TextEditingController titleController,
-  TextEditingController descriptionController,
-  TextEditingController estimatedTimeController,
-) async {
-  final newTitle = titleController.text.trim();
-  final newDescription = descriptionController.text.trim();
-  final newEstimatedTime = int.tryParse(estimatedTimeController.text.trim());
-
-  if (newTitle.isEmpty) return;
-
-  final projectProvider = context.read<ProjectProvider>();
-
-  if (isEditMode) {
-    await _updateExistingProject(
-      projectProvider,
-      project!,
-      newTitle,
-      newDescription,
-      newEstimatedTime,
-    );
-  } else {
-    await _createNewProject(
-      context,
-      projectProvider,
-      newTitle,
-      newDescription,
-      newEstimatedTime,
+      ),
     );
   }
-
-  Navigator.pop(context);
-}
-
-// 기존 프로젝트 업데이트 처리
-Future<void> _updateExistingProject(
-  ProjectProvider provider,
-  ProjectModel project,
-  String title,
-  String description,
-  int? estimatedTime,
-) async {
-  provider.selectedProject = project;
-  await provider.updateProject({
-    ProjectField.title: title,
-    ProjectField.description: description,
-    if (estimatedTime != null && estimatedTime >= 0)
-      ProjectField.estimatedTime: estimatedTime,
-  });
-
-  ToastMessage.show(
-    '프로젝트 정보가 수정되었습니다.',
-    backgroundColor: const Color.fromARGB(255, 170, 158, 52),
-  );
-}
-
-// 신규 프로젝트 생성 처리
-Future<void> _createNewProject(
-  BuildContext context,
-  ProjectProvider provider,
-  String title,
-  String description,
-  int? estimatedTime,
-) async {
-  final user = context.read<UserProvider>().currentUser;
-  if (user != null) {
-    await provider.createProject(
-      title: title,
-      description: description,
-      currentUser: user,
-      estimatedTime: estimatedTime,
-    );
-
-    final createdProject = provider.selectedProject;
-    if (createdProject != null && estimatedTime != null) {
-      await provider.updateProject({ProjectField.estimatedTime: estimatedTime});
-    }
-
-    ToastMessage.show(
-      '프로젝트가 추가되었습니다.',
-      backgroundColor: const Color(0xFF4CAF50),
-    );
-  } else {
-    // TODO: 사용자 정보가 없을 경우 처리
-  }
-}
-
-// 프로젝트 삭제 다이얼로그
-void showDeleteProjectDialog(BuildContext context, ProjectModel project) {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder:
-        (context) => AlertDialog(
-          title: const Text('프로젝트 삭제'),
-          content: Text('"${project.title}" 프로젝트를 삭제하시겠습니까?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('아니요'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await context.read<ProjectProvider>().deleteProject(project.id);
-                Navigator.pop(context);
-                ToastMessage.show(
-                  '프로젝트가 삭제되었습니다.',
-                  backgroundColor: const Color(0xFFF44336),
-                );
-              },
-              child: const Text('예', style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        ),
-  );
 }

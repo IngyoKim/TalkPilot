@@ -1,202 +1,116 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/provider/project_provider.dart';
+import 'package:talk_pilot/src/provider/user_provider.dart';
+import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
-import 'package:talk_pilot/src/pages/work_page/widgets/project_card.dart';
-import 'package:talk_pilot/src/pages/work_page/widgets/work_helpers.dart';
 
-class ProjectCard extends StatefulWidget {
-  final ProjectModel project;
-  final VoidCallback onTap;
+// ignore_for_file: use_build_context_synchronously
+void showProjectDialog(BuildContext context, {ProjectModel? project}) {
+  final isEditMode = project != null;
+  final titleController = TextEditingController(text: project?.title ?? '');
+  final descriptionController = TextEditingController(
+    text: project?.description ?? '',
+  );
 
-  const ProjectCard({super.key, required this.project, required this.onTap});
+  showDialog(
+    context: context,
+    builder:
+        (context) => AlertDialog(
+          title: Text(isEditMode ? '프로젝트 정보 수정' : '새 프로젝트 추가'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                autofocus: true,
+                decoration: const InputDecoration(hintText: '프로젝트 제목 입력'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  hintText: '프로젝트 설명 입력 (최대 100자)',
+                  counterText: '',
+                ),
+                maxLength: 100,
+                minLines: 1,
+                maxLines: 3,
+                keyboardType: TextInputType.multiline,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final newTitle = titleController.text.trim();
+                final newDescription = descriptionController.text.trim();
+                if (newTitle.isEmpty) return;
 
-  @override
-  State<ProjectCard> createState() => _ProjectCardState();
+                if (isEditMode) {
+                  final projectProvider = context.read<ProjectProvider>();
+                  projectProvider.selectedProject = project;
+                  await projectProvider.updateProject({
+                    ProjectField.title: newTitle,
+                    ProjectField.description: newDescription,
+                  });
+                  ToastMessage.show(
+                    '프로젝트 정보가 수정되었습니다.',
+                    backgroundColor: const Color.fromARGB(255, 170, 158, 52),
+                  );
+                } else {
+                  final user = context.read<UserProvider>().currentUser;
+                  if (user != null) {
+                    await context.read<ProjectProvider>().createProject(
+                      title: newTitle,
+                      description: newDescription,
+                      currentUser: user,
+                    );
+                    ToastMessage.show(
+                      '프로젝트가 추가되었습니다.',
+                      backgroundColor: const Color(0xFF4CAF50),
+                    );
+                  }
+                }
+                Navigator.pop(context);
+              },
+              child: Text(isEditMode ? '수정 완료' : '추가'),
+            ),
+          ],
+        ),
+  );
 }
 
-class _ProjectCardState extends State<ProjectCard> {
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    // ✅ 최신 project 객체를 provider에서 다시 가져옴
-    final project = context.watch<ProjectProvider>().projects.firstWhere(
-      (p) => p.id == widget.project.id,
-      orElse: () => widget.project,
-    );
-
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: Card(
-        elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: IntrinsicHeight(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        project.title,
-                        style: TextStyle(
-                          fontSize: screenWidth * 0.045,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    PopupMenuButton<String>(
-                      padding: EdgeInsets.zero,
-                      icon: Container(
-                        width: 12,
-                        height: 12,
-                        margin: const EdgeInsets.only(right: 8),
-                        decoration: BoxDecoration(
-                          color: getStatusColor(project.status),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      onSelected: (value) async {
-                        if (!context.mounted) return;
-                        context.read<ProjectProvider>().selectedProject =
-                            project;
-                        await context.read<ProjectProvider>().updateProject({
-                          ProjectField.status: value,
-                        });
-                        ToastMessage.show('프로젝트 상태가 변경되었습니다.');
-                      },
-                      itemBuilder:
-                          (context) => [
-                            const PopupMenuItem(
-                              value: 'preparing',
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.circle,
-                                    size: 10,
-                                    color: Colors.green,
-                                  ),
-                                  SizedBox(width: 6),
-                                  Text('진행 중'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'paused',
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.circle,
-                                    size: 10,
-                                    color: Colors.yellow,
-                                  ),
-                                  SizedBox(width: 6),
-                                  Text('보류'),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuItem(
-                              value: 'completed',
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.circle,
-                                    size: 10,
-                                    color: Colors.red,
-                                  ),
-                                  SizedBox(width: 6),
-                                  Text('끝'),
-                                ],
-                              ),
-                            ),
-                          ],
-                    ),
-                    PopupMenuButton<String>(
-                      padding: EdgeInsets.zero,
-                      icon: const Icon(Icons.more_vert, size: 20),
-                      onSelected: (value) async {
-                        if (!context.mounted) return;
-                        if (value == 'edit') {
-                          showProjectDialog(context, project: project);
-                        } else if (value == 'delete') {
-                          showDeleteProjectDialog(context, project);
-                        } else if (value == 'copy_id') {
-                          await Clipboard.setData(
-                            ClipboardData(text: project.id),
-                          );
-                          ToastMessage.show('프로젝트 ID가 복사되었습니다.');
-                        }
-                      },
-                      itemBuilder:
-                          (context) => [
-                            const PopupMenuItem(
-                              value: 'edit',
-                              child: Text('수정'),
-                            ),
-                            const PopupMenuItem(
-                              value: 'delete',
-                              child: Text('삭제'),
-                            ),
-                            const PopupMenuItem(
-                              value: 'copy_id',
-                              child: Text('ID 복사'),
-                            ),
-                          ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    if (project.updatedAt != null)
-                      Text(
-                        formatElapsedTime(project.updatedAt!),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 6),
-                      child: Text(
-                        project.estimatedTime != null
-                            ? '⏱ ${project.estimatedTime! ~/ 60}분 ${project.estimatedTime! % 60}초'
-                            : '⏱ 미정',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  '생성일: ${DateFormat('yyyy-MM-dd / hh:mm a').format(project.createdAt!)}',
-                  style: const TextStyle(fontSize: 12),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  ' 만든 사람:  / 참여자 수: ${project.participants.length}', // Owner 추후 추가 예정
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
+void showDeleteProjectDialog(BuildContext context, ProjectModel project) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder:
+        (context) => AlertDialog(
+          title: const Text('프로젝트 삭제'),
+          content: Text('"${project.title}" 프로젝트를 삭제하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('아니요'),
             ),
-          ),
+            TextButton(
+              onPressed: () async {
+                await context.read<ProjectProvider>().deleteProject(project.id);
+                Navigator.pop(context);
+                ToastMessage.show(
+                  '프로젝트가 삭제되었습니다.',
+                  backgroundColor: const Color(0xFFF44336),
+                );
+              },
+              child: const Text('예', style: TextStyle(color: Colors.red)),
+            ),
+          ],
         ),
-      ),
-    );
-  }
+  );
 }

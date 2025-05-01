@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:talk_pilot/src/components/toast_message.dart';
 
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
@@ -79,19 +80,6 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
     super.dispose();
   }
 
-  String _getStatusLabel(String status) {
-    switch (status) {
-      case 'preparing':
-        return '진행 중';
-      case 'paused':
-        return '보류';
-      case 'completed':
-        return '끝';
-      default:
-        return '알 수 없음';
-    }
-  }
-
   String _formatDate(DateTime? date) {
     return date != null ? DateFormat('yyyy-MM-dd / HH:mm').format(date) : '없음';
   }
@@ -146,12 +134,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                         tooltip: 'ID 복사',
                         onPressed: () {
                           Clipboard.setData(ClipboardData(text: project.id));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('프로젝트 ID가 복사되었습니다'),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
+                          ToastMessage.show("프로젝트 ID가 복사되었습니다");
                         },
                       ),
                       Flexible(
@@ -220,7 +203,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                       shape: BoxShape.circle,
                     ),
                   ),
-                  Text(_getStatusLabel(project.status)),
+                  Text(project.status),
                 ],
               ),
             ),

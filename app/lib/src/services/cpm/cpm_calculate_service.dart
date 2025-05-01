@@ -73,7 +73,7 @@ class CpmCalculateService extends ChangeNotifier {
 
           // 🔁 ProfilePage로 이동
           if (context.mounted) {
-            Navigator.pop(context);
+            Navigator.pop(context, averageCpm);
           }
         } else {
           _currentIndex++;

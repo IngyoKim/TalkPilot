@@ -151,13 +151,17 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const CpmCalculatePage(),
                   ),
                 );
+
+                if (result != null && result is double) {
+                  await context.read<UserProvider>().refreshUser();
+                }
               },
               icon: const Icon(Icons.calculate, color: Colors.white),
               label: const Text(

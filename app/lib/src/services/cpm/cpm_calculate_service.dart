@@ -19,8 +19,8 @@ class CpmCalculateService extends ChangeNotifier {
   int _currentIndex = 0;
   DateTime? _startTime;
   double? _cpmResult;
-  List<double> _cpmList = [];
   CpmStage _stage = CpmStage.ready;
+  final List<double> _cpmList = [];
 
   String get currentSentence => _sentences[_currentIndex];
   double? get cpmResult => _cpmResult;
@@ -71,7 +71,7 @@ class CpmCalculateService extends ChangeNotifier {
             });
           }
 
-          // 🔁 ProfilePage로 이동
+          /// ProfilePage로 이동
           if (context.mounted) {
             Navigator.pop(context, averageCpm);
           }

@@ -1,13 +1,13 @@
+import 'dart:async';
+
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 import 'package:talk_pilot/src/models/user_model.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
@@ -26,30 +26,51 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
   late final TextEditingController _descController = TextEditingController(
     text: widget.project.description,
   );
-  late SharedPreferences _prefs;
-  String get _memoKey => 'memo_${widget.project.title}';
+  late final DatabaseReference _memoRef;
+  Timer? _debounce;
+
+  void _setupMemoSync() {
+    // DB → TextField
+    _memoRef.onValue.listen((event) {
+      final newText = event.snapshot.value as String? ?? '';
+      if (_memoController.text != newText) {
+        _memoController.text = newText;
+      }
+    });
+
+    // TextField → DB (debounce & 실질적 변경 시만)
+    _memoController.addListener(() {
+      final newText = _memoController.text;
+
+      _debounce?.cancel();
+      _debounce = Timer(const Duration(milliseconds: 400), () async {
+        final snapshot = await _memoRef.get();
+        final currentValue = snapshot.value as String? ?? '';
+
+        if (newText != currentValue) {
+          await _memoRef.set(newText);
+          await ProjectService().updateProject(widget.project.id, {
+            'updatedAt': DateTime.now().toIso8601String(),
+          });
+        }
+      });
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    _initMemo();
-  }
-
-  Future<void> _initMemo() async {
-    _prefs = await SharedPreferences.getInstance();
-    _memoController.text = _prefs.getString(_memoKey) ?? '';
-    _memoController.addListener(() async {
-      await _prefs.setString(_memoKey, _memoController.text);
-      await ProjectService().updateProject(widget.project.id, {
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
-    });
+    _memoRef = FirebaseDatabase.instance.ref(
+      'projects/${widget.project.id}/memo',
+    );
+    _setupMemoSync();
   }
 
   @override
   void dispose() {
     _memoController.dispose();
     _descController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -191,7 +212,9 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
         const SizedBox(height: 8),
         TextField(
           controller: _memoController,
-          maxLines: null,
+          minLines: 1,
+          maxLines: 1000,
+          maxLength: 1000,
           decoration: InputDecoration(
             hintText: '내용을 작성하세요...',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

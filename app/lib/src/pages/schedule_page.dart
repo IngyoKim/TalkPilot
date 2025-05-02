@@ -11,7 +11,7 @@ class SchedulePage extends StatefulWidget {
 class _SchedulePageState extends State<SchedulePage> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  final Map<DateTime, String> _events = {};
+  final Map<DateTime, List<String>> _events = {};
   final TextEditingController _eventController = TextEditingController();
   bool _isInputVisible = false;
 
@@ -21,10 +21,14 @@ class _SchedulePageState extends State<SchedulePage> {
     super.dispose();
   }
 
+  List<String> _getEventsForDay(DateTime day) {
+    return _events[day] ?? [];
+  }
+
   @override
   Widget build(BuildContext context) {
     final selected = _selectedDay ?? _focusedDay;
-    final savedEvent = _events[selected];
+    final savedEvents = _getEventsForDay(selected);
 
     return Scaffold(
       appBar: AppBar(
@@ -43,7 +47,7 @@ class _SchedulePageState extends State<SchedulePage> {
               setState(() {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
-                _eventController.text = _events[selectedDay] ?? '';
+                _eventController.clear();
                 _isInputVisible = false;
               });
             },
@@ -62,7 +66,6 @@ class _SchedulePageState extends State<SchedulePage> {
               ),
             ),
           ),
-          // 일정 생성 버튼
           Align(
             alignment: Alignment.centerRight,
             child: Padding(
@@ -102,9 +105,16 @@ class _SchedulePageState extends State<SchedulePage> {
                   const SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: () {
-                      if (_selectedDay != null && _eventController.text.isNotEmpty) {
+                      final text = _eventController.text.trim();
+                      if (_selectedDay != null && text.isNotEmpty) {
                         setState(() {
-                          _events[_selectedDay!] = _eventController.text.trim();
+                          final day = _selectedDay!;
+                          if (_events.containsKey(day)) {
+                            _events[day]!.add(text);
+                          } else {
+                            _events[day] = [text];
+                          }
+                          _eventController.clear();
                           _isInputVisible = false;
                         });
                       }
@@ -114,7 +124,7 @@ class _SchedulePageState extends State<SchedulePage> {
                 ],
               ),
             ),
-          if (savedEvent != null && savedEvent.isNotEmpty)
+          if (savedEvents.isNotEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Column(
@@ -122,7 +132,10 @@ class _SchedulePageState extends State<SchedulePage> {
                 children: [
                   const Text('저장된 일정:', style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
-                  Text(savedEvent),
+                  ...savedEvents.map((e) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Text('- $e'),
+                      )),
                 ],
               ),
             ),

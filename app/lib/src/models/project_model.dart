@@ -7,6 +7,9 @@ enum ProjectField {
   status,
   estimatedTime,
   score,
+  scheduleDate,
+  script,
+  memo,
 }
 
 extension ProjectFieldExt on ProjectField {

@@ -12,25 +12,55 @@ import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
+import 'package:talk_pilot/src/services/database/project_stream_service.dart';
 
-class ProjectDetailPage extends StatefulWidget {
-  final ProjectModel project;
-  const ProjectDetailPage({super.key, required this.project});
+/// 최상위 실시간 페이지
+class ProjectDetailPage extends StatelessWidget {
+  final String projectId;
+  const ProjectDetailPage({super.key, required this.projectId});
 
   @override
-  State<ProjectDetailPage> createState() => _ProjectDetailPageState();
+  Widget build(BuildContext context) {
+    return StreamBuilder<ProjectModel>(
+      stream: ProjectService().streamProject(projectId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return _ProjectDetailView(project: snapshot.data!);
+      },
+    );
+  }
 }
 
-class _ProjectDetailPageState extends State<ProjectDetailPage> {
+/// 내부 State 로직 유지
+class _ProjectDetailView extends StatefulWidget {
+  final ProjectModel project;
+  const _ProjectDetailView({required this.project});
+
+  @override
+  State<_ProjectDetailView> createState() => _ProjectDetailViewState();
+}
+
+class _ProjectDetailViewState extends State<_ProjectDetailView> {
   late final TextEditingController _memoController = TextEditingController();
-  late final TextEditingController _descController = TextEditingController(
-    text: widget.project.description,
-  );
-  late final DatabaseReference _memoRef;
+  late final TextEditingController _descController = TextEditingController();
+  late DatabaseReference _memoRef;
   Timer? _debounce;
 
+  @override
+  void initState() {
+    super.initState();
+    _descController.text = widget.project.description;
+    _memoRef = FirebaseDatabase.instance.ref(
+      'projects/${widget.project.id}/memo',
+    );
+    _setupMemoSync();
+  }
+
   void _setupMemoSync() {
-    // DB → TextField
     _memoRef.onValue.listen((event) {
       final newText = event.snapshot.value as String? ?? '';
       if (_memoController.text != newText) {
@@ -38,32 +68,27 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
       }
     });
 
-    // TextField → DB (debounce & 실질적 변경 시만)
     _memoController.addListener(() {
       final newText = _memoController.text;
-
       _debounce?.cancel();
       _debounce = Timer(const Duration(milliseconds: 400), () async {
         final snapshot = await _memoRef.get();
         final currentValue = snapshot.value as String? ?? '';
-
         if (newText != currentValue) {
           await _memoRef.set(newText);
-          await ProjectService().updateProject(widget.project.id, {
-            'updatedAt': DateTime.now().toIso8601String(),
-          });
+          await ProjectProvider().updateProject({ProjectField.memo: _memoRef});
+          await ProjectService().updateProject(widget.project.id, {});
         }
       });
     });
   }
 
   @override
-  void initState() {
-    super.initState();
-    _memoRef = FirebaseDatabase.instance.ref(
-      'projects/${widget.project.id}/memo',
-    );
-    _setupMemoSync();
+  void didUpdateWidget(covariant _ProjectDetailView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.project.description != oldWidget.project.description) {
+      _descController.text = widget.project.description;
+    }
   }
 
   @override

@@ -30,7 +30,9 @@ class _WorkPageState extends State<WorkPage> {
     context.read<ProjectProvider>().selectedProject = project;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => ProjectDetailPage(project: project)),
+      MaterialPageRoute(
+        builder: (_) => ProjectDetailPage(projectId: project.id),
+      ),
     );
   }
 

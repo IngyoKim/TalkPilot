@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+
+import 'package:talk_pilot/src/models/user_model.dart';
+import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:talk_pilot/src/models/project_model.dart';
-import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/provider/project_provider.dart';
+import 'package:talk_pilot/src/components/toast_message.dart';
+import 'package:talk_pilot/src/services/database/user_service.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 
 class ProjectDetailPage extends StatefulWidget {
@@ -152,7 +155,16 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             ),
             _info('생성일', _format(p.createdAt)),
             _info('수정일', _format(p.updatedAt)),
-            _info('생성자', p.ownerUid),
+            FutureBuilder(
+              future: UserService().readUser(p.ownerUid),
+              builder: (context, snapshot) {
+                final nickname =
+                    snapshot.hasData
+                        ? (snapshot.data as UserModel).nickname
+                        : '로딩 중...';
+                return _info('생성자', nickname);
+              },
+            ),
             _info('참여자 수', '${p.participants.length}명'),
             _info('상태', p.status),
             _info(

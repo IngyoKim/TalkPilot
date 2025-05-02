@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   provider: ^6.1.4
+  speech_to_text: ^7.0.0
   flutter_dotenv: ^5.2.1
   shared_preferences: ^2.5.3
   
@@ -46,6 +47,13 @@ dependencies:
   firebase_core: ^3.13.0
   firebase_auth: ^5.5.2
   firebase_database: ^11.3.5
+  uuid: ^4.5.1
+
+  fluttertoast: ^8.2.4
+
+  archive: ^3.3.7       
+  xml: ^6.3.0           
+  file_picker: ^10.1.2
 
   table_calendar: ^3.0.9
 dev_dependencies:

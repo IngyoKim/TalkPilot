@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:talk_pilot/src/components/loading_indicator.dart';
+
+import 'package:talk_pilot/src/provider/login_provider.dart';
 import 'package:talk_pilot/src/services/auth/kakao_login.dart';
 import 'package:talk_pilot/src/services/auth/google_login.dart';
-import 'package:talk_pilot/src/provider/login_provider.dart';
-import 'package:talk_pilot/src/components/loading_indicator.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -87,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
 
                             final user = FirebaseAuth.instance.currentUser;
                             if (user != null) {
-                              await UserService().initUserFromAuth(
+                              await UserService().initUser(
                                 user,
                                 loginMethod: 'Kakao',
                               );
@@ -137,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
 
                             final user = FirebaseAuth.instance.currentUser;
                             if (user != null) {
-                              await UserService().initUserFromAuth(
+                              await UserService().initUser(
                                 user,
                                 loginMethod: 'Google',
                               );

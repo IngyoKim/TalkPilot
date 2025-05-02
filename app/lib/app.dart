@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:talk_pilot/src/pages/base_page.dart';
 import 'package:talk_pilot/src/provider/login_provider.dart';
+import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 
 class App extends StatelessWidget {
@@ -15,6 +16,7 @@ class App extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => LoginProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => ProjectProvider()),
       ],
       child: MaterialApp(
         /// App title.

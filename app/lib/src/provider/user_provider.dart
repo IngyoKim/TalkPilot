@@ -10,25 +10,16 @@ class UserProvider with ChangeNotifier {
   UserModel? get currentUser => _currentUser;
   bool get hasUser => _currentUser != null;
 
+  /// 유저정보 로드
   Future<void> loadUser(String uid) async {
     final user = await _userService.readUser(uid);
     if (user != null) {
       _currentUser = user;
-    } else {
-      // 최초 로그인 시 기본 UserModel 생성
-      _currentUser = UserModel(
-        uid: uid,
-        name: '',
-        email: '',
-        nickname: '',
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-      await _userService.writeUser(_currentUser!);
+      notifyListeners();
     }
-    notifyListeners();
   }
 
+  /// 유저정보 새로고침
   Future<void> refreshUser() async {
     if (_currentUser == null) return;
     final latest = await _userService.readUser(_currentUser!.uid);
@@ -38,12 +29,17 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  Future<void> updateUser(UserModel updatedUser) async {
-    _currentUser = updatedUser;
-    await _userService.updateUser(updatedUser);
-    notifyListeners();
+  /// 유저 업데이트
+  Future<void> updateUser(Map<UserField, dynamic> updates) async {
+    if (_currentUser == null) return;
+    final updateMap = {
+      for (final entry in updates.entries) entry.key.key: entry.value,
+    };
+    await _userService.updateUser(_currentUser!.uid, updateMap);
+    await refreshUser(); // 업데이트한 정보로 갱신
   }
 
+  /// 유저 삭제(로컬에서)
   void clearUser() {
     _currentUser = null;
     notifyListeners();

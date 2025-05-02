@@ -3,11 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:talk_pilot/src/pages/schedule_page.dart';
-import 'package:talk_pilot/src/pages/work_page.dart';
+import 'package:talk_pilot/src/pages/work_page/work_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/profile_page.dart';
 
+import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
+import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
+import 'package:talk_pilot/src/services/database/user_service.dart';
 
 class BottomBar extends StatefulWidget {
   const BottomBar({super.key});
@@ -31,11 +34,16 @@ class _BottomBarState extends State<BottomBar>
   Future<void> _loadUser() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      await context.read<UserProvider>().loadUser(user.uid);
+      final userProvider = context.read<UserProvider>();
+      final projectProvider = context.read<ProjectProvider>();
+
+      await UserService().initUser(user);
+      await userProvider.loadUser(user.uid);
+      await projectProvider.initAllProjects(user.uid);
+
+      ToastMessage.show("${user.displayName}님 환영합니다.");
     }
-    if (mounted) {
-      setState(() => _isUserLoaded = true);
-    }
+    if (mounted) setState(() => _isUserLoaded = true);
   }
 
   @override

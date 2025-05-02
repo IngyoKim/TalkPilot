@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/database/project_stream_service.dart';
-import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart';
+
 import 'package:talk_pilot/src/pages/project_page/widgets/text_editor.dart';
-import 'package:talk_pilot/src/pages/project_page/widgets/number_editor.dart';
-import 'package:talk_pilot/src/pages/project_page/widgets/date_picker.dart';
+import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart';
 
 class ProjectDetailPage extends StatefulWidget {
   final String projectId;
@@ -16,15 +16,6 @@ class ProjectDetailPage extends StatefulWidget {
 }
 
 class _ProjectDetailPageState extends State<ProjectDetailPage> {
-  @override
-  void dispose() {
-    // updatedAt만 dispose 시점에 갱신
-    ProjectService().updateProject(widget.projectId, {
-      'updatedAt': DateTime.now().toIso8601String(),
-    });
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<ProjectModel>(
@@ -94,22 +85,6 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                 maxLength: 3000,
               ),
               const SizedBox(height: 16),
-
-              NumberEditor(
-                projectId: project.id,
-                field: ProjectField.estimatedTime,
-                label: '예상 발표 시간 (초)',
-                value: project.estimatedTime,
-              ),
-              const SizedBox(height: 16),
-
-              DatePicker(
-                projectId: project.id,
-                field: ProjectField.scheduledDate,
-                label: '발표 날짜',
-                initialValue: project.scheduledDate,
-              ),
-              const SizedBox(height: 32),
             ],
           ),
         );

@@ -24,24 +24,55 @@ class DatePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text(_format(initialValue)),
-      trailing: const Icon(Icons.calendar_today),
-      onTap: () async {
-        final now = DateTime.now();
-        final selected = await showDatePicker(
-          context: context,
-          initialDate: initialValue ?? now,
-          firstDate: DateTime(now.year - 5),
-          lastDate: DateTime(now.year + 5),
-        );
-        if (selected != null) {
-          ProjectService().updateProject(projectId, {
-            field.key: selected.toIso8601String(),
-          });
-        }
-      },
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(
+            width: 120,
+            child: Text(
+              '발표 날짜',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+            ),
+          ),
+          Flexible(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  _format(initialValue),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                GestureDetector(
+                  onTap: () async {
+                    final now = DateTime.now();
+                    final selected = await showDatePicker(
+                      context: context,
+                      initialDate: initialValue ?? now,
+                      firstDate: DateTime(now.year - 5),
+                      lastDate: DateTime(now.year + 5),
+                    );
+                    if (selected != null) {
+                      ProjectService().updateProject(projectId, {
+                        field.key: selected.toIso8601String(),
+                      });
+                    }
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.only(top: 2), // ← 아이콘을 아래로 조금 내림
+                    child: Icon(Icons.calendar_today, size: 18),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-// 모델 클래스
 class Event {
   final String title;
   final Color color;
@@ -23,10 +22,16 @@ class _SchedulePageState extends State<SchedulePage> {
   DateTime? _selectedDay;
   bool _isInputVisible = false;
   int? _editingIndex;
-  Color _selectedColor = Colors.blue;
+  Color _selectedColor = Colors.red;
 
   final List<Color> _colorOptions = [
-    Colors.blue, Colors.red, Colors.green, Colors.orange, Colors.purple
+    Colors.red,
+    Colors.orange,
+    Colors.yellow,
+    Colors.green,
+    Colors.blue,
+    Colors.indigo,
+    Colors.purple,
   ];
 
   List<Event> _getEvents(DateTime day) => _events[day] ?? [];
@@ -93,10 +98,19 @@ class _SchedulePageState extends State<SchedulePage> {
                 _editingIndex = null;
               });
             },
-            headerStyle: const HeaderStyle(titleCentered: true, formatButtonVisible: false),
+            headerStyle: const HeaderStyle(
+              titleCentered: true,
+              formatButtonVisible: false,
+            ),
             calendarStyle: const CalendarStyle(
-              todayDecoration: BoxDecoration(color: Colors.deepPurpleAccent, shape: BoxShape.circle),
-              selectedDecoration: BoxDecoration(color: Colors.deepPurple, shape: BoxShape.circle),
+              todayDecoration: BoxDecoration(
+                color: Colors.deepPurpleAccent,
+                shape: BoxShape.circle,
+              ),
+              selectedDecoration: BoxDecoration(
+                color: Colors.deepPurple,
+                shape: BoxShape.circle,
+              ),
             ),
           ),
           Align(
@@ -106,10 +120,18 @@ class _SchedulePageState extends State<SchedulePage> {
               child: GestureDetector(
                 onTap: () => _toggleInput(),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.deepPurple, borderRadius: BorderRadius.circular(20)),
-                  child: const Text('일정 생성', style: TextStyle(color: Colors.white)),
+                    color: Colors.deepPurple,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    '일정 생성',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ),
@@ -169,22 +191,24 @@ class EventInputForm extends StatelessWidget {
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
-            children: colorOptions.map((color) {
-              return GestureDetector(
-                onTap: () => onColorChanged(color),
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                    border: selectedColor == color
-                        ? Border.all(color: Colors.black, width: 2)
-                        : null,
-                  ),
-                ),
-              );
-            }).toList(),
+            children:
+                colorOptions.map((color) {
+                  return GestureDetector(
+                    onTap: () => onColorChanged(color),
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                        border:
+                            selectedColor == color
+                                ? Border.all(color: Colors.black, width: 2)
+                                : null,
+                      ),
+                    ),
+                  );
+                }).toList(),
           ),
           const SizedBox(height: 8),
           ElevatedButton(
@@ -220,21 +244,41 @@ class EventList extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('저장된 일정:', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           ...events.asMap().entries.map((entry) {
             final i = entry.key;
             final e = entry.value;
-            return Row(
-              children: [
-                Container(
-                  width: 10, height: 10,
-                  margin: const EdgeInsets.only(right: 8),
-                  decoration: BoxDecoration(color: e.color, shape: BoxShape.circle),
-                ),
-                Expanded(child: Text(e.title)),
-                IconButton(icon: const Icon(Icons.edit, size: 20), onPressed: () => onEdit(i, e)),
-                IconButton(icon: const Icon(Icons.delete, size: 20), onPressed: () => onDelete(i)),
-              ],
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    margin: const EdgeInsets.only(right: 12),
+                    decoration: BoxDecoration(
+                      color: e.color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(e.title, style: const TextStyle(fontSize: 16)),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.edit, size: 20),
+                    onPressed: () => onEdit(i, e),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, size: 20),
+                    onPressed: () => onDelete(i),
+                  ),
+                ],
+              ),
             );
           }),
         ],

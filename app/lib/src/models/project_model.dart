@@ -7,8 +7,8 @@ enum ProjectField {
   status,
   estimatedTime,
   score,
-  scheduleDate,
   script,
+  scheduledDate,
   memo,
 }
 
@@ -27,6 +27,9 @@ class ProjectModel {
   final String status; // e.g. "preparing", "completed"
   final int? estimatedTime; // 발표 예상 시간 (단위: 초)
   final double? score; // 프로젝트 점수
+  final String? script; // 대본
+  final DateTime? scheduledDate; // 발표 일자
+  final String? memo; // 메모
 
   ProjectModel({
     required this.id,
@@ -39,8 +42,10 @@ class ProjectModel {
     required this.status,
     this.estimatedTime,
     this.score,
+    this.script,
+    this.scheduledDate,
+    this.memo,
   });
-
   factory ProjectModel.fromMap(String id, Map<String, dynamic> map) {
     return ProjectModel(
       id: id,
@@ -59,8 +64,14 @@ class ProjectModel {
       estimatedTime:
           map['estimatedTime'] != null
               ? (map['estimatedTime'] as num).toInt()
+              : 0,
+      score: map['score'] != null ? (map['score'] as num).toDouble() : 0.0,
+      script: map['script'] ?? '',
+      scheduledDate:
+          map['scheduledDate'] != null
+              ? DateTime.tryParse(map['scheduledDate'])
               : null,
-      score: map['score'] != null ? (map['score'] as num).toDouble() : null,
+      memo: map['memo'] ?? '',
     );
   }
 
@@ -75,6 +86,10 @@ class ProjectModel {
       "status": status,
       if (estimatedTime != null) "estimatedTime": estimatedTime,
       if (score != null) "score": score,
+      if (script != null) "script": script,
+      if (scheduledDate != null)
+        "scheduledDate": scheduledDate!.toIso8601String(),
+      if (memo != null) "memo": memo,
     };
   }
 
@@ -88,6 +103,9 @@ class ProjectModel {
     String? status,
     int? estimatedTime,
     double? score,
+    String? script,
+    DateTime? scheduledDate,
+    String? memo,
   }) {
     return ProjectModel(
       id: id,
@@ -100,6 +118,9 @@ class ProjectModel {
       status: status ?? this.status,
       estimatedTime: estimatedTime ?? this.estimatedTime,
       score: score ?? this.score,
+      script: script ?? this.script,
+      scheduledDate: scheduledDate ?? this.scheduledDate,
+      memo: memo ?? this.memo,
     );
   }
 }

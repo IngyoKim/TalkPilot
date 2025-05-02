@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 
-class TextEditor extends StatelessWidget {
+class TextEditor extends StatefulWidget {
   final String projectId;
   final ProjectField field;
   final String label;
@@ -19,16 +19,42 @@ class TextEditor extends StatelessWidget {
   });
 
   @override
+  State<TextEditor> createState() => _TextEditorState();
+}
+
+class _TextEditorState extends State<TextEditor> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.value);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant TextEditor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value && widget.value != _controller.text) {
+      _controller.text = widget.value;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = TextEditingController(text: value);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(widget.label, style: const TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 6),
         TextField(
-          controller: controller,
-          maxLength: maxLength,
+          controller: _controller,
+          maxLength: widget.maxLength,
           maxLines: null,
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -36,7 +62,9 @@ class TextEditor extends StatelessWidget {
             fillColor: Colors.grey[100],
           ),
           onChanged: (text) {
-            ProjectService().updateProject(projectId, {field.key: text});
+            ProjectService().updateProject(widget.projectId, {
+              widget.field.key: text,
+            });
           },
         ),
       ],

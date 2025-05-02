@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:talk_pilot/src/services/database/database_logger.dart';
 
 class DatabaseService {
   final FirebaseDatabase _database = FirebaseDatabase.instance;
@@ -10,9 +10,9 @@ class DatabaseService {
     final ref = _database.ref(path);
     try {
       await ref.set(data);
-      _log("[WRITE] $path", data);
+      log("[WRITE] $path", data);
     } catch (e) {
-      _error("[WRITE] $path", e);
+      error("[WRITE] $path", e);
       rethrow;
     }
   }
@@ -36,7 +36,7 @@ class DatabaseService {
 
       return raw as T;
     } catch (e) {
-      _error("[READ] $path", e);
+      error("[READ] $path", e);
       rethrow;
     }
   }
@@ -46,9 +46,9 @@ class DatabaseService {
     final ref = _database.ref(path);
     try {
       await ref.update(updates);
-      _log("[UPDATE] $path", updates);
+      log("[UPDATE] $path", updates);
     } catch (e) {
-      _error("[UPDATE] $path", e);
+      error("[UPDATE] $path", e);
       rethrow;
     }
   }
@@ -60,7 +60,7 @@ class DatabaseService {
       await ref.remove();
       debugPrint("[DELETE] $path - success");
     } catch (e) {
-      _error("[DELETE] $path", e);
+      error("[DELETE] $path", e);
       rethrow;
     }
   }
@@ -82,27 +82,15 @@ class DatabaseService {
                       fromMap(Map<String, dynamic>.from(child.value as Map)),
                 )
                 .toList();
-        _log("[FETCH] $path", data);
+        log("[FETCH] $path", data);
         return data;
       } else {
         debugPrint("[FETCH] $path - no data");
         return [];
       }
     } catch (e) {
-      _error("[FETCH] $path", e);
+      error("[FETCH] $path", e);
       rethrow;
     }
-  }
-
-  /// Pretty log helper
-  /// json 형태로 데이터 출력
-  void _log(String tag, dynamic data) {
-    final pretty = const JsonEncoder.withIndent('  ').convert(data);
-    debugPrint("[DatabaseService] $tag:\n$pretty");
-  }
-
-  /// Error log helper
-  void _error(String tag, Object error) {
-    debugPrint("[DatabaseService] $tag - error: $error");
   }
 }

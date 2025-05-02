@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:talk_pilot/src/models/project_model.dart';
 
 class DatabaseStreamService {
   final FirebaseDatabase _database = FirebaseDatabase.instance;
 
-  /// 단일 객체를 실시간 구독
   Stream<T> streamData<T>({
     required String path,
     required T Function(Map<String, dynamic>) fromMap,
@@ -22,7 +22,13 @@ class DatabaseStreamService {
       try {
         final map = Map<String, dynamic>.from(data as Map);
         final model = fromMap(map);
-        _log("[STREAM:$logTag] $path", model);
+
+        if (model is ProjectModel) {
+          _log("[STREAM:$logTag] $path", model.toMap());
+        } else {
+          _log("[STREAM:$logTag] $path", model.toString());
+        }
+
         return model;
       } catch (e) {
         _error("[STREAM:$logTag] $path", e);

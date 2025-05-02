@@ -46,6 +46,7 @@ class ProjectModel {
     this.scheduledDate,
     this.memo,
   });
+
   factory ProjectModel.fromMap(String id, Map<String, dynamic> map) {
     return ProjectModel(
       id: id,

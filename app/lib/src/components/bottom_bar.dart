@@ -66,7 +66,7 @@ class _BottomBarState extends State<BottomBar>
     return Scaffold(
       body: TabBarView(
         controller: _tabController,
-        children: [const SchedulePage(), WorkPage(), const ProfilePage()],
+        children: [SchedulePage(), WorkPage(), const ProfilePage()],
       ),
       bottomNavigationBar: Container(
         color: Colors.white,

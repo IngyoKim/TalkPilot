@@ -1,18 +1,24 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'package:talk_pilot/src/pages/schedule_page/widgets/event.dart';
 import 'package:talk_pilot/src/pages/schedule_page/widgets/event_input_form.dart';
 import 'package:talk_pilot/src/pages/schedule_page/widgets/event_list.dart';
+import 'package:talk_pilot/src/services/database/project_service.dart';
 
 class SchedulePage extends StatefulWidget {
-  const SchedulePage({super.key});
-
   @override
   State<SchedulePage> createState() => _SchedulePageState();
 }
 
 class _SchedulePageState extends State<SchedulePage> {
+  @override
+  void initState() {
+    super.initState();
+    _loadProjectsFromDB();
+  }
+
   final Map<DateTime, List<Event>> _events = {};
   final TextEditingController _controller = TextEditingController();
   DateTime _focusedDay = DateTime.now();
@@ -26,6 +32,25 @@ class _SchedulePageState extends State<SchedulePage> {
   DateTime _normalize(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
   List<Event> _getEvents(DateTime day) => _events[_normalize(day)] ?? [];
+
+  void _loadProjectsFromDB() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final service = ProjectService();
+    final projects = await service.fetchProjects(uid);
+
+    setState(() {
+      for (final project in projects) {
+        if (project.scheduledDate != null) {
+          final day = _normalize(project.scheduledDate!);
+          _events
+              .putIfAbsent(day, () => [])
+              .add(Event(title: project.title, color: Colors.indigo));
+        }
+      }
+    });
+  }
 
   void _toggleInput({int? editIndex, Event? event}) {
     setState(() {

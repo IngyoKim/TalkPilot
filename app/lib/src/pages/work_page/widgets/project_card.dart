@@ -8,8 +8,8 @@ import 'package:talk_pilot/src/components/toast_message.dart';
 
 import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
-import 'package:talk_pilot/src/pages/work_page/widgets/work_dialogs.dart';
 import 'package:talk_pilot/src/pages/work_page/widgets/work_helpers.dart';
+import 'package:talk_pilot/src/pages/work_page/widgets/project_manage_dialog.dart';
 
 class ProjectCard extends StatefulWidget {
   final ProjectModel project;

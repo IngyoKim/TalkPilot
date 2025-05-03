@@ -11,6 +11,7 @@ import 'package:talk_pilot/src/pages/profile_page/widgets/profile_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/stats_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_drawer.dart';
 import 'package:talk_pilot/src/pages/profile_page/docx_text_page.dart';
+import 'package:talk_pilot/src/pages/profile_page/txt_text_page.dart';
 
 // ignore_for_file: use_build_context_synchronously
 class ProfilePage extends StatefulWidget {
@@ -192,6 +193,27 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueGrey,
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const TxtTextPage()),
+                );
+              },
+              icon: const Icon(Icons.note_alt, color: Colors.white),
+              label: const Text(
+                'TXT 텍스트 추출 테스트',
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
                 minimumSize: const Size.fromHeight(50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

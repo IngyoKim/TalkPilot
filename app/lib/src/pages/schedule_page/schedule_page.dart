@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:talk_pilot/src/pages/schedule_page/widgets/event.dart';
@@ -58,56 +59,78 @@ class _SchedulePageState extends State<SchedulePage> {
     });
   }
 
-  void _openMonthYearSelectorDialog() {
+  void _showMonthYearPicker() {
     int tempYear = _focusedDay.year;
+    int tempMonth = _focusedDay.month;
 
-    showDialog(
+    showCupertinoModalPopup(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('연도와 월 선택'),
-          content: SizedBox(
-            width: double.maxFinite,
+      builder:
+          (_) => Container(
             height: 300,
-            child: Row(
+            color: Colors.white,
+            padding: const EdgeInsets.only(top: 12),
+            child: Column(
               children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: 11,
-                    itemBuilder: (context, index) {
-                      int year = 2025 + index;
-                      return ListTile(
-                        title: Center(child: Text('$year')),
-                        selected: year == tempYear,
-                        onTap: () {
-                          setState(() => tempYear = year);
-                        },
-                      );
-                    },
+                SizedBox(
+                  height: 180,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: CupertinoPicker(
+                          scrollController: FixedExtentScrollController(
+                            initialItem: tempYear - 2025,
+                          ),
+                          itemExtent: 36.0,
+                          onSelectedItemChanged: (index) {
+                            tempYear = 2025 + index;
+                          },
+                          children: List.generate(11, (index) {
+                            final year = 2025 + index;
+                            return Center(
+                              child: Text(
+                                '$year년',
+                                style: const TextStyle(fontSize: 18),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                      Expanded(
+                        child: CupertinoPicker(
+                          scrollController: FixedExtentScrollController(
+                            initialItem: tempMonth - 1,
+                          ),
+                          itemExtent: 36.0,
+                          onSelectedItemChanged: (index) {
+                            tempMonth = index + 1;
+                          },
+                          children: List.generate(12, (index) {
+                            return Center(
+                              child: Text(
+                                '${_monthAbbr[index]}월',
+                                style: const TextStyle(fontSize: 18),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: 12,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Center(child: Text(_monthAbbr[index])),
-                        onTap: () {
-                          Navigator.pop(context);
-                          setState(() {
-                            _focusedDay = DateTime(tempYear, index + 1);
-                            _selectedDay = DateTime(tempYear, index + 1, 1);
-                          });
-                        },
-                      );
-                    },
-                  ),
+                CupertinoButton(
+                  child: const Text('선택 완료'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    setState(() {
+                      _focusedDay = DateTime(tempYear, tempMonth);
+                      _selectedDay = DateTime(tempYear, tempMonth, 1);
+                    });
+                  },
                 ),
               ],
             ),
           ),
-        );
-      },
     );
   }
 
@@ -126,12 +149,12 @@ class _SchedulePageState extends State<SchedulePage> {
             },
           ),
           GestureDetector(
-            onTap: _openMonthYearSelectorDialog,
+            onTap: _showMonthYearPicker,
             child: Text(
-              '${_monthAbbr[_focusedDay.month - 1]} ${_focusedDay.year}',
+              '${_focusedDay.year}년 ${_focusedDay.month}월',
               style: const TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
                 decoration: TextDecoration.underline,
               ),
             ),
@@ -150,18 +173,18 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   final List<String> _monthAbbr = [
-    'JAN',
-    'FEB',
-    'MAR',
-    'APR',
-    'MAY',
-    'JUN',
-    'JUL',
-    'AUG',
-    'SEP',
-    'OCT',
-    'NOV',
-    'DEC',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '10',
+    '11',
+    '12',
   ];
 
   @override

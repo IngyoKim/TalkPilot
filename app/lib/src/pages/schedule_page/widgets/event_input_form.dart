@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//일정 입력/수정 위젯
 class EventInputForm extends StatelessWidget {
   final TextEditingController controller;
   final Color selectedColor;

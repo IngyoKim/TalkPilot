@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-
 import 'package:talk_pilot/src/pages/schedule_page/widgets/event.dart';
 import 'package:talk_pilot/src/pages/schedule_page/widgets/event_input_form.dart';
 import 'package:talk_pilot/src/pages/schedule_page/widgets/event_list.dart';
@@ -16,20 +15,10 @@ class _SchedulePageState extends State<SchedulePage> {
   final Map<DateTime, List<Event>> _events = {};
   final TextEditingController _controller = TextEditingController();
   DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
+  DateTime? _selectedDay = DateTime.now();
   bool _isInputVisible = false;
   int? _editingIndex;
   Color _selectedColor = Colors.red;
-
-  final List<Color> _colorOptions = [
-    Colors.red,
-    Colors.orange,
-    Colors.yellow,
-    Colors.green,
-    Colors.blue,
-    Colors.indigo,
-    Colors.purple,
-  ];
 
   List<Event> _getEvents(DateTime day) => _events[day] ?? [];
 
@@ -69,6 +58,112 @@ class _SchedulePageState extends State<SchedulePage> {
     });
   }
 
+  void _openMonthYearSelectorDialog() {
+    int tempYear = _focusedDay.year;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('연도와 월 선택'),
+          content: SizedBox(
+            width: double.maxFinite,
+            height: 300,
+            child: Row(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: 11,
+                    itemBuilder: (context, index) {
+                      int year = 2025 + index;
+                      return ListTile(
+                        title: Center(child: Text('$year')),
+                        selected: year == tempYear,
+                        onTap: () {
+                          setState(() => tempYear = year);
+                        },
+                      );
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: 12,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Center(child: Text(_monthAbbr[index])),
+                        onTap: () {
+                          Navigator.pop(context);
+                          setState(() {
+                            _focusedDay = DateTime(tempYear, index + 1);
+                            _selectedDay = DateTime(tempYear, index + 1, 1);
+                          });
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCustomHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: () {
+              setState(() {
+                _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
+              });
+            },
+          ),
+          GestureDetector(
+            onTap: _openMonthYearSelectorDialog,
+            child: Text(
+              '${_monthAbbr[_focusedDay.month - 1]} ${_focusedDay.year}',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: () {
+              setState(() {
+                _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  final List<String> _monthAbbr = [
+    'JAN',
+    'FEB',
+    'MAR',
+    'APR',
+    'MAY',
+    'JUN',
+    'JUL',
+    'AUG',
+    'SEP',
+    'OCT',
+    'NOV',
+    'DEC',
+  ];
+
   @override
   Widget build(BuildContext context) {
     final selected = _selectedDay ?? _focusedDay;
@@ -81,6 +176,7 @@ class _SchedulePageState extends State<SchedulePage> {
       ),
       body: Column(
         children: [
+          _buildCustomHeader(),
           TableCalendar(
             firstDay: DateTime.utc(2025, 1, 1),
             lastDay: DateTime.utc(2035, 12, 31),
@@ -95,10 +191,7 @@ class _SchedulePageState extends State<SchedulePage> {
                 _editingIndex = null;
               });
             },
-            headerStyle: const HeaderStyle(
-              titleCentered: true,
-              formatButtonVisible: false,
-            ),
+            headerVisible: false,
             calendarStyle: const CalendarStyle(
               todayDecoration: BoxDecoration(
                 color: Colors.deepPurpleAccent,
@@ -138,7 +231,7 @@ class _SchedulePageState extends State<SchedulePage> {
               controller: _controller,
               selectedColor: _selectedColor,
               onColorChanged: (color) => setState(() => _selectedColor = color),
-              colorOptions: _colorOptions,
+              colorOptions: Event.colorOptions,
               isEditing: _editingIndex != null,
               onSave: _saveEvent,
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'event.dart';
 
+//저장된 일정 리스트 UI
 class EventList extends StatelessWidget {
   final List<Event> events;
   final void Function(int index, Event event) onEdit;

@@ -54,7 +54,7 @@ class _WorkPageState extends State<WorkPage> {
               iconSize: 28,
               color: Colors.white,
               tooltip: '프로젝트 추가',
-              onPressed: () => showProjectDialog(context),
+              onPressed: () => showJoinProjectDialog(context),
             ),
           ),
         ],

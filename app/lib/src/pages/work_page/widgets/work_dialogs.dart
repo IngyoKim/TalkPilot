@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:talk_pilot/src/models/project_model.dart';
+import 'package:talk_pilot/src/models/user_model.dart';
+import 'package:talk_pilot/src/services/database/project_service.dart';
+import 'package:talk_pilot/src/services/database/user_service.dart';
 import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
-import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
 
 // ignore_for_file: use_build_context_synchronously
-void showProjectDialog(BuildContext context, {ProjectModel? project}) {
-  final isEditMode = project != null;
-  final titleController = TextEditingController(text: project?.title ?? '');
-  final descriptionController = TextEditingController(
-    text: project?.description ?? '',
-  );
+
+void showCreateProjectDialog(BuildContext context) {
+  final titleController = TextEditingController();
+  final descriptionController = TextEditingController();
 
   showDialog(
     context: context,
     builder:
         (context) => AlertDialog(
-          title: Text(isEditMode ? '프로젝트 정보 수정' : '새 프로젝트 추가'),
+          title: const Text('새 프로젝트 생성'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -48,38 +48,124 @@ void showProjectDialog(BuildContext context, {ProjectModel? project}) {
             ),
             TextButton(
               onPressed: () async {
-                final newTitle = titleController.text.trim();
-                final newDescription = descriptionController.text.trim();
-                if (newTitle.isEmpty) return;
+                final title = titleController.text.trim();
+                final description = descriptionController.text.trim();
+                final user = context.read<UserProvider>().currentUser;
 
-                if (isEditMode) {
-                  final projectProvider = context.read<ProjectProvider>();
-                  projectProvider.selectedProject = project;
-                  await projectProvider.updateProject({
-                    ProjectField.title: newTitle,
-                    ProjectField.description: newDescription,
-                  });
-                  ToastMessage.show(
-                    '프로젝트 정보가 수정되었습니다.',
-                    backgroundColor: const Color.fromARGB(255, 170, 158, 52),
-                  );
-                } else {
-                  final user = context.read<UserProvider>().currentUser;
-                  if (user != null) {
-                    await context.read<ProjectProvider>().createProject(
-                      title: newTitle,
-                      description: newDescription,
-                      currentUser: user,
-                    );
-                    ToastMessage.show(
-                      '프로젝트가 추가되었습니다.',
-                      backgroundColor: const Color(0xFF4CAF50),
-                    );
-                  }
-                }
+                if (title.isEmpty || user == null) return;
+
+                await context.read<ProjectProvider>().createProject(
+                  title: title,
+                  description: description,
+                  currentUser: user,
+                );
+
+                ToastMessage.show(
+                  '프로젝트가 생성되었습니다.',
+                  backgroundColor: const Color(0xFF4CAF50),
+                );
                 Navigator.pop(context);
               },
-              child: Text(isEditMode ? '수정 완료' : '추가'),
+              child: const Text('생성'),
+            ),
+          ],
+        ),
+  );
+}
+
+void showJoinProjectDialog(BuildContext context) {
+  final projectIdController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder:
+        (context) => AlertDialog(
+          title: const Text('프로젝트 참여'),
+          content: TextField(
+            controller: projectIdController,
+            decoration: const InputDecoration(hintText: '프로젝트 ID 입력'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () async {
+                ToastMessage.show(
+                  '프로젝트에 참여했습니다.',
+                  backgroundColor: const Color(0xFF2196F3),
+                );
+
+                Navigator.pop(context);
+              },
+              child: const Text('참여'),
+            ),
+          ],
+        ),
+  );
+}
+
+void showEditProjectDialog(BuildContext context, ProjectModel project) {
+  final titleController = TextEditingController(text: project.title);
+  final descriptionController = TextEditingController(
+    text: project.description,
+  );
+
+  showDialog(
+    context: context,
+    builder:
+        (context) => AlertDialog(
+          title: const Text('프로젝트 정보 수정'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                autofocus: true,
+                decoration: const InputDecoration(hintText: '프로젝트 제목 수정'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  hintText: '프로젝트 설명 수정',
+                  counterText: '',
+                ),
+                maxLength: 100,
+                minLines: 1,
+                maxLines: 3,
+                keyboardType: TextInputType.multiline,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('취소'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final newTitle = titleController.text.trim();
+                final newDescription = descriptionController.text.trim();
+
+                if (newTitle.isEmpty) return;
+
+                final projectProvider = context.read<ProjectProvider>();
+                projectProvider.selectedProject = project;
+
+                await projectProvider.updateProject({
+                  ProjectField.title: newTitle,
+                  ProjectField.description: newDescription,
+                });
+
+                ToastMessage.show(
+                  '프로젝트 정보가 수정되었습니다.',
+                  backgroundColor: const Color.fromARGB(255, 170, 158, 52),
+                );
+                Navigator.pop(context);
+              },
+              child: const Text('수정'),
             ),
           ],
         ),

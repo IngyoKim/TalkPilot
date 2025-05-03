@@ -94,8 +94,9 @@ class _ProjectCardState extends State<ProjectCard> {
                       icon: const Icon(Icons.more_vert, size: 20),
                       onSelected: (value) async {
                         if (!context.mounted) return;
+
                         if (value == 'edit') {
-                          showProjectDialog(context, project: project);
+                          showEditProjectDialog(context, project);
                         } else if (value == 'delete') {
                           showDeleteProjectDialog(context, project);
                         }

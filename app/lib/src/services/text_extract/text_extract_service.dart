@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/text_extract/docx_extract_service.dart';
 import 'package:talk_pilot/src/services/text_extract/txt_extract_service.dart';
+import 'package:talk_pilot/src/components/toast_message.dart';
 
 Future<void> pickAndExtractScriptText({
   required String projectId,
@@ -35,7 +36,7 @@ Future<void> pickAndExtractScriptText({
   } else if (filePath.endsWith('.txt')) {
     extractedText = await TxtExtractService().extractTextFromTxt(file);
   } else {
-    showMessage('지원되지 않는 파일 형식입니다.');
+    ToastMessage.show('업로드에 실패하였습니다. \n지원되지 않는 파일 형식입니다.');
     setLoading(false);
     return;
   }
@@ -49,12 +50,13 @@ Future<void> pickAndExtractScriptText({
       '현재 대본이 존재합니다.\n 이 내용을 덮어쓰시겠습니까?',
     );
     if (confirm != true) {
+      ToastMessage.show('업로드가 취소되었습니다. \n기존 대본은 그대로 유지됩니다.');
       setLoading(false);
       return;
     }
   }
 
   await ProjectService().updateProject(projectId, {'script': extractedText});
-  showMessage('대본 필드에 텍스트가 반영되었습니다.');
+  ToastMessage.show('업로드에 성공하였습니다.\n대본 필드에 텍스트가 반영되었습니다.');
   setLoading(false);
 }

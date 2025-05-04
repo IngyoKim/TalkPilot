@@ -22,10 +22,7 @@ class ProjectDetailPage extends StatefulWidget {
 
 class _ProjectDetailPageState extends State<ProjectDetailPage> {
   final _projectService = ProjectService();
-  String? extractedDocxText;
-  String? extractedTxtText;
-  bool isLoadingDocx = false;
-  bool isLoadingTxt = false;
+  bool isLoading = false;
 
   Future<void> pickAndExtractTextFile() async {
     final result = await FilePicker.platform.pickFiles(
@@ -37,39 +34,37 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
       final file = File(result.files.single.path!);
       final filePath = file.path.toLowerCase();
 
+      setState(() {
+        isLoading = true;
+      });
+
+      String? extractedText;
+
       if (filePath.endsWith('.docx')) {
         final service = DocxExtractService();
-
-        setState(() {
-          isLoadingDocx = true;
-          extractedDocxText = null;
-        });
-
-        final text = await service.extractTextFromDocx(file);
-
-        setState(() {
-          extractedDocxText = text;
-          isLoadingDocx = false;
-        });
+        extractedText = await service.extractTextFromDocx(file);
       } else if (filePath.endsWith('.txt')) {
         final service = TxtExtractService();
-
-        setState(() {
-          isLoadingTxt = true;
-          extractedTxtText = null;
-        });
-
-        final text = await service.extractTextFromTxt(file);
-
-        setState(() {
-          extractedTxtText = text;
-          isLoadingTxt = false;
-        });
+        extractedText = await service.extractTextFromTxt(file);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('지원되지 않는 파일 형식입니다.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('지원되지 않는 파일 형식입니다.')));
       }
+
+      if (extractedText != null) {
+        await _projectService.updateProject(widget.projectId, {
+          'script': extractedText,
+        });
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('대본 필드에 텍스트가 반영되었습니다.')));
+      }
+
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -97,7 +92,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             iconTheme: const IconThemeData(color: Colors.white),
             actions: [
               IconButton(
-                onPressed: isLoadingDocx || isLoadingTxt ? null : pickAndExtractTextFile,
+                onPressed: isLoading ? null : pickAndExtractTextFile,
                 icon: const Icon(Icons.upload_file),
                 tooltip: 'DOCX 또는 TXT 업로드',
               ),
@@ -106,8 +101,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              if (isLoadingDocx || isLoadingTxt)
-                const LinearProgressIndicator(),
+              if (isLoading) const LinearProgressIndicator(),
 
               const Text(
                 '프로젝트 정보',
@@ -152,46 +146,10 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                 maxLength: 3000,
               ),
               const SizedBox(height: 32),
-
-              if (extractedDocxText != null)
-                _buildExtractedSection('DOCX', extractedDocxText!),
-
-              if (extractedTxtText != null)
-                _buildExtractedSection('TXT', extractedTxtText!),
             ],
           ),
         );
       },
-    );
-  }
-
-  Widget _buildExtractedSection(String fileType, String content) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '추출된 $fileType 텍스트',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.deepPurple,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            border: Border.all(color: Colors.deepPurple.shade100),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            content,
-            style: const TextStyle(fontSize: 14),
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
     );
   }
 }

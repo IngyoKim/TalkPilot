@@ -1,14 +1,13 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
-
 import 'package:talk_pilot/src/models/user_model.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
-
 import 'package:talk_pilot/src/pages/project_page/widgets/read_only/info_row.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/read_only/copyable_row.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/editable/editable_date_picker.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/editable/editable_estimated_time.dart';
+import 'package:talk_pilot/src/pages/project_page/widgets/participant_list_button.dart';
 
 class ProjectInfoCard extends StatelessWidget {
   final ProjectModel project;
@@ -47,7 +46,7 @@ class ProjectInfoCard extends StatelessWidget {
                 return InfoRow(label: '생성자', value: nickname);
               },
             ),
-            InfoRow(label: '참여자 수', value: '${project.participants.length}명'),
+            ParticipantListButton(project: project, editable: editable),
             InfoRow(label: '상태', value: project.status),
             const SizedBox(height: 8),
             EditableEstimatedTime(

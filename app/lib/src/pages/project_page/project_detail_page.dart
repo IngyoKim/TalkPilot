@@ -7,6 +7,7 @@ import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/database/project_stream_service.dart';
 import 'package:talk_pilot/src/services/text_extract/docx_extract_service.dart';
+import 'package:talk_pilot/src/services/text_extract/txt_extract_service.dart';
 
 import 'package:talk_pilot/src/pages/project_page/widgets/text_editor.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart';
@@ -22,7 +23,9 @@ class ProjectDetailPage extends StatefulWidget {
 class _ProjectDetailPageState extends State<ProjectDetailPage> {
   final _projectService = ProjectService();
   String? extractedDocxText;
+  String? extractedTxtText;
   bool isLoadingDocx = false;
+  bool isLoadingTxt = false;
 
   Future<void> pickAndExtractDocxText() async {
     final result = await FilePicker.platform.pickFiles(
@@ -44,6 +47,30 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
       setState(() {
         extractedDocxText = text;
         isLoadingDocx = false;
+      });
+    }
+  }
+
+  Future<void> pickAndExtractTxtText() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['txt'],
+    );
+
+    if (result != null && result.files.single.path != null) {
+      final file = File(result.files.single.path!);
+      final service = TxtExtractService();
+
+      setState(() {
+        isLoadingTxt = true;
+        extractedTxtText = null;
+      });
+
+      final text = await service.extractTextFromTxt(file);
+
+      setState(() {
+        extractedTxtText = text;
+        isLoadingTxt = false;
       });
     }
   }
@@ -76,12 +103,18 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                 icon: const Icon(Icons.upload_file),
                 tooltip: 'DOCX 업로드',
               ),
+              IconButton(
+                onPressed: isLoadingTxt ? null : pickAndExtractTxtText,
+                icon: const Icon(Icons.note_add),
+                tooltip: 'TXT 업로드',
+              ),
             ],
           ),
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              if (isLoadingDocx) const LinearProgressIndicator(),
+              if (isLoadingDocx || isLoadingTxt)
+                const LinearProgressIndicator(),
 
               const Text(
                 '프로젝트 정보',
@@ -128,37 +161,44 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
               const SizedBox(height: 32),
 
               if (extractedDocxText != null)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '추출된 DOCX 텍스트',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        border: Border.all(color: Colors.deepPurple.shade100),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        extractedDocxText!,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ),
+                _buildExtractedSection('DOCX', extractedDocxText!),
+
+              if (extractedTxtText != null)
+                _buildExtractedSection('TXT', extractedTxtText!),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildExtractedSection(String fileType, String content) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '추출된 $fileType 텍스트',
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.deepPurple,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            border: Border.all(color: Colors.deepPurple.shade100),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            content,
+            style: const TextStyle(fontSize: 14),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }

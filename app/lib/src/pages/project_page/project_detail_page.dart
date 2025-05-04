@@ -47,10 +47,35 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                 onPressed: isLoading
                     ? null
                     : () => pickAndExtractScriptText(
-                          context: context,
                           projectId: widget.projectId,
-                          setLoading: (value) =>
-                              setState(() => isLoading = value),
+                          setLoading: (val) =>
+                              setState(() => isLoading = val),
+                          showMessage: (msg) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(msg)),
+                            );
+                          },
+                          confirmDialog: (title, content) async {
+                            if (!mounted) return false;
+                            return await showDialog<bool>(
+                              context: context,
+                              builder: (dialogContext) => AlertDialog(
+                                title: Text(title),
+                                content: Text(content),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(dialogContext).pop(false),
+                                    child: const Text('취소'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.of(dialogContext).pop(true),
+                                    child: const Text('확인'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
               ),
             ],
@@ -59,15 +84,11 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             padding: const EdgeInsets.all(16),
             children: [
               if (isLoading) const LinearProgressIndicator(),
-
-              const Text(
-                '프로젝트 정보',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              const Text('프로젝트 정보',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               ProjectInfoCard(project: project),
               const SizedBox(height: 32),
-
               TextEditor(
                 projectId: project.id,
                 field: ProjectField.title,
@@ -76,7 +97,6 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                 maxLength: 100,
               ),
               const SizedBox(height: 16),
-
               TextEditor(
                 projectId: project.id,
                 field: ProjectField.description,
@@ -85,7 +105,6 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                 maxLength: 300,
               ),
               const SizedBox(height: 16),
-
               TextEditor(
                 projectId: project.id,
                 field: ProjectField.memo,
@@ -94,7 +113,6 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                 maxLength: 1000,
               ),
               const SizedBox(height: 16),
-
               TextEditor(
                 projectId: project.id,
                 field: ProjectField.script,

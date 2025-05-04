@@ -27,51 +27,49 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
   bool isLoadingDocx = false;
   bool isLoadingTxt = false;
 
-  Future<void> pickAndExtractDocxText() async {
+  Future<void> pickAndExtractTextFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['docx'],
+      allowedExtensions: ['docx', 'txt'],
     );
 
     if (result != null && result.files.single.path != null) {
       final file = File(result.files.single.path!);
-      final service = DocxExtractService();
+      final filePath = file.path.toLowerCase();
 
-      setState(() {
-        isLoadingDocx = true;
-        extractedDocxText = null;
-      });
+      if (filePath.endsWith('.docx')) {
+        final service = DocxExtractService();
 
-      final text = await service.extractTextFromDocx(file);
+        setState(() {
+          isLoadingDocx = true;
+          extractedDocxText = null;
+        });
 
-      setState(() {
-        extractedDocxText = text;
-        isLoadingDocx = false;
-      });
-    }
-  }
+        final text = await service.extractTextFromDocx(file);
 
-  Future<void> pickAndExtractTxtText() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['txt'],
-    );
+        setState(() {
+          extractedDocxText = text;
+          isLoadingDocx = false;
+        });
+      } else if (filePath.endsWith('.txt')) {
+        final service = TxtExtractService();
 
-    if (result != null && result.files.single.path != null) {
-      final file = File(result.files.single.path!);
-      final service = TxtExtractService();
+        setState(() {
+          isLoadingTxt = true;
+          extractedTxtText = null;
+        });
 
-      setState(() {
-        isLoadingTxt = true;
-        extractedTxtText = null;
-      });
+        final text = await service.extractTextFromTxt(file);
 
-      final text = await service.extractTextFromTxt(file);
-
-      setState(() {
-        extractedTxtText = text;
-        isLoadingTxt = false;
-      });
+        setState(() {
+          extractedTxtText = text;
+          isLoadingTxt = false;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('지원되지 않는 파일 형식입니다.')),
+        );
+      }
     }
   }
 
@@ -99,14 +97,9 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             iconTheme: const IconThemeData(color: Colors.white),
             actions: [
               IconButton(
-                onPressed: isLoadingDocx ? null : pickAndExtractDocxText,
+                onPressed: isLoadingDocx || isLoadingTxt ? null : pickAndExtractTextFile,
                 icon: const Icon(Icons.upload_file),
-                tooltip: 'DOCX 업로드',
-              ),
-              IconButton(
-                onPressed: isLoadingTxt ? null : pickAndExtractTxtText,
-                icon: const Icon(Icons.note_add),
-                tooltip: 'TXT 업로드',
+                tooltip: 'DOCX 또는 TXT 업로드',
               ),
             ],
           ),

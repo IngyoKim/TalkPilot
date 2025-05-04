@@ -41,6 +41,15 @@ Future<void> pickAndExtractScriptText({
     return;
   }
 
+  const int maxLength = 3000;
+  if (extractedText.length > maxLength) {
+    ToastMessage.show(
+      '업로드 실패에 실패하였습니다. \n대본은 최대 $maxLength자까지만 허용됩니다. \n현재 문자수: ${extractedText.length}자',
+    );
+    setLoading(false);
+    return;
+  }
+
   final project = await ProjectService().readProject(projectId);
   final hasScript = project?.script?.trim().isNotEmpty ?? false;
 

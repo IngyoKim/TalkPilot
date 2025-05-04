@@ -8,8 +8,8 @@ import 'package:talk_pilot/src/components/toast_message.dart';
 
 import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
-import 'package:talk_pilot/src/pages/work_page/widgets/work_dialogs.dart';
 import 'package:talk_pilot/src/pages/work_page/widgets/work_helpers.dart';
+import 'package:talk_pilot/src/pages/work_page/widgets/project_manage_dialog.dart';
 
 class ProjectCard extends StatefulWidget {
   final ProjectModel project;
@@ -94,8 +94,9 @@ class _ProjectCardState extends State<ProjectCard> {
                       icon: const Icon(Icons.more_vert, size: 20),
                       onSelected: (value) async {
                         if (!context.mounted) return;
+
                         if (value == 'edit') {
-                          showProjectDialog(context, project: project);
+                          showEditProjectDialog(context, project);
                         } else if (value == 'delete') {
                           showDeleteProjectDialog(context, project);
                         }

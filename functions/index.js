@@ -24,6 +24,7 @@
 
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const cors = require("cors");
 
 var serviceAccount = require("./serviceAccountKey.json");
 
@@ -32,33 +33,39 @@ admin.initializeApp({
 });
 
 exports.createCustomToken = functions.https.onRequest(async (request, response) => {
-    const user = request.body;
+    cors({
+        origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+        methods: ["POST"],
+        credentials: false,
+    })(request, response, async () => {
 
-    const uid = `kakao_${user.uid}`; // uid 형식 준수
+        const user = request.body;
+        const uid = `kakao_${user.uid}`; // uid 형식 준수
 
-    /// 필수로 받을 정보만 남기고, 선택 사항은 조건부로 포함
-    const updateParams = {};
-    if (user.email) updateParams.email = user.email;
-    if (user.photoURL) updateParams.photoURL = user.photoURL;
-    if (user.displayName) updateParams.displayName = user.displayName;
+        /// 필수로 받을 정보만 남기고, 선택 사항은 조건부로 포함
+        const updateParams = {};
+        if (user.email) updateParams.email = user.email;
+        if (user.photoURL) updateParams.photoURL = user.photoURL;
+        if (user.displayName) updateParams.displayName = user.displayName;
 
-    try {
-        /// 사용자 업데이트 또는 생성
         try {
-            await admin.auth().updateUser(uid, updateParams);
-            console.log("User updated:", uid);
-        } catch (error) {
-            /// 사용자가 없으면 새로 생성
-            updateParams["uid"] = uid;
-            await admin.auth().createUser(updateParams);
-            console.log("User created:", uid);
-        }
+            /// 사용자 업데이트 또는 생성
+            try {
+                await admin.auth().updateUser(uid, updateParams);
+                console.log("User updated:", uid);
+            } catch (error) {
+                /// 사용자가 없으면 새로 생성
+                updateParams["uid"] = uid;
+                await admin.auth().createUser(updateParams);
+                console.log("User created:", uid);
+            }
 
-        /// 커스텀 토큰 생성
-        const token = await admin.auth().createCustomToken(uid);
-        response.json({ token });
-    } catch (error) {
-        console.error("Error creating custom token:", error);
-        response.status(500).json({ error: "Error creating custom token" });
-    }
+            /// 커스텀 토큰 생성
+            const token = await admin.auth().createCustomToken(uid);
+            response.json({ token });
+        } catch (error) {
+            console.error("Error creating custom token:", error);
+            response.status(500).json({ error: "Error creating custom token" });
+        }
+    });
 });

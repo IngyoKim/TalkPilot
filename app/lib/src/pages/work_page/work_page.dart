@@ -7,7 +7,7 @@ import 'package:talk_pilot/src/provider/project_provider.dart';
 
 import 'package:talk_pilot/src/pages/work_page/widgets/work_dialogs.dart';
 import 'package:talk_pilot/src/pages/work_page/widgets/project_card.dart';
-import 'package:talk_pilot/src/pages/work_page/widgets/project_detail_page.dart';
+import 'package:talk_pilot/src/pages/project_page/project_detail_page.dart';
 
 class WorkPage extends StatefulWidget {
   const WorkPage({super.key});
@@ -30,7 +30,9 @@ class _WorkPageState extends State<WorkPage> {
     context.read<ProjectProvider>().selectedProject = project;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => ProjectDetailPage(project: project)),
+      MaterialPageRoute(
+        builder: (_) => ProjectDetailPage(projectId: project.id),
+      ),
     );
   }
 

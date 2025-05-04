@@ -10,7 +10,6 @@ import 'package:talk_pilot/src/services/auth/kakao_login.dart';
 import 'package:talk_pilot/src/services/auth/google_login.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
 
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -47,142 +46,143 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: _isLoading
-            ? const LoadingIndicator(isFetching: true)
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Column(
-                    children: [
-                      Image.asset(
-                        'assets/login/logo.png',
-                        height: 200,
-                        width: 200,
-                      ),
-                      const SizedBox(height: 30),
-                      const Text(
-                        'Talk Pilot',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
+        child:
+            _isLoading
+                ? const LoadingIndicator(isFetching: true)
+                : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Column(
+                      children: [
+                        Image.asset(
+                          'assets/login/logo.png',
+                          height: 200,
+                          width: 200,
+                        ),
+                        const SizedBox(height: 30),
+                        const Text(
+                          'Talk Pilot',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        const Text(
+                          '로그인을 위해\nSNS 계정을 연결해주세요.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 40),
+
+                    /// Kakao Login
+                    GestureDetector(
+                      onTap: () {
+                        tryLogin(
+                          context: context,
+                          loginAction: () async {
+                            final loginProvider = context.read<LoginProvider>();
+                            await loginProvider.login(KakaoLogin());
+
+                            final user = FirebaseAuth.instance.currentUser;
+                            if (user != null) {
+                              await UserService().initUser(
+                                user,
+                                loginMethod: 'Kakao',
+                              );
+                            }
+                          },
+                          setLoading: _setLoading,
+                        );
+                      },
+                      child: Container(
+                        width: 300,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/login/kakao.png',
+                              height: 32,
+                              width: 32,
+                            ),
+                            const SizedBox(width: 10),
+                            const Text(
+                              'Continue with Kakao',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 15),
-                      const Text(
-                        '로그인을 위해\nSNS 계정을 연결해주세요.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
+                    ),
+                    const SizedBox(height: 20),
 
-                  /// Kakao Login
-                  GestureDetector(
-                    onTap: () {
-                      tryLogin(
-                        context: context,
-                        loginAction: () async {
-                          final loginProvider = context.read<LoginProvider>();
-                          await loginProvider.login(KakaoLogin());
+                    /// Google Login
+                    GestureDetector(
+                      onTap: () {
+                        tryLogin(
+                          context: context,
+                          loginAction: () async {
+                            final loginProvider = context.read<LoginProvider>();
+                            await loginProvider.login(GoogleLogin());
 
-                          final user = FirebaseAuth.instance.currentUser;
-                          if (user != null) {
-                            await UserService().initUserFromAuth(
-                              user,
-                              loginMethod: 'Kakao',
-                            );
-                          }
-                        },
-                        setLoading: _setLoading,
-                      );
-                    },
-                    child: Container(
-                      width: 300,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/login/kakao.png',
-                            height: 32,
-                            width: 32,
-                          ),
-                          const SizedBox(width: 10),
-                          const Text(
-                            'Continue with Kakao',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black,
+                            final user = FirebaseAuth.instance.currentUser;
+                            if (user != null) {
+                              await UserService().initUser(
+                                user,
+                                loginMethod: 'Google',
+                              );
+                            }
+                          },
+                          setLoading: _setLoading,
+                        );
+                      },
+                      child: Container(
+                        width: 300,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/login/google.png',
+                              height: 32,
+                              width: 32,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 10),
+                            const Text(
+                              'Continue with Google',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  /// Google Login
-                  GestureDetector(
-                    onTap: () {
-                      tryLogin(
-                        context: context,
-                        loginAction: () async {
-                          final loginProvider = context.read<LoginProvider>();
-                          await loginProvider.login(GoogleLogin());
-
-                          final user = FirebaseAuth.instance.currentUser;
-                          if (user != null) {
-                            await UserService().initUserFromAuth(
-                              user,
-                              loginMethod: 'Google',
-                            );
-                          }
-                        },
-                        setLoading: _setLoading,
-                      );
-                    },
-                    child: Container(
-                      width: 300,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            'assets/login/google.png',
-                            height: 32,
-                            width: 32,
-                          ),
-                          const SizedBox(width: 10),
-                          const Text(
-                            'Continue with Google',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
+                    const SizedBox(height: 50),
+                    const Text(
+                      'CBNU Department of Computer Engineering, 2025',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                  const SizedBox(height: 50),
-                  const Text(
-                    'CBNU Department of Computer Engineering, 2025',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+                  ],
+                ),
       ),
     );
   }

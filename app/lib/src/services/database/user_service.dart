@@ -32,30 +32,43 @@ class UserService {
   }
 
   /// FirebaseAuth 유저로부터 UserModel 생성 + 저장 (초기화 전용)
-  Future<void> initUserFromAuth(
-    User firebaseUser, {
-    String? loginMethod,
-  }) async {
+  /// 유저 정보 중에서 누락된 필드가 있으면 자동으로 초기화
+  Future<void> initUser(User firebaseUser, {String? loginMethod}) async {
+    final existing = await readUser(firebaseUser.uid);
+
     final providerInfo =
         firebaseUser.providerData.isNotEmpty
             ? firebaseUser.providerData.first
             : null;
 
-    final userModel = UserModel(
-      uid: firebaseUser.uid,
-      name: providerInfo?.displayName ?? firebaseUser.displayName ?? '',
-      email: providerInfo?.email ?? firebaseUser.email ?? '',
-      nickname: providerInfo?.displayName ?? firebaseUser.displayName ?? '',
-      photoUrl: providerInfo?.photoURL ?? firebaseUser.photoURL,
-      loginMethod: loginMethod,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      projectIds: {},
-      averageScore: 0.0,
-      targetScore: 90.0,
-      cpm: 0.0,
-    );
+    final newFields = {
+      'name': providerInfo?.displayName ?? firebaseUser.displayName ?? '',
+      'email': providerInfo?.email ?? firebaseUser.email ?? '',
+      'nickname': providerInfo?.displayName ?? firebaseUser.displayName ?? '',
+      'photoUrl': providerInfo?.photoURL ?? firebaseUser.photoURL,
+      'loginMethod': loginMethod,
+      'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+      'projectIds': {},
+      'averageScore': 0.0,
+      'targetScore': 90.0,
+      'cpm': 0.0,
+    };
 
-    await writeUser(userModel, onlyIfAbsent: true);
+    if (existing == null) {
+      await _db.writeDB("users/${firebaseUser.uid}", newFields);
+    } else {
+      // 누락 필드만 채워 넣음
+      final missingFields = <String, dynamic>{};
+      newFields.forEach((key, value) {
+        if (!(existing.toMap().containsKey(key))) {
+          missingFields[key] = value;
+        }
+      });
+
+      if (missingFields.isNotEmpty) {
+        await updateUser(firebaseUser.uid, missingFields);
+      }
+    }
   }
 }

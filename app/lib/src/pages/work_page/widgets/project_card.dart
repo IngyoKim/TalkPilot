@@ -2,10 +2,12 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:talk_pilot/src/models/user_model.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
-import 'package:talk_pilot/src/provider/project_provider.dart';
 
+import 'package:talk_pilot/src/provider/project_provider.dart';
+import 'package:talk_pilot/src/services/database/user_service.dart';
 import 'package:talk_pilot/src/pages/work_page/widgets/work_dialogs.dart';
 import 'package:talk_pilot/src/pages/work_page/widgets/work_helpers.dart';
 
@@ -131,11 +133,21 @@ class _ProjectCardState extends State<ProjectCard> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  '만든 사람:  / 참여자 수: ${project.participants.length}', // Owner 추후 추가 예정
-                  style: const TextStyle(fontSize: 12),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                FutureBuilder(
+                  future: UserService().readUser(project.ownerUid),
+                  builder: (context, snapshot) {
+                    final nickname =
+                        snapshot.hasData
+                            ? (snapshot.data as UserModel).nickname
+                            : '로딩 중...';
+
+                    return Text(
+                      '만든 사람: $nickname / 참여자 수: ${project.participants.length}',
+                      style: const TextStyle(fontSize: 12),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    );
+                  },
                 ),
               ],
             ),

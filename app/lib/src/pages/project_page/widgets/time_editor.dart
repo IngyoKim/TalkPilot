@@ -7,11 +7,13 @@ import 'package:talk_pilot/src/services/database/project_service.dart';
 class EstimatedTimeEditor extends StatefulWidget {
   final String projectId;
   final int? initialSeconds;
+  final bool editable;
 
   const EstimatedTimeEditor({
     super.key,
     required this.projectId,
     required this.initialSeconds,
+    this.editable = true,
   });
 
   @override
@@ -46,14 +48,13 @@ class _EstimatedTimeEditorState extends State<EstimatedTimeEditor> {
     await ProjectService().updateProject(widget.projectId, {
       ProjectField.estimatedTime.key: total,
     });
-
     ToastMessage.show("예상 발표 시간이 저장되었습니다");
     setState(() => _isEditing = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_isEditing) {
+    if (!_isEditing || !widget.editable) {
       final seconds = widget.initialSeconds ?? 0;
       final display = '${seconds ~/ 60}분 ${seconds % 60}초';
       return Padding(
@@ -83,10 +84,11 @@ class _EstimatedTimeEditorState extends State<EstimatedTimeEditor> {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  GestureDetector(
-                    onTap: () => setState(() => _isEditing = true),
-                    child: const Icon(Icons.edit, size: 18),
-                  ),
+                  if (widget.editable)
+                    GestureDetector(
+                      onTap: () => setState(() => _isEditing = true),
+                      child: const Icon(Icons.edit, size: 18),
+                    ),
                 ],
               ),
             ),
@@ -140,7 +142,10 @@ class _EstimatedTimeEditorState extends State<EstimatedTimeEditor> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                ElevatedButton(onPressed: _save, child: const Text('저장')),
+                ElevatedButton(
+                  onPressed: widget.editable ? _save : null,
+                  child: const Text('저장'),
+                ),
               ],
             ),
           ),

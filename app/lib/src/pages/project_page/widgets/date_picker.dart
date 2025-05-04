@@ -8,6 +8,7 @@ class DatePicker extends StatelessWidget {
   final ProjectField field;
   final String label;
   final DateTime? initialValue;
+  final bool editable;
 
   const DatePicker({
     super.key,
@@ -15,6 +16,7 @@ class DatePicker extends StatelessWidget {
     required this.field,
     required this.label,
     required this.initialValue,
+    this.editable = true,
   });
 
   String _format(DateTime? date) {
@@ -48,26 +50,27 @@ class DatePicker extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 4),
-                GestureDetector(
-                  onTap: () async {
-                    final now = DateTime.now();
-                    final selected = await showDatePicker(
-                      context: context,
-                      initialDate: initialValue ?? now,
-                      firstDate: DateTime(now.year - 5),
-                      lastDate: DateTime(now.year + 5),
-                    );
-                    if (selected != null) {
-                      ProjectService().updateProject(projectId, {
-                        field.key: selected.toIso8601String(),
-                      });
-                    }
-                  },
-                  child: const Padding(
-                    padding: EdgeInsets.only(top: 2), // ← 아이콘을 아래로 조금 내림
-                    child: Icon(Icons.calendar_today, size: 18),
+                if (editable)
+                  GestureDetector(
+                    onTap: () async {
+                      final now = DateTime.now();
+                      final selected = await showDatePicker(
+                        context: context,
+                        initialDate: initialValue ?? now,
+                        firstDate: DateTime(now.year - 5),
+                        lastDate: DateTime(now.year + 5),
+                      );
+                      if (selected != null) {
+                        ProjectService().updateProject(projectId, {
+                          field.key: selected.toIso8601String(),
+                        });
+                      }
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.only(top: 2),
+                      child: Icon(Icons.calendar_today, size: 18),
+                    ),
                   ),
-                ),
               ],
             ),
           ),

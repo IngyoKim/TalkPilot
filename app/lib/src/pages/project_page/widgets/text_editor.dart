@@ -8,6 +8,7 @@ class TextEditor extends StatefulWidget {
   final String label;
   final String value;
   final int maxLength;
+  final bool editable;
 
   const TextEditor({
     super.key,
@@ -16,6 +17,7 @@ class TextEditor extends StatefulWidget {
     required this.label,
     required this.value,
     required this.maxLength,
+    this.editable = true,
   });
 
   @override
@@ -56,16 +58,20 @@ class _TextEditorState extends State<TextEditor> {
           controller: _controller,
           maxLength: widget.maxLength,
           maxLines: null,
+          enabled: widget.editable,
           decoration: InputDecoration(
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             filled: true,
             fillColor: Colors.grey[100],
           ),
-          onChanged: (text) {
-            ProjectService().updateProject(widget.projectId, {
-              widget.field.key: text,
-            });
-          },
+          onChanged:
+              widget.editable
+                  ? (text) {
+                    ProjectService().updateProject(widget.projectId, {
+                      widget.field.key: text,
+                    });
+                  }
+                  : null,
         ),
       ],
     );

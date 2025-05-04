@@ -116,10 +116,51 @@ class _SchedulePageState extends State<SchedulePage> {
 
   void _deleteEvent(int index) {
     final day = _normalize(_selectedDay!);
-    setState(() {
-      _events[day]!.removeAt(index);
-      if (_events[day]!.isEmpty) _events.remove(day);
-    });
+    final target = _events[day]![index];
+
+    showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text("일정 삭제"),
+            content: const Text("삭제할 범위를 선택하세요."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx), // 취소
+                child: const Text("취소"),
+              ),
+              TextButton(
+                onPressed: () {
+                  // 해당 날짜에서만 삭제
+                  Navigator.pop(ctx);
+                  setState(() {
+                    _events[day]!.removeAt(index);
+                    if (_events[day]!.isEmpty) {
+                      _events.remove(day);
+                    }
+                  });
+                },
+                child: const Text("이 날짜만 삭제"),
+              ),
+              TextButton(
+                onPressed: () {
+                  // 전체 삭제
+                  Navigator.pop(ctx);
+                  setState(() {
+                    _events.forEach((date, events) {
+                      events.removeWhere(
+                        (e) =>
+                            e.title == target.title && e.color == target.color,
+                      );
+                    });
+                    _events.removeWhere((_, events) => events.isEmpty);
+                  });
+                },
+                child: const Text("전체 삭제"),
+              ),
+            ],
+          ),
+    );
   }
 
   void _onHeaderTapped() {

@@ -4,7 +4,7 @@ import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/database/project_stream_service.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/text_editor.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart';
-import 'package:talk_pilot/src/services/text_extract/text_extract_service.dart';
+import 'package:talk_pilot/src/pages/project_page/widgets/script_upload.dart';
 
 class ProjectDetailPage extends StatefulWidget {
   final String projectId;
@@ -41,42 +41,12 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             backgroundColor: Colors.deepPurple,
             iconTheme: const IconThemeData(color: Colors.white),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.upload_file),
-                tooltip: 'DOCX 또는 TXT 업로드',
-                onPressed: isLoading
-                    ? null
-                    : () => pickAndExtractScriptText(
-                          projectId: widget.projectId,
-                          setLoading: (val) =>
-                              setState(() => isLoading = val),
-                          showMessage: (msg) {
-                            if (!mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(msg)),
-                            );
-                          },
-                          confirmDialog: (title, content) async {
-                            if (!mounted) return false;
-                            return await showDialog<bool>(
-                              context: context,
-                              builder: (dialogContext) => AlertDialog(
-                                title: Text(title),
-                                content: Text(content),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.of(dialogContext).pop(false),
-                                    child: const Text('취소'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () => Navigator.of(dialogContext).pop(true),
-                                    child: const Text('확인'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
+              ScriptUpload(
+                context: context,
+                isLoading: isLoading,
+                projectId: widget.projectId,
+                setLoading: (val) => setState(() => isLoading = val),
+                mounted: mounted,
               ),
             ],
           ),
@@ -84,8 +54,10 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             padding: const EdgeInsets.all(16),
             children: [
               if (isLoading) const LinearProgressIndicator(),
-              const Text('프로젝트 정보',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                '프로젝트 정보',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 12),
               ProjectInfoCard(project: project),
               const SizedBox(height: 32),

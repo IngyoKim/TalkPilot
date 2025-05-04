@@ -67,8 +67,11 @@ class _ProjectActionDialogState extends State<_ProjectActionDialog> {
 
     final projectService = ProjectService();
     final userService = UserService();
+    final projectProvider = context.read<ProjectProvider>();
 
     final project = await projectService.readProject(inputId);
+
+    /// 잘못된 [projectId] 처리
     if (project == null) {
       ToastMessage.show(
         '존재하지 않는 프로젝트입니다.',
@@ -77,6 +80,7 @@ class _ProjectActionDialogState extends State<_ProjectActionDialog> {
       return;
     }
 
+    /// 이미 참여중인 프로젝트 처리
     if (project.participants.containsKey(user.uid)) {
       ToastMessage.show(
         '이미 참여 중인 프로젝트입니다.',
@@ -86,13 +90,18 @@ class _ProjectActionDialogState extends State<_ProjectActionDialog> {
       return;
     }
 
+    /// DB에 참여자 추가
     await projectService.updateProject(project.id, {
       'participants': {...project.participants, user.uid: 'Member'},
     });
 
+    /// 유저 정보에 프로젝트 추가
     await userService.updateUser(user.uid, {
       'projectIds': {...?user.projectIds, project.id: project.status},
     });
+
+    /// 전체 프로젝트 다시 로드
+    await projectProvider.loadProjects(user.uid);
 
     ToastMessage.show(
       '프로젝트에 참여했습니다.',

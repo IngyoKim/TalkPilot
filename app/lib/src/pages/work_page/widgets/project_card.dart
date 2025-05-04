@@ -2,19 +2,17 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:talk_pilot/src/models/user_model.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
-
 import 'package:talk_pilot/src/provider/project_provider.dart';
+
 import 'package:talk_pilot/src/services/database/user_service.dart';
-import 'package:talk_pilot/src/pages/work_page/widgets/work_dialogs.dart';
 import 'package:talk_pilot/src/pages/work_page/widgets/work_helpers.dart';
+import 'package:talk_pilot/src/pages/work_page/widgets/project_manage_dialog.dart';
 
 class ProjectCard extends StatefulWidget {
   final ProjectModel project;
   final VoidCallback onTap;
-
   const ProjectCard({super.key, required this.project, required this.onTap});
 
   @override
@@ -22,11 +20,24 @@ class ProjectCard extends StatefulWidget {
 }
 
 class _ProjectCardState extends State<ProjectCard> {
+  String _ownerNickname = '로딩 중...';
+
+  @override
+  void initState() {
+    super.initState();
+    UserService().readUser(widget.project.ownerUid).then((user) {
+      if (mounted && user != null) {
+        setState(() {
+          _ownerNickname = user.nickname;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final project = widget.project;
-
     return GestureDetector(
       onTap: widget.onTap,
       child: Card(
@@ -95,7 +106,7 @@ class _ProjectCardState extends State<ProjectCard> {
                       onSelected: (value) async {
                         if (!context.mounted) return;
                         if (value == 'edit') {
-                          showProjectDialog(context, project: project);
+                          showEditProjectDialog(context, project);
                         } else if (value == 'delete') {
                           showDeleteProjectDialog(context, project);
                         }
@@ -114,9 +125,7 @@ class _ProjectCardState extends State<ProjectCard> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 4),
-
                 if (project.updatedAt != null)
                   Text(
                     formatElapsedTime(project.updatedAt!),
@@ -133,21 +142,11 @@ class _ProjectCardState extends State<ProjectCard> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                FutureBuilder(
-                  future: UserService().readUser(project.ownerUid),
-                  builder: (context, snapshot) {
-                    final nickname =
-                        snapshot.hasData
-                            ? (snapshot.data as UserModel).nickname
-                            : '로딩 중...';
-
-                    return Text(
-                      '만든 사람: $nickname / 참여자 수: ${project.participants.length}',
-                      style: const TextStyle(fontSize: 12),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    );
-                  },
+                Text(
+                  '만든 사람: $_ownerNickname / 참여자 수: ${project.participants.length}',
+                  style: const TextStyle(fontSize: 12),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/database/project_stream_service.dart';
+import 'package:talk_pilot/src/services/text_extract/docx_extract_service.dart';
 
 import 'package:talk_pilot/src/pages/project_page/widgets/text_editor.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart';
@@ -16,10 +20,38 @@ class ProjectDetailPage extends StatefulWidget {
 }
 
 class _ProjectDetailPageState extends State<ProjectDetailPage> {
+  final _projectService = ProjectService();
+  String? extractedDocxText;
+  bool isLoadingDocx = false;
+
+  Future<void> pickAndExtractDocxText() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['docx'],
+    );
+
+    if (result != null && result.files.single.path != null) {
+      final file = File(result.files.single.path!);
+      final service = DocxExtractService();
+
+      setState(() {
+        isLoadingDocx = true;
+        extractedDocxText = null;
+      });
+
+      final text = await service.extractTextFromDocx(file);
+
+      setState(() {
+        extractedDocxText = text;
+        isLoadingDocx = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<ProjectModel>(
-      stream: ProjectService().streamProject(widget.projectId),
+      stream: _projectService.streamProject(widget.projectId),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Scaffold(
@@ -38,10 +70,19 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             ),
             backgroundColor: Colors.deepPurple,
             iconTheme: const IconThemeData(color: Colors.white),
+            actions: [
+              IconButton(
+                onPressed: isLoadingDocx ? null : pickAndExtractDocxText,
+                icon: const Icon(Icons.upload_file),
+                tooltip: 'DOCX 업로드',
+              ),
+            ],
           ),
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              if (isLoadingDocx) const LinearProgressIndicator(),
+
               const Text(
                 '프로젝트 정보',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -84,7 +125,36 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                 value: project.script ?? '',
                 maxLength: 3000,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
+
+              if (extractedDocxText != null)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '추출된 DOCX 텍스트',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        border: Border.all(color: Colors.deepPurple.shade100),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        extractedDocxText!,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
             ],
           ),
         );

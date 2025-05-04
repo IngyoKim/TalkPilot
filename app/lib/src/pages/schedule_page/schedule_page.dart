@@ -13,12 +13,6 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  @override
-  void initState() {
-    super.initState();
-    _loadProjectsFromDB();
-  }
-
   final Map<DateTime, List<Event>> _events = {};
   final TextEditingController _controller = TextEditingController();
   DateTime _focusedDay = DateTime.now();
@@ -32,6 +26,12 @@ class _SchedulePageState extends State<SchedulePage> {
   DateTime _normalize(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
   List<Event> _getEvents(DateTime day) => _events[_normalize(day)] ?? [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProjectsFromDB();
+  }
 
   void _loadProjectsFromDB() async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
@@ -63,7 +63,7 @@ class _SchedulePageState extends State<SchedulePage> {
     });
   }
 
-  void _saveEvent() {
+  Future<void> _saveEvent() async {
     final text = _controller.text.trim();
     if (text.isEmpty || _selectedDay == null) return;
 
@@ -72,6 +72,16 @@ class _SchedulePageState extends State<SchedulePage> {
     final newEvent = Event(title: text, color: _selectedColor);
 
     setState(() {
+      // 수정 모드일 경우 기존 이벤트 삭제
+      if (_editingIndex != null) {
+        final day = _normalize(_selectedDay!);
+        final dayEvents = _events[day];
+        if (dayEvents != null && _editingIndex! < dayEvents.length) {
+          dayEvents.removeAt(_editingIndex!);
+          if (dayEvents.isEmpty) _events.remove(day);
+        }
+      }
+
       for (
         var day = start;
         !day.isAfter(end);
@@ -79,12 +89,29 @@ class _SchedulePageState extends State<SchedulePage> {
       ) {
         _events.putIfAbsent(day, () => []).add(newEvent);
       }
+
       _controller.clear();
       _isInputVisible = false;
       _editingIndex = null;
       _rangeStart = null;
       _rangeEnd = null;
+      _selectedDay = start;
     });
+
+    // DB 저장
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final projectService = ProjectService();
+    final projects = await projectService.fetchProjects(uid);
+
+    final matched = projects.where((p) => p.title == text).toList();
+    if (matched.isNotEmpty) {
+      final project = matched.first;
+      await projectService.updateProject(project.id, {
+        'scheduledDate': start.toIso8601String(),
+      });
+    }
   }
 
   void _deleteEvent(int index) {
@@ -271,7 +298,7 @@ class _SchedulePageState extends State<SchedulePage> {
                       (color) => setState(() => _selectedColor = color),
                   colorOptions: Event.colorOptions,
                   isEditing: _editingIndex != null,
-                  onSave: _saveEvent,
+                  onSave: () async => await _saveEvent(), // ✅ async 래퍼
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

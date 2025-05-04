@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+
 import 'package:talk_pilot/src/models/project_model.dart';
+import 'package:talk_pilot/src/components/loading_indicator.dart';
+
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/database/project_stream_service.dart';
+
 import 'package:talk_pilot/src/pages/project_page/widgets/text_editor.dart';
-import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/script_upload.dart';
+import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart';
 
 class ProjectDetailPage extends StatefulWidget {
   final String projectId;
@@ -25,7 +29,10 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            body: LoadingIndicator(
+              isFetching: true,
+              message: '데이터를 불러오는 중입니다...',
+            ),
           );
         }
 

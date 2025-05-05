@@ -5,7 +5,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:talk_pilot/src/pages/schedule_page/widgets/event.dart';
 import 'package:talk_pilot/src/pages/schedule_page/widgets/event_input_form.dart';
 import 'package:talk_pilot/src/pages/schedule_page/widgets/event_list.dart';
-import 'package:talk_pilot/src/services/database/project_service.dart';
+import 'package:talk_pilot/src/pages/schedule_page/widgets/schedule_controller.dart';
 
 class SchedulePage extends StatefulWidget {
   @override
@@ -13,8 +13,9 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  final Map<DateTime, List<Event>> _events = {};
-  final TextEditingController _controller = TextEditingController();
+  final ScheduleController _controller = ScheduleController();
+  final TextEditingController _textController = TextEditingController();
+
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay = DateTime.now();
   DateTime? _rangeStart;
@@ -23,40 +24,24 @@ class _SchedulePageState extends State<SchedulePage> {
   int? _editingIndex;
   Color _selectedColor = Colors.red;
 
-  DateTime _normalize(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
-
-  List<Event> _getEvents(DateTime day) => _events[_normalize(day)] ?? [];
-
   @override
   void initState() {
     super.initState();
-    _loadProjectsFromDB();
+    _initialize();
   }
 
-  void _loadProjectsFromDB() async {
+  Future<void> _initialize() async {
+    await _controller.loadColors();
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
-
-    final service = ProjectService();
-    final projects = await service.fetchProjects(uid);
-
-    setState(() {
-      for (final project in projects) {
-        if (project.scheduledDate != null) {
-          final day = _normalize(project.scheduledDate!);
-          _events
-              .putIfAbsent(day, () => [])
-              .add(Event(title: project.title, color: Colors.indigo));
-        }
-      }
-    });
+    if (uid != null) await _controller.loadEvents(uid);
+    setState(() {});
   }
 
   void _toggleInput({int? editIndex, Event? event}) {
     setState(() {
       _isInputVisible = true;
       _editingIndex = editIndex;
-      _controller.text = event?.title ?? '';
+      _textController.text = event?.title ?? '';
       _selectedColor = event?.color ?? Colors.blue;
       _rangeStart = null;
       _rangeEnd = null;
@@ -64,117 +49,40 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Future<void> _saveEvent() async {
-    final text = _controller.text.trim();
+    final text = _textController.text.trim();
     if (text.isEmpty || _selectedDay == null) return;
 
-    final start = _normalize(_rangeStart ?? _selectedDay!);
-    final end = _normalize(_rangeEnd ?? _selectedDay!);
+    final start = _controller.normalize(_rangeStart ?? _selectedDay!);
+    final end = _controller.normalize(_rangeEnd ?? _selectedDay!);
     final newEvent = Event(title: text, color: _selectedColor);
 
+    await _controller.saveColor(text, _selectedColor);
+
     setState(() {
-      // 수정 모드일 경우 기존 이벤트 삭제
       if (_editingIndex != null) {
-        final day = _normalize(_selectedDay!);
-        final dayEvents = _events[day];
+        final day = _controller.normalize(_selectedDay!);
+        final dayEvents = _controller.events[day];
         if (dayEvents != null && _editingIndex! < dayEvents.length) {
           dayEvents.removeAt(_editingIndex!);
-          if (dayEvents.isEmpty) _events.remove(day);
+          if (dayEvents.isEmpty) _controller.events.remove(day);
         }
       }
 
       for (
         var day = start;
         !day.isAfter(end);
-        day = day.add(const Duration(days: 1))
+        day = day.add(Duration(days: 1))
       ) {
-        _events.putIfAbsent(day, () => []).add(newEvent);
+        _controller.events.putIfAbsent(day, () => []).add(newEvent);
       }
 
-      _controller.clear();
+      _textController.clear();
       _isInputVisible = false;
       _editingIndex = null;
       _rangeStart = null;
       _rangeEnd = null;
       _selectedDay = start;
     });
-
-    // DB 저장
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) return;
-
-    final projectService = ProjectService();
-    final projects = await projectService.fetchProjects(uid);
-
-    final matched = projects.where((p) => p.title == text).toList();
-    if (matched.isNotEmpty) {
-      final project = matched.first;
-      await projectService.updateProject(project.id, {
-        'scheduledDate': start.toIso8601String(),
-      });
-    }
-  }
-
-  void _deleteEvent(int index) {
-    final day = _normalize(_selectedDay!);
-    final target = _events[day]![index];
-
-    showDialog(
-      context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text("일정 삭제"),
-            content: const Text("삭제할 범위를 선택하세요."),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx), // 취소
-                child: const Text("취소"),
-              ),
-              TextButton(
-                onPressed: () {
-                  // 해당 날짜에서만 삭제
-                  Navigator.pop(ctx);
-                  setState(() {
-                    _events[day]!.removeAt(index);
-                    if (_events[day]!.isEmpty) {
-                      _events.remove(day);
-                    }
-                  });
-                },
-                child: const Text("이 날짜만 삭제"),
-              ),
-              TextButton(
-                onPressed: () {
-                  // 전체 삭제
-                  Navigator.pop(ctx);
-                  setState(() {
-                    _events.forEach((date, events) {
-                      events.removeWhere(
-                        (e) =>
-                            e.title == target.title && e.color == target.color,
-                      );
-                    });
-                    _events.removeWhere((_, events) => events.isEmpty);
-                  });
-                },
-                child: const Text("전체 삭제"),
-              ),
-            ],
-          ),
-    );
-  }
-
-  void _onHeaderTapped() {
-    Event.showMonthYearPickerDialog(
-      context: context,
-      initialYear: _focusedDay.year,
-      initialMonth: _focusedDay.month,
-      onSelected: (year, month) {
-        setState(() {
-          _focusedDay = DateTime(year, month);
-          _selectedDay = DateTime(year, month, 1);
-        });
-      },
-    );
   }
 
   Widget _buildCustomHeader() {
@@ -184,18 +92,30 @@ class _SchedulePageState extends State<SchedulePage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: () {
-              setState(() {
-                _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
-              });
-            },
+            icon: Icon(Icons.chevron_left),
+            onPressed:
+                () => setState(() {
+                  _focusedDay = DateTime(
+                    _focusedDay.year,
+                    _focusedDay.month - 1,
+                  );
+                }),
           ),
           GestureDetector(
-            onTap: _onHeaderTapped,
+            onTap:
+                () => Event.showMonthYearPickerDialog(
+                  context: context,
+                  initialYear: _focusedDay.year,
+                  initialMonth: _focusedDay.month,
+                  onSelected:
+                      (year, month) => setState(() {
+                        _focusedDay = DateTime(year, month);
+                        _selectedDay = DateTime(year, month, 1);
+                      }),
+                ),
             child: Text(
               '${_focusedDay.year}년 ${_focusedDay.month}월',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 decoration: TextDecoration.underline,
@@ -203,12 +123,14 @@ class _SchedulePageState extends State<SchedulePage> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: () {
-              setState(() {
-                _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
-              });
-            },
+            icon: Icon(Icons.chevron_right),
+            onPressed:
+                () => setState(() {
+                  _focusedDay = DateTime(
+                    _focusedDay.year,
+                    _focusedDay.month + 1,
+                  );
+                }),
           ),
         ],
       ),
@@ -222,11 +144,7 @@ class _SchedulePageState extends State<SchedulePage> {
       firstDate: DateTime(2020),
       lastDate: DateTime(2035),
     );
-    if (picked != null) {
-      setState(() {
-        _rangeStart = picked;
-      });
-    }
+    if (picked != null) setState(() => _rangeStart = picked);
   }
 
   Future<void> _pickEndDate() async {
@@ -236,21 +154,17 @@ class _SchedulePageState extends State<SchedulePage> {
       firstDate: _rangeStart ?? DateTime(2020),
       lastDate: DateTime(2035),
     );
-    if (picked != null) {
-      setState(() {
-        _rangeEnd = picked;
-      });
-    }
+    if (picked != null) setState(() => _rangeEnd = picked);
   }
 
   @override
   Widget build(BuildContext context) {
     final selected = _selectedDay ?? _focusedDay;
-    final savedEvents = _getEvents(selected);
+    final savedEvents = _controller.getEvents(selected);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('스케줄', style: TextStyle(color: Colors.white)),
+        title: Text('스케줄', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.deepPurple,
       ),
       body: Column(
@@ -263,21 +177,19 @@ class _SchedulePageState extends State<SchedulePage> {
             selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
-                _selectedDay = _normalize(selectedDay);
+                _selectedDay = _controller.normalize(selectedDay);
                 _focusedDay = focusedDay;
                 _isInputVisible = false;
-                _controller.clear();
+                _textController.clear();
                 _editingIndex = null;
               });
             },
             headerVisible: false,
             calendarBuilders: CalendarBuilders(
               defaultBuilder: (context, date, _) {
-                final normalizedDate = _normalize(date);
-                final hasEvent = _events.containsKey(normalizedDate);
-                final eventList = _getEvents(normalizedDate);
-                if (!hasEvent) return null;
-
+                final normalizedDate = _controller.normalize(date);
+                final eventList = _controller.getEvents(normalizedDate);
+                if (eventList.isEmpty) return null;
                 return Container(
                   decoration: BoxDecoration(
                     border: Border(
@@ -290,12 +202,12 @@ class _SchedulePageState extends State<SchedulePage> {
                   alignment: Alignment.center,
                   child: Text(
                     '${date.day}',
-                    style: const TextStyle(color: Colors.black),
+                    style: TextStyle(color: Colors.black),
                   ),
                 );
               },
             ),
-            calendarStyle: const CalendarStyle(
+            calendarStyle: CalendarStyle(
               todayDecoration: BoxDecoration(
                 color: Colors.deepPurpleAccent,
                 shape: BoxShape.circle,
@@ -309,22 +221,16 @@ class _SchedulePageState extends State<SchedulePage> {
           Align(
             alignment: Alignment.centerRight,
             child: Padding(
-              padding: const EdgeInsets.only(right: 16.0, top: 8),
+              padding: EdgeInsets.only(right: 16.0, top: 8),
               child: GestureDetector(
                 onTap: () => _toggleInput(),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.deepPurple,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text(
-                    '일정 생성',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  child: Text('일정 생성', style: TextStyle(color: Colors.white)),
                 ),
               ),
             ),
@@ -333,13 +239,13 @@ class _SchedulePageState extends State<SchedulePage> {
             Column(
               children: [
                 EventInputForm(
-                  controller: _controller,
+                  controller: _textController,
                   selectedColor: _selectedColor,
                   onColorChanged:
                       (color) => setState(() => _selectedColor = color),
                   colorOptions: Event.colorOptions,
                   isEditing: _editingIndex != null,
-                  onSave: () async => await _saveEvent(), // ✅ async 래퍼
+                  onSave: _saveEvent,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -352,7 +258,7 @@ class _SchedulePageState extends State<SchedulePage> {
                             : '시작: ${_rangeStart!.year}.${_rangeStart!.month}.${_rangeStart!.day}',
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: _pickEndDate,
                       child: Text(
@@ -368,7 +274,14 @@ class _SchedulePageState extends State<SchedulePage> {
           EventList(
             events: savedEvents,
             onEdit: (i, e) => _toggleInput(editIndex: i, event: e),
-            onDelete: _deleteEvent,
+            onDelete:
+                (i) => setState(() {
+                  final day = _controller.normalize(_selectedDay!);
+                  _controller.events[day]?.removeAt(i);
+                  if (_controller.events[day]?.isEmpty ?? false) {
+                    _controller.events.remove(day);
+                  }
+                }),
           ),
         ],
       ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:talk_pilot/src/pages/schedule_page.dart';
+import 'package:talk_pilot/src/pages/schedule_page/schedule_page.dart';
 import 'package:talk_pilot/src/pages/work_page/work_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/profile_page.dart';
 
@@ -66,7 +66,7 @@ class _BottomBarState extends State<BottomBar>
     return Scaffold(
       body: TabBarView(
         controller: _tabController,
-        children: [const SchedulePage(), WorkPage(), const ProfilePage()],
+        children: [SchedulePage(), WorkPage(), const ProfilePage()],
       ),
       bottomNavigationBar: Container(
         color: Colors.white,

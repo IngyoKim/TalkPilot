@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:talk_pilot/src/models/project_model.dart';
+import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
 
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/database/project_stream_service.dart';
 
-import 'package:talk_pilot/src/pages/project_page/widgets/text_editor.dart';
-import 'package:talk_pilot/src/pages/project_page/widgets/script_upload.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart';
+import 'package:talk_pilot/src/pages/project_page/widgets/script_upload_button.dart';
+import 'package:talk_pilot/src/pages/project_page/widgets/editable/editable_text_editor.dart';
 
 class ProjectDetailPage extends StatefulWidget {
   final String projectId;
@@ -22,8 +24,19 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
   final _projectService = ProjectService();
   bool isLoading = false;
 
+  ProjectRole getUserRole(ProjectModel project, String? uid) {
+    final role = project.participants[uid] ?? 'member';
+    return switch (role.toLowerCase()) {
+      'owner' => ProjectRole.owner,
+      'editor' => ProjectRole.editor,
+      _ => ProjectRole.member,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    final currentUid = context.read<UserProvider>().currentUser?.uid;
+
     return StreamBuilder<ProjectModel>(
       stream: _projectService.streamProject(widget.projectId),
       builder: (context, snapshot) {
@@ -37,6 +50,8 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
         }
 
         final project = snapshot.data!;
+        final isEditable =
+            getUserRole(project, currentUid) != ProjectRole.member;
 
         return Scaffold(
           appBar: AppBar(
@@ -48,13 +63,14 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             backgroundColor: Colors.deepPurple,
             iconTheme: const IconThemeData(color: Colors.white),
             actions: [
-              ScriptUpload(
-                context: context,
-                isLoading: isLoading,
-                projectId: widget.projectId,
-                setLoading: (val) => setState(() => isLoading = val),
-                mounted: mounted,
-              ),
+              if (isEditable)
+                ScriptUploadButton(
+                  context: context,
+                  isLoading: isLoading,
+                  projectId: widget.projectId,
+                  setLoading: (val) => setState(() => isLoading = val),
+                  mounted: mounted,
+                ),
             ],
           ),
           body: ListView(
@@ -66,40 +82,42 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              ProjectInfoCard(project: project),
+              ProjectInfoCard(project: project, editable: isEditable),
               const SizedBox(height: 32),
-              TextEditor(
-                projectId: project.id,
-                field: ProjectField.title,
-                label: '제목',
-                value: project.title,
-                maxLength: 100,
-              ),
-              const SizedBox(height: 16),
-              TextEditor(
-                projectId: project.id,
-                field: ProjectField.description,
-                label: '설명',
-                value: project.description,
-                maxLength: 300,
-              ),
-              const SizedBox(height: 16),
-              TextEditor(
-                projectId: project.id,
-                field: ProjectField.memo,
-                label: '메모',
-                value: project.memo ?? '',
-                maxLength: 1000,
-              ),
-              const SizedBox(height: 16),
-              TextEditor(
-                projectId: project.id,
-                field: ProjectField.script,
-                label: '대본',
-                value: project.script ?? '',
-                maxLength: 3000,
-              ),
-              const SizedBox(height: 32),
+              ...[
+                EditableTextEditor(
+                  projectId: project.id,
+                  field: ProjectField.title,
+                  label: '제목',
+                  value: project.title,
+                  maxLength: 100,
+                  editable: isEditable,
+                ),
+                EditableTextEditor(
+                  projectId: project.id,
+                  field: ProjectField.description,
+                  label: '설명',
+                  value: project.description,
+                  maxLength: 300,
+                  editable: isEditable,
+                ),
+                EditableTextEditor(
+                  projectId: project.id,
+                  field: ProjectField.memo,
+                  label: '메모',
+                  value: project.memo ?? '',
+                  maxLength: 1000,
+                  editable: isEditable,
+                ),
+                EditableTextEditor(
+                  projectId: project.id,
+                  field: ProjectField.script,
+                  label: '대본',
+                  value: project.script ?? '',
+                  maxLength: 3000,
+                  editable: isEditable,
+                ),
+              ].expand((widget) => [widget, const SizedBox(height: 16)]),
             ],
           ),
         );

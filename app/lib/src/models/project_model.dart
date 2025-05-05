@@ -16,6 +16,13 @@ extension ProjectFieldExt on ProjectField {
   String get key => toString().split('.').last;
 }
 
+/// 역할 정의
+enum ProjectRole { owner, editor, member }
+
+extension ProjectRoleExtension on ProjectRole {
+  bool get canEdit => this == ProjectRole.owner || this == ProjectRole.editor;
+}
+
 class ProjectModel {
   final String id;
   final String title;

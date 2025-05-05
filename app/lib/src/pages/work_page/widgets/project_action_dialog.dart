@@ -92,7 +92,7 @@ class _ProjectActionDialogState extends State<_ProjectActionDialog> {
 
     /// DB에 참여자 추가
     await projectService.updateProject(project.id, {
-      'participants': {...project.participants, user.uid: 'Member'},
+      'participants': {...project.participants, user.uid: 'member'},
     });
 
     /// 유저 정보에 프로젝트 추가

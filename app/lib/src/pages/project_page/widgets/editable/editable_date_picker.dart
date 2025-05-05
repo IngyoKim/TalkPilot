@@ -1,20 +1,21 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 
-class DatePicker extends StatelessWidget {
+class EditableDatePicker extends StatelessWidget {
   final String projectId;
   final ProjectField field;
-  final String label;
   final DateTime? initialValue;
+  final bool editable;
 
-  const DatePicker({
+  const EditableDatePicker({
     super.key,
     required this.projectId,
     required this.field,
-    required this.label,
     required this.initialValue,
+    this.editable = false,
   });
 
   String _format(DateTime? date) {
@@ -24,29 +25,21 @@ class DatePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(
-            width: 120,
-            child: Text(
-              '발표 날짜',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-            ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(
+          width: 120,
+          child: Text(
+            '발표 날짜',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
           ),
-          Flexible(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  _format(initialValue),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
+        ),
+        Flexible(
+          child: Row(
+            children: [
+              Text(_format(initialValue), style: const TextStyle(fontSize: 14)),
+              if (editable) ...[
                 const SizedBox(width: 4),
                 GestureDetector(
                   onTap: () async {
@@ -64,15 +57,15 @@ class DatePicker extends StatelessWidget {
                     }
                   },
                   child: const Padding(
-                    padding: EdgeInsets.only(top: 2), // ← 아이콘을 아래로 조금 내림
+                    padding: EdgeInsets.only(top: 2),
                     child: Icon(Icons.calendar_today, size: 18),
                   ),
                 ),
               ],
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

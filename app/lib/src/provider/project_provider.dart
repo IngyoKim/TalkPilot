@@ -51,7 +51,7 @@ class ProjectProvider with ChangeNotifier {
       title: title,
       description: description,
       ownerUid: currentUser.uid,
-      participants: {currentUser.uid: "Owner"},
+      participants: {currentUser.uid: "owner"},
     );
 
     final updatedProjectIds = {

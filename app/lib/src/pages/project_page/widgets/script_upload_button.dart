@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/services/text_extract/text_extract_service.dart';
 
 class ScriptUploadButton extends StatelessWidget {
@@ -36,7 +37,7 @@ class ScriptUploadButton extends StatelessWidget {
 
   void _showMessage(String msg) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    ToastMessage.show(msg);
   }
 
   Future<bool> _showConfirmDialog(String title, String content) async {

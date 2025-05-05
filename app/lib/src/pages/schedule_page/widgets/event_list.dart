@@ -5,14 +5,8 @@ import 'event.dart';
 class EventList extends StatelessWidget {
   final List<Event> events;
   final void Function(int index, Event event) onEdit;
-  final void Function(int index) onDelete;
 
-  const EventList({
-    super.key,
-    required this.events,
-    required this.onEdit,
-    required this.onDelete,
-  });
+  const EventList({super.key, required this.events, required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +46,6 @@ class EventList extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.edit, size: 20),
                     onPressed: () => onEdit(i, e),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete, size: 20),
-                    onPressed: () => onDelete(i),
                   ),
                 ],
               ),

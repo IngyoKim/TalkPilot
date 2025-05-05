@@ -55,6 +55,7 @@ dependencies:
   xml: ^6.3.0           
   file_picker: ^10.1.2
 
+  table_calendar: ^3.0.9
 dev_dependencies:
   flutter_test:
     sdk: flutter

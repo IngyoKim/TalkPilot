@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:talk_pilot/src/pages/schedule_page/components/schedule_calendar.dart';
-import 'package:talk_pilot/src/pages/schedule_page/components/schedule_event_editor.dart';
-import 'package:talk_pilot/src/pages/schedule_page/components/schedule_header.dart';
-
 import 'package:talk_pilot/src/pages/schedule_page/utils/event.dart';
 import 'package:talk_pilot/src/pages/schedule_page/widgets/event_list.dart';
 import 'package:talk_pilot/src/pages/schedule_page/widgets/schedule_controller.dart';
+
+import 'package:talk_pilot/src/pages/schedule_page/components/schedule_calendar.dart';
+import 'package:talk_pilot/src/pages/schedule_page/components/schedule_header.dart';
+import 'package:talk_pilot/src/pages/schedule_page/components/schedule_color_dialog.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -20,9 +20,6 @@ class _SchedulePageState extends State<SchedulePage> {
   final controller = ScheduleController();
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay = DateTime.now();
-  bool _isInputVisible = false;
-  int? _editingIndex;
-  Color _selectedColor = Colors.red;
 
   @override
   void initState() {
@@ -43,34 +40,27 @@ class _SchedulePageState extends State<SchedulePage> {
     setState(() {
       _selectedDay = controller.normalize(selected);
       _focusedDay = focused;
-      _isInputVisible = false;
-      _editingIndex = null;
     });
   }
 
-  void _onEdit(int index, Event event) {
-    setState(() {
-      _editingIndex = index;
-      _selectedColor = event.color;
-      _isInputVisible = true;
-    });
-  }
-
-  Future<void> _updateColor() async {
+  Future<void> _onEdit(int index, Event event) async {
     final day = _selectedDay;
-    final index = _editingIndex;
-    if (day == null || index == null) return;
-    final events = controller.getEvents(day);
-    if (index >= events.length) return;
+    if (day == null) return;
 
-    final old = events[index];
-    final updated = Event(title: old.title, color: _selectedColor);
-    await controller.saveColor(old.title, _selectedColor);
+    final newColor = await showColorDialog(
+      context: context,
+      initialColor: event.color,
+    );
+
+    if (newColor == null) return;
+
+    final events = controller.getEvents(day);
+    final updated = Event(title: event.title, color: newColor);
+
+    await controller.saveColor(event.title, newColor);
 
     setState(() {
       events[index] = updated;
-      _isInputVisible = false;
-      _editingIndex = null;
     });
   }
 
@@ -126,12 +116,6 @@ class _SchedulePageState extends State<SchedulePage> {
             onPageChanged: (d) => setState(() => _focusedDay = d),
             controller: controller,
           ),
-          if (_isInputVisible)
-            ScheduleEventEditor(
-              selectedColor: _selectedColor,
-              onColorChanged: (color) => setState(() => _selectedColor = color),
-              onSave: _updateColor,
-            ),
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: EventList(events: events, onEdit: _onEdit),

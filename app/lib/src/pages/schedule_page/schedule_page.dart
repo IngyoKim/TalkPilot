@@ -62,6 +62,7 @@ class _SchedulePageState extends State<SchedulePage> {
       events[_editingIndex!] = newEvent;
       _isInputVisible = false;
       _editingIndex = null;
+      _focusedDay = _focusedDay.add(const Duration());
     });
   }
 
@@ -132,6 +133,7 @@ class _SchedulePageState extends State<SchedulePage> {
         children: [
           _buildCustomHeader(),
           TableCalendar(
+            key: ValueKey(_focusedDay),
             firstDay: DateTime.utc(2025, 1, 1),
             lastDay: DateTime.utc(2035, 12, 31),
             focusedDay: _focusedDay,
@@ -142,6 +144,11 @@ class _SchedulePageState extends State<SchedulePage> {
                 _focusedDay = focusedDay;
                 _isInputVisible = false;
                 _editingIndex = null;
+              });
+            },
+            onPageChanged: (focusedDay) {
+              setState(() {
+                _focusedDay = focusedDay;
               });
             },
             headerVisible: false,
@@ -182,7 +189,7 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
           if (_isInputVisible)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 0.0),
               child: Column(
                 children: [
                   Wrap(

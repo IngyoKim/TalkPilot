@@ -1,5 +1,6 @@
 import React from "react";
 import { signInWithGoogle } from "../firebase/googleLogin";
+import { signInWithKakao } from "../firebase/kakaoLogin";
 import SocialLoginButton from "../components/SocialLoginButton";
 
 export default function LoginPage() {
@@ -15,9 +16,15 @@ export default function LoginPage() {
     };
 
 
-    const handleKakaoLogin = () => {
-        /// 카카오 로그인 로직 구현 예정
-        console.log("카카오 로그인 클릭");
+    const handleKakaoLogin = async () => {
+        try {
+            const authObj = await signInWithKakao();
+            console.log("Kakao 로그인 성공:", authObj);
+            /// 로그인 상태 저장, 페이지 이동 등 추가해야함.
+        } catch (error) {
+            alert("카카오 로그인 실패");
+            console.error("Kakao 로그인 에러:", error);
+        }
     };
 
     return (

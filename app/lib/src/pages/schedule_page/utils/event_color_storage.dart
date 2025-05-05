@@ -19,6 +19,7 @@ class EventColorStorage {
 
   static Future<void> saveEventColor(String title, Color color) async {
     final prefs = await SharedPreferences.getInstance();
+    // ignore: deprecated_member_use
     await prefs.setInt('color_$title', color.value);
   }
 }

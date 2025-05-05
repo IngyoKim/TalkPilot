@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:talk_pilot/src/pages/schedule_page/widgets/event_color_storage.dart';
-import '../../../services/database/project_service.dart';
-import '../widgets/event.dart';
+import 'package:talk_pilot/src/services/database/project_service.dart';
+import 'package:talk_pilot/src/pages/schedule_page/utils/event.dart';
+import 'package:talk_pilot/src/pages/schedule_page/utils/event_color_storage.dart';
 
 class ScheduleController {
   final Map<DateTime, List<Event>> events = {};
@@ -36,6 +36,7 @@ class ScheduleController {
   }
 
   Future<void> saveColor(String title, Color color) async {
+    // ignore: deprecated_member_use
     eventColorMap[title] = color.value;
     await EventColorStorage.saveEventColor(title, color);
   }

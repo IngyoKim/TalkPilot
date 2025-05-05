@@ -1,27 +1,28 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:talk_pilot/src/pages/schedule_page/components/schedule_calendar.dart';
+import 'package:talk_pilot/src/pages/schedule_page/components/schedule_event_editor.dart';
+import 'package:talk_pilot/src/pages/schedule_page/components/schedule_header.dart';
+
+import 'package:talk_pilot/src/pages/schedule_page/utils/event.dart';
+import 'package:talk_pilot/src/pages/schedule_page/widgets/event_list.dart';
 import 'package:talk_pilot/src/pages/schedule_page/widgets/schedule_controller.dart';
 
-import 'widgets/event.dart';
-import 'widgets/event_list.dart';
-
 class SchedulePage extends StatefulWidget {
+  const SchedulePage({super.key});
+
   @override
   State<SchedulePage> createState() => _SchedulePageState();
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  final ScheduleController controller = ScheduleController();
-
+  final controller = ScheduleController();
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay = DateTime.now();
   bool _isInputVisible = false;
   int? _editingIndex;
   Color _selectedColor = Colors.red;
-
-  DateTime _normalize(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
-  List<Event> _getEvents(DateTime day) => controller.getEvents(day);
 
   @override
   void initState() {
@@ -38,35 +39,42 @@ class _SchedulePageState extends State<SchedulePage> {
     }
   }
 
-  void _toggleColorEdit(int index, Event event) {
+  void _onDayTapped(DateTime selected, DateTime focused) {
     setState(() {
-      _isInputVisible = true;
-      _editingIndex = index;
-      _selectedColor = event.color;
-    });
-  }
-
-  Future<void> _updateColorOnly() async {
-    if (_selectedDay == null || _editingIndex == null) return;
-
-    final day = _normalize(_selectedDay!);
-    final events = controller.events[day];
-    if (events == null || _editingIndex! >= events.length) return;
-
-    final oldEvent = events[_editingIndex!];
-    final newEvent = Event(title: oldEvent.title, color: _selectedColor);
-
-    await controller.saveColor(oldEvent.title, _selectedColor);
-
-    setState(() {
-      events[_editingIndex!] = newEvent;
+      _selectedDay = controller.normalize(selected);
+      _focusedDay = focused;
       _isInputVisible = false;
       _editingIndex = null;
-      _focusedDay = _focusedDay.add(const Duration());
     });
   }
 
-  void _onHeaderTapped() {
+  void _onEdit(int index, Event event) {
+    setState(() {
+      _editingIndex = index;
+      _selectedColor = event.color;
+      _isInputVisible = true;
+    });
+  }
+
+  Future<void> _updateColor() async {
+    final day = _selectedDay;
+    final index = _editingIndex;
+    if (day == null || index == null) return;
+    final events = controller.getEvents(day);
+    if (index >= events.length) return;
+
+    final old = events[index];
+    final updated = Event(title: old.title, color: _selectedColor);
+    await controller.saveColor(old.title, _selectedColor);
+
+    setState(() {
+      events[index] = updated;
+      _isInputVisible = false;
+      _editingIndex = null;
+    });
+  }
+
+  void _showMonthPicker() {
     Event.showMonthYearPickerDialog(
       context: context,
       initialYear: _focusedDay.year,
@@ -80,48 +88,10 @@ class _SchedulePageState extends State<SchedulePage> {
     );
   }
 
-  Widget _buildCustomHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: () {
-              setState(() {
-                _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1);
-              });
-            },
-          ),
-          GestureDetector(
-            onTap: _onHeaderTapped,
-            child: Text(
-              '${_focusedDay.year}년 ${_focusedDay.month}월',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: () {
-              setState(() {
-                _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1);
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final selected = _selectedDay ?? _focusedDay;
-    final savedEvents = _getEvents(selected);
+    final events = controller.getEvents(selected);
 
     return Scaffold(
       appBar: AppBar(
@@ -131,102 +101,40 @@ class _SchedulePageState extends State<SchedulePage> {
       body: ListView(
         padding: const EdgeInsets.only(bottom: 24),
         children: [
-          _buildCustomHeader(),
-          TableCalendar(
-            key: ValueKey(_focusedDay),
-            firstDay: DateTime.utc(2025, 1, 1),
-            lastDay: DateTime.utc(2035, 12, 31),
+          ScheduleHeader(
             focusedDay: _focusedDay,
-            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-            onDaySelected: (selectedDay, focusedDay) {
-              setState(() {
-                _selectedDay = _normalize(selectedDay);
-                _focusedDay = focusedDay;
-                _isInputVisible = false;
-                _editingIndex = null;
-              });
-            },
-            onPageChanged: (focusedDay) {
-              setState(() {
-                _focusedDay = focusedDay;
-              });
-            },
-            headerVisible: false,
-            calendarBuilders: CalendarBuilders(
-              defaultBuilder: (context, date, _) {
-                final normalizedDate = _normalize(date);
-                final hasEvent = controller.events.containsKey(normalizedDate);
-                final eventList = _getEvents(normalizedDate);
-                if (!hasEvent) return null;
-
-                return Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: eventList.first.color,
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '${date.day}',
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                );
-              },
-            ),
-            calendarStyle: const CalendarStyle(
-              todayDecoration: BoxDecoration(
-                color: Colors.deepPurpleAccent,
-                shape: BoxShape.circle,
-              ),
-              selectedDecoration: BoxDecoration(
-                color: Colors.deepPurple,
-                shape: BoxShape.circle,
-              ),
-            ),
+            onLeft:
+                () => setState(() {
+                  _focusedDay = DateTime(
+                    _focusedDay.year,
+                    _focusedDay.month - 1,
+                  );
+                }),
+            onRight:
+                () => setState(() {
+                  _focusedDay = DateTime(
+                    _focusedDay.year,
+                    _focusedDay.month + 1,
+                  );
+                }),
+            onTapMonth: _showMonthPicker,
+          ),
+          ScheduleCalendar(
+            focusedDay: _focusedDay,
+            selectedDay: _selectedDay,
+            onDaySelected: _onDayTapped,
+            onPageChanged: (d) => setState(() => _focusedDay = d),
+            controller: controller,
           ),
           if (_isInputVisible)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 0.0),
-              child: Column(
-                children: [
-                  Wrap(
-                    spacing: 8,
-                    children:
-                        Event.colorOptions.map((color) {
-                          return GestureDetector(
-                            onTap: () => setState(() => _selectedColor = color),
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: color,
-                                shape: BoxShape.circle,
-                                border:
-                                    _selectedColor == color
-                                        ? Border.all(
-                                          color: Colors.black,
-                                          width: 2,
-                                        )
-                                        : null,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                  ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: _updateColorOnly,
-                    child: const Text('색상 수정'),
-                  ),
-                ],
-              ),
+            ScheduleEventEditor(
+              selectedColor: _selectedColor,
+              onColorChanged: (color) => setState(() => _selectedColor = color),
+              onSave: _updateColor,
             ),
           Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: EventList(events: savedEvents, onEdit: _toggleColorEdit),
+            child: EventList(events: events, onEdit: _onEdit),
           ),
         ],
       ),

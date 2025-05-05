@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'event.dart';
+import 'package:talk_pilot/src/pages/schedule_page/utils/event.dart';
 
 //저장된 일정 리스트 UI
 class EventList extends StatelessWidget {

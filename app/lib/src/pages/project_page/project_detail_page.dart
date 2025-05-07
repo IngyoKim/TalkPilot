@@ -7,10 +7,10 @@ import 'package:talk_pilot/src/components/loading_indicator.dart';
 
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/database/project_stream_service.dart';
-
 import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/script_upload_button.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/editable/editable_text_editor.dart';
+import 'package:talk_pilot/src/pages/practice_page/presentation_practice_page.dart';
 
 class ProjectDetailPage extends StatefulWidget {
   final String projectId;
@@ -118,6 +118,25 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                   editable: isEditable,
                 ),
               ].expand((widget) => [widget, const SizedBox(height: 16)]),
+
+              const SizedBox(height: 24),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PresentationPracticePage(projectId: project.id),
+                    ),
+                  );
+                },
+                child: const Text('발표 연습 시작'),
+              ),
             ],
           ),
         );

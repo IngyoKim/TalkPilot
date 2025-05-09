@@ -4,10 +4,15 @@ class LiveCpmService {
   final Stopwatch _stopwatch = Stopwatch();
   Timer? _timer;
   int _totalCharacters = 0;
+  double _userAverageCpm = 0.0;
 
-  Function(double cpm)? _onCpmUpdate;
+  Function(double cpm, String status)? _onCpmUpdate;
 
-  void start({required Function(double cpm) onCpmUpdate}) {
+  void start({
+    required double userAverageCpm,
+    required Function(double cpm, String status) onCpmUpdate,
+  }) {
+    _userAverageCpm = userAverageCpm;
     _onCpmUpdate = onCpmUpdate;
     _totalCharacters = 0;
     _stopwatch.reset();
@@ -15,9 +20,10 @@ class LiveCpmService {
 
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       final minutes = _stopwatch.elapsed.inSeconds / 60;
-      if (minutes > 0) {
+      if (minutes > 0.1) {
         final cpm = _totalCharacters / minutes;
-        _onCpmUpdate?.call(cpm);
+        final status = _getCpmStatus(_userAverageCpm, cpm);
+        _onCpmUpdate?.call(cpm, status);
       }
     });
   }
@@ -37,5 +43,11 @@ class LiveCpmService {
     stop();
     _totalCharacters = 0;
     _stopwatch.reset();
+  }
+
+  String _getCpmStatus(double userCpm, double currentCpm) {
+    if (currentCpm < userCpm * 0.7) return '느림';
+    if (currentCpm > userCpm * 1.3) return '빠름';
+    return '적당함';
   }
 }

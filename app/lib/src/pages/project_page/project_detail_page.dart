@@ -4,16 +4,12 @@ import 'package:provider/provider.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
-
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/database/project_stream_service.dart';
-import 'package:talk_pilot/src/services/database/user_service.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/script_upload_button.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/editable/editable_text_editor.dart';
-import 'package:talk_pilot/src/pages/practice_page/presentation_practice_page.dart';
-import 'package:talk_pilot/src/pages/profile_page/cpm_calculate_page.dart';
-
+import 'package:talk_pilot/src/pages/project_page/widgets/practice_button.dart';
 
 class ProjectDetailPage extends StatefulWidget {
   final String projectId;
@@ -121,68 +117,9 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                   editable: isEditable,
                 ),
               ].expand((widget) => [widget, const SizedBox(height: 16)]),
-
               const SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                onPressed: () async {
-                  final user = context.read<UserProvider>().currentUser;
-                  if (user == null) return;
 
-                  final userModel = await UserService().readUser(user.uid);
-                  final userCpm = userModel?.cpm;
-
-                  if (userCpm == null || userCpm == 0.0) {
-                    showDialog(
-                      context: context,
-                      builder:
-                          (context) => AlertDialog(
-                            title: const Text('CPM 정보가 없습니다'),
-                            content: const Text(
-                              '발표 연습을 시작하기 전에\nCPM을 먼저 측정해주세요.',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text('취소'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context); // 다이얼로그 닫기
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const CpmCalculatePage(),
-                                    ),
-                                  );
-                                },
-                                child: const Text('측정하러 가기'),
-                              ),
-                            ],
-                          ),
-                    );
-                    return;
-                  }
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) =>
-                              PresentationPracticePage(projectId: project.id),
-                    ),
-                  );
-                },
-                child: const Text('발표 연습 시작'),
-              ),
+              PracticeButton(project: project),
             ],
           ),
         );

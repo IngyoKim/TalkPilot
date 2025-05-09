@@ -4,39 +4,131 @@ import { motion } from 'framer-motion';
 
 export default function MainPage() {
     return (
-        <div className="flex flex-col min-h-screen bg-gray-50">
+        <div style={styles.container}>
             {/* Top Navbar */}
-            <div className="flex justify-between items-center px-8 py-4 bg-white shadow">
-                <h1 className="text-2xl font-bold">TalkPilot</h1>
-                <div className="flex space-x-6">
-                    <button className="px-4 py-2 bg-transparent text-gray-700 hover:text-blue-500">Script</button>
-                    <button className="px-4 py-2 bg-transparent text-gray-700 hover:text-blue-500">Schedule</button>
-                    <User className="w-6 h-6" />
+            <div style={styles.navbar}>
+                <h1 style={styles.title}>TalkPilot</h1>
+                <div style={styles.navButtons}>
+                    <button style={styles.navButton}>Script</button>
+                    <button style={styles.navButton}>Schedule</button>
+                    <User size={24} />
                 </div>
             </div>
 
             {/* Main Content */}
-            <motion.div className="flex flex-col items-center justify-center flex-1 p-12" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <h2 className="text-3xl font-semibold mb-6">Welcome to TalkPilot!</h2>
-                <button className="px-6 py-3 mb-12 bg-blue-500 text-white rounded hover:bg-blue-600">Start a New Presentation</button>
+            <motion.div
+                style={styles.mainContent}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+            >
+                <h2 style={styles.welcomeText}>Welcome to TalkPilot!</h2>
+                <button style={styles.startButton}>Start a New Presentation</button>
 
-                <div className="grid grid-cols-3 gap-8 w-full max-w-6xl">
-                    <div className="flex flex-col items-center p-6 bg-white rounded shadow hover:shadow-lg transition">
-                        <Home className="w-10 h-10 mb-3" />
-                        <div className="text-lg font-medium">Script</div>
-                    </div>
-                    <div className="flex flex-col items-center p-6 bg-white rounded shadow hover:shadow-lg transition">
-                        <Calendar className="w-10 h-10 mb-3" />
-                        <div className="text-lg font-medium">Schedule</div>
-                    </div>
-                    <div className="flex flex-col items-center p-6 bg-white rounded shadow hover:shadow-lg transition">
-                        <User className="w-10 h-10 mb-3" />
-                        <div className="text-lg font-medium">Profile</div>
-                    </div>
+                <div style={styles.grid}>
+                    <button style={styles.card}>
+                        <Calendar size={40} style={{ marginBottom: 12 }} />
+                        <div style={styles.cardText}>Schedule</div>
+                    </button>
+                    <button style={styles.card}>
+                        <Home size={40} style={{ marginBottom: 12 }} />
+                        <div style={styles.cardText}>Project</div>
+                    </button>
+                    <button style={styles.card}>
+                        <User size={40} style={{ marginBottom: 12 }} />
+                        <div style={styles.cardText}>Profile</div>
+                    </button>
                 </div>
             </motion.div>
 
-            <footer className="px-8 py-4 bg-white text-center text-sm text-gray-500">© 2025 TalkPilot. All rights reserved.</footer>
+            <footer style={styles.footer}>
+                © 2025 TalkPilot. All rights reserved.
+            </footer>
         </div>
     );
 }
+
+const styles = {
+    container: {
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: '#f7f7f7',
+    },
+    navbar: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '16px 32px',
+        backgroundColor: '#fff',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    },
+    title: {
+        fontSize: '28px',
+        fontWeight: 'bold',
+    },
+    navButtons: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '16px',
+    },
+    navButton: {
+        padding: '8px 16px',
+        backgroundColor: 'transparent',
+        color: '#555',
+        border: 'none',
+        cursor: 'pointer',
+        fontSize: '16px',
+    },
+    mainContent: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '48px 16px',
+        flex: 1,
+    },
+    welcomeText: {
+        fontSize: '24px',
+        fontWeight: '600',
+        marginBottom: '24px',
+    },
+    startButton: {
+        padding: '12px 24px',
+        marginBottom: '48px',
+        backgroundColor: '#3b82f6',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        fontSize: '16px',
+    },
+    grid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+        gap: '16px',
+        width: '100%',
+        maxWidth: '800px',
+    },
+    card: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        backgroundColor: '#fff',
+        borderRadius: '12px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+    },
+    cardText: {
+        fontSize: '16px',
+        fontWeight: '500',
+    },
+    footer: {
+        textAlign: 'center',
+        padding: '16px',
+        fontSize: '12px',
+        color: '#888',
+        backgroundColor: '#fff',
+    },
+};

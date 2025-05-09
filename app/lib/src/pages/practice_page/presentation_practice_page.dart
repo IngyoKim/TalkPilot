@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:talk_pilot/src/services/stt/stt_service.dart';
 import 'package:talk_pilot/src/services/practice/live_cpm_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
-import 'package:talk_pilot/src/models/user_model.dart';
 
 class PresentationPracticePage extends StatefulWidget {
   final String projectId;

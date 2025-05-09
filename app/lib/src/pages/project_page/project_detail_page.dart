@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
-import 'package:talk_pilot/src/components/toast_message.dart';
 
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/database/project_stream_service.dart';
@@ -13,6 +12,8 @@ import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart
 import 'package:talk_pilot/src/pages/project_page/widgets/script_upload_button.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/editable/editable_text_editor.dart';
 import 'package:talk_pilot/src/pages/practice_page/presentation_practice_page.dart';
+import 'package:talk_pilot/src/pages/profile_page/cpm_calculate_page.dart';
+
 
 class ProjectDetailPage extends StatefulWidget {
   final String projectId;
@@ -139,8 +140,35 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                   final userModel = await UserService().readUser(user.uid);
                   final userCpm = userModel?.cpm;
 
-                  if (userCpm == 0 || userCpm == null) {
-                    ToastMessage.show("CPM 측정을 먼저 완료해주세요.");
+                  if (userCpm == null || userCpm == 0.0) {
+                    showDialog(
+                      context: context,
+                      builder:
+                          (context) => AlertDialog(
+                            title: const Text('CPM 정보가 없습니다'),
+                            content: const Text(
+                              '발표 연습을 시작하기 전에\nCPM을 먼저 측정해주세요.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('취소'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context); // 다이얼로그 닫기
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const CpmCalculatePage(),
+                                    ),
+                                  );
+                                },
+                                child: const Text('측정하러 가기'),
+                              ),
+                            ],
+                          ),
+                    );
                     return;
                   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:talk_pilot/src/services/stt/stt_service.dart';
+import 'package:talk_pilot/src/services/practice/live_cpm_service.dart';
 
 class PresentationPracticePage extends StatefulWidget {
   final String projectId;
@@ -11,8 +12,11 @@ class PresentationPracticePage extends StatefulWidget {
 
 class _PresentationPracticePageState extends State<PresentationPracticePage> {
   final SttService _sttService = SttService();
+  final LiveCpmService _cpmService = LiveCpmService();
+
   String _recognizedText = '';
   bool _isListening = false;
+  double _currentCpm = 0.0;
 
   @override
   void initState() {
@@ -21,17 +25,26 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
   }
 
   void _startListening() {
+    _cpmService.start(onCpmUpdate: (cpm) {
+      if (!mounted) return;
+      setState(() {
+        _currentCpm = cpm;
+      });
+    });
+
     _sttService.startListening((text) {
       if (!mounted) return;
       setState(() {
         _recognizedText = text;
         _isListening = true;
       });
+      _cpmService.updateRecognizedText(text);
     });
   }
 
   void _stopListening() async {
     await _sttService.stopListening();
+    _cpmService.stop();
     if (!mounted) return;
     setState(() {
       _isListening = false;
@@ -41,6 +54,7 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
   @override
   void dispose() {
     _sttService.stopListening();
+    _cpmService.stop();
     super.dispose();
   }
 
@@ -71,6 +85,13 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
               onPressed: _isListening ? _stopListening : _startListening,
               child: Text(_isListening ? '발표 중지' : '발표 시작'),
             ),
+            const SizedBox(height: 16),
+
+            Text(
+              '현재 CPM: ${_currentCpm.toStringAsFixed(1)}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+
             const SizedBox(height: 24),
             const Text(
               '인식된 내용:',

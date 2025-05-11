@@ -54,7 +54,9 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              onPressed: _controller.isListening ? _controller.stopListening : _controller.startListening,
+              onPressed: _controller.isListening
+                  ? _controller.stopListening
+                  : _controller.startListening,
               child: Text(_controller.isListening ? '발표 중지' : '발표 시작'),
             ),
             const SizedBox(height: 16),
@@ -94,6 +96,8 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
             ResultButton(
               progress: _controller.scriptProgress,
               accuracy: _controller.scriptAccuracy,
+              actualCpm: _controller.currentCpm,
+              userCpm: _controller.userCpm,
               cpmStatus: _controller.cpmStatus,
               actualDuration: _controller.presentationDuration,
               expectedDuration: _controller.expectedDuration,

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:talk_pilot/src/services/stt/stt_service.dart';
 import 'package:talk_pilot/src/services/practice/live_cpm_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
+import 'package:talk_pilot/src/services/practice/script_progress_service.dart';
 
 class PresentationPracticePage extends StatefulWidget {
   final String projectId;
@@ -15,18 +16,20 @@ class PresentationPracticePage extends StatefulWidget {
 class _PresentationPracticePageState extends State<PresentationPracticePage> {
   final SttService _sttService = SttService();
   final LiveCpmService _cpmService = LiveCpmService();
+  final ScriptProgressService _progressService = ScriptProgressService();
 
-  String _recognizedText = '';
   bool _isListening = false;
   double _currentCpm = 0.0;
   String _cpmStatus = '';
   double _userCpm = 0.0;
+  double _scriptProgress = 0.0;
 
   @override
   void initState() {
     super.initState();
     _sttService.init();
     _loadUserCpm();
+    _loadScript();
   }
 
   void _loadUserCpm() async {
@@ -39,6 +42,11 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
     setState(() {
       _userCpm = userModel.cpm ?? 200.0;
     });
+  }
+
+  void _loadScript() async {
+    await _progressService.loadScript(widget.projectId);
+    setState(() {});
   }
 
   void _startListening() {
@@ -55,9 +63,10 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
 
     _sttService.startListening((text) {
       if (!mounted) return;
+      _progressService.updateRecognizedText(text);
       setState(() {
-        _recognizedText = text;
         _isListening = true;
+        _scriptProgress = _progressService.getProgress();
       });
       _cpmService.updateRecognizedText(text);
     });
@@ -70,6 +79,46 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
     setState(() {
       _isListening = false;
     });
+  }
+
+  Widget _buildScriptComparisonView() {
+    final scriptChunks = _progressService.scriptChunks;
+    final recognizedWords = _progressService.getRecognizedWords();
+
+    List<InlineSpan> scriptSpans = [];
+    List<InlineSpan> recognizedSpans = [];
+
+    for (int i = 0; i < scriptChunks.length; i++) {
+      final scriptWord = scriptChunks[i];
+      final recognizedWord = i < recognizedWords.length ? recognizedWords[i] : '';
+      final isRecognized = _progressService.isMatchedAt(i);
+
+      scriptSpans.add(TextSpan(
+        text: '$scriptWord ',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: isRecognized ? FontWeight.bold : FontWeight.normal,
+          color: isRecognized ? Colors.deepPurple : Colors.black,
+        ),
+      ));
+
+      recognizedSpans.add(TextSpan(
+        text: '$recognizedWord ',
+        style: TextStyle(
+          fontSize: 16,
+          color: Colors.grey[700],
+        ),
+      ));
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RichText(text: TextSpan(children: scriptSpans)),
+        const SizedBox(height: 4),
+        RichText(text: TextSpan(children: recognizedSpans)),
+      ],
+    );
   }
 
   @override
@@ -111,9 +160,14 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
               '현재 CPM: ${_currentCpm.toStringAsFixed(1)} ($_cpmStatus)',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
+            const SizedBox(height: 8),
+            Text(
+              '진행도: ${(_scriptProgress * 100).toStringAsFixed(1)}%',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
             const SizedBox(height: 24),
             const Text(
-              '인식된 내용:',
+              '대본 및 인식 결과:',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
@@ -125,12 +179,7 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: SingleChildScrollView(
-                  child: Text(
-                    _recognizedText.isEmpty
-                        ? '아직 인식된 내용이 없습니다.'
-                        : _recognizedText,
-                    style: const TextStyle(fontSize: 16),
-                  ),
+                  child: _buildScriptComparisonView(),
                 ),
               ),
             ),

@@ -4,38 +4,33 @@ class ScriptProgressService {
   final ProjectService _projectService = ProjectService();
 
   List<String> _scriptChunks = [];
-  String _currentRecognizedText = '';
-  double progress = 0.0;
-  List<bool> _matchedFlags = [];
 
   Future<void> loadScript(String projectId) async {
     final project = await _projectService.readProject(projectId);
     final script = project?.script ?? '';
     _scriptChunks = _splitText(script);
-    _matchedFlags = List.filled(_scriptChunks.length, false);
   }
 
-  void updateRecognizedText(String recognizedText) {
-    _currentRecognizedText = recognizedText;
-    _matchedFlags = List.filled(_scriptChunks.length, false);
-    progress = _calculateProgress(_currentRecognizedText);
-  }
-
-  double _calculateProgress(String recognizedText) {
+  double calculateProgressByLastMatch(String recognizedText) {
     final recognizedWords = _splitText(recognizedText);
-    if (_scriptChunks.isEmpty) return 0.0;
+    if (_scriptChunks.isEmpty || recognizedWords.isEmpty) return 0.0;
 
-    for (final word in recognizedWords) {
+    int maxMatchedIndex = -1;
+
+    for (final recognizedWord in recognizedWords) {
       for (int i = 0; i < _scriptChunks.length; i++) {
-        if (!_matchedFlags[i] && isSimilar(_scriptChunks[i], word)) {
-          _matchedFlags[i] = true;
+        if (isSimilar(_scriptChunks[i], recognizedWord)) {
+          if (i > maxMatchedIndex) {
+            maxMatchedIndex = i;
+          }
           break;
         }
       }
     }
 
-    final matchedCount = _matchedFlags.where((v) => v).length;
-    return matchedCount / _scriptChunks.length;
+    if (maxMatchedIndex == -1) return 0.0;
+
+    return (maxMatchedIndex + 1) / _scriptChunks.length;
   }
 
   List<String> _splitText(String text) {
@@ -51,11 +46,7 @@ class ScriptProgressService {
     return a == b || a.contains(b) || b.contains(a);
   }
 
-  double getProgress() => progress;
-
   List<String> get scriptChunks => _scriptChunks;
 
-  List<String> getRecognizedWords() => _splitText(_currentRecognizedText);
-
-  bool isMatchedAt(int index) => index < _matchedFlags.length && _matchedFlags[index];
+  List<String> splitText(String text) => _splitText(text);
 }

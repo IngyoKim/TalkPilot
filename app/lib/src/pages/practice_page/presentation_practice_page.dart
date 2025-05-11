@@ -18,6 +18,7 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
   final LiveCpmService _cpmService = LiveCpmService();
   final ScriptProgressService _progressService = ScriptProgressService();
 
+  String _recognizedText = '';
   bool _isListening = false;
   double _currentCpm = 0.0;
   String _cpmStatus = '';
@@ -63,10 +64,11 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
 
     _sttService.startListening((text) {
       if (!mounted) return;
-      _progressService.updateRecognizedText(text);
+      final progress = _progressService.calculateProgressByLastMatch(text);
       setState(() {
+        _recognizedText = text;
         _isListening = true;
-        _scriptProgress = _progressService.getProgress();
+        _scriptProgress = progress;
       });
       _cpmService.updateRecognizedText(text);
     });
@@ -83,31 +85,30 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
 
   Widget _buildScriptComparisonView() {
     final scriptChunks = _progressService.scriptChunks;
-    final recognizedWords = _progressService.getRecognizedWords();
+    final recognizedWords = _progressService.splitText(_recognizedText);
 
     List<InlineSpan> scriptSpans = [];
     List<InlineSpan> recognizedSpans = [];
 
-    for (int i = 0; i < scriptChunks.length; i++) {
-      final scriptWord = scriptChunks[i];
-      final recognizedWord = i < recognizedWords.length ? recognizedWords[i] : '';
-      final isRecognized = _progressService.isMatchedAt(i);
+    for (final scriptWord in scriptChunks) {
+      final isMatched = recognizedWords.any(
+        (w) => _progressService.isSimilar(scriptWord, w),
+      );
 
       scriptSpans.add(TextSpan(
         text: '$scriptWord ',
         style: TextStyle(
           fontSize: 16,
-          fontWeight: isRecognized ? FontWeight.bold : FontWeight.normal,
-          color: isRecognized ? Colors.deepPurple : Colors.black,
+          fontWeight: isMatched ? FontWeight.bold : FontWeight.normal,
+          color: isMatched ? Colors.deepPurple : Colors.black,
         ),
       ));
+    }
 
+    for (final word in recognizedWords) {
       recognizedSpans.add(TextSpan(
-        text: '$recognizedWord ',
-        style: TextStyle(
-          fontSize: 16,
-          color: Colors.grey[700],
-        ),
+        text: '$word ',
+        style: const TextStyle(fontSize: 16, color: Colors.grey),
       ));
     }
 

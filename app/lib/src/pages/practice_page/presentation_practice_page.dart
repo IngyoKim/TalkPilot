@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:talk_pilot/src/pages/practice_page/presentation_result_page.dart';
 import 'package:talk_pilot/src/pages/practice_page/widgets/presentation_practice_controller.dart';
+import 'package:talk_pilot/src/pages/practice_page/presentation_result_page.dart';
 import 'widgets/script_comparison_view.dart';
 
 class PresentationPracticePage extends StatefulWidget {
@@ -96,7 +96,14 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const PresentationResultPage(),
+                    builder:
+                        (_) => PresentationResultPage(
+                          scriptAccuracy:
+                              _controller.scriptAccuracy,
+                          cpmStatus: _controller.cpmStatus,
+                          actualDuration: _controller.presentationDuration,
+                          expectedDuration: _controller.expectedDuration,
+                        ),
                   ),
                 );
               },

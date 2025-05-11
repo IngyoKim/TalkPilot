@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:talk_pilot/src/pages/practice_page/presentation_result_page.dart';
 import 'package:talk_pilot/src/pages/practice_page/widgets/presentation_practice_controller.dart';
 import 'widgets/script_comparison_view.dart';
 
@@ -7,7 +8,8 @@ class PresentationPracticePage extends StatefulWidget {
   const PresentationPracticePage({super.key, required this.projectId});
 
   @override
-  State<PresentationPracticePage> createState() => _PresentationPracticePageState();
+  State<PresentationPracticePage> createState() =>
+      _PresentationPracticePageState();
 }
 
 class _PresentationPracticePageState extends State<PresentationPracticePage> {
@@ -49,11 +51,15 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
           children: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: _controller.isListening ? Colors.grey : Colors.deepPurple,
+                backgroundColor:
+                    _controller.isListening ? Colors.grey : Colors.deepPurple,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              onPressed: _controller.isListening ? _controller.stopListening : _controller.startListening,
+              onPressed:
+                  _controller.isListening
+                      ? _controller.stopListening
+                      : _controller.startListening,
               child: Text(_controller.isListening ? '발표 중지' : '발표 시작'),
             ),
             const SizedBox(height: 16),
@@ -83,6 +89,23 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                   ),
                 ),
               ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const PresentationResultPage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: const Text('결과 보러 가기'),
             ),
           ],
         ),

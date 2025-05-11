@@ -33,6 +33,40 @@ class ScriptProgressService {
     return (maxMatchedIndex + 1) / _scriptChunks.length;
   }
 
+  bool isSimilar(String a, String b) {
+    return _similarity(a, b) >= 0.5;
+  }
+
+  double _similarity(String a, String b) {
+    int distance = _levenshtein(a.toLowerCase(), b.toLowerCase());
+    int maxLength = a.length > b.length ? a.length : b.length;
+    if (maxLength == 0) return 1.0;
+    return 1.0 - (distance / maxLength);
+  }
+
+  int _levenshtein(String s1, String s2) {
+    final len1 = s1.length;
+    final len2 = s2.length;
+
+    List<List<int>> dp = List.generate(len1 + 1, (_) => List.filled(len2 + 1, 0));
+
+    for (int i = 0; i <= len1; i++) {
+      for (int j = 0; j <= len2; j++) {
+        if (i == 0) {
+          dp[i][j] = j;
+        } else if (j == 0) {
+          dp[i][j] = i;
+        } else if (s1[i - 1] == s2[j - 1]) {
+          dp[i][j] = dp[i - 1][j - 1];
+        } else {
+          dp[i][j] = 1 + [dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]].reduce((a, b) => a < b ? a : b);
+        }
+      }
+    }
+
+    return dp[len1][len2];
+  }
+
   List<String> _splitText(String text) {
     return text
         .trim()
@@ -40,10 +74,6 @@ class ScriptProgressService {
         .split(RegExp(r'\s+'))
         .where((word) => word.isNotEmpty)
         .toList();
-  }
-
-  bool isSimilar(String a, String b) {
-    return a == b || a.contains(b) || b.contains(a);
   }
 
   List<String> get scriptChunks => _scriptChunks;

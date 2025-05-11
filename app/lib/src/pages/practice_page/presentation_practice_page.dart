@@ -115,8 +115,16 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Text(
+          '대본:',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
         RichText(text: TextSpan(children: scriptSpans)),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
+        const Text(
+          '인식 결과:',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
         RichText(text: TextSpan(children: recognizedSpans)),
       ],
     );
@@ -167,11 +175,6 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 24),
-            const Text(
-              '대본 및 인식 결과:',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(16),

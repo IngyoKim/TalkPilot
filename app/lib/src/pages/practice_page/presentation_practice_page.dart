@@ -45,72 +45,69 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
           fontWeight: FontWeight.bold,
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    _controller.isListening ? Colors.grey : Colors.deepPurple,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _controller.isListening
+                      ? Colors.grey
+                      : Colors.deepPurple,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                onPressed: _controller.isListening
+                    ? _controller.stopListening
+                    : _controller.startListening,
+                child:
+                    Text(_controller.isListening ? '발표 중지' : '발표 시작'),
               ),
-              onPressed:
-                  _controller.isListening
-                      ? _controller.stopListening
-                      : _controller.startListening,
-              child: Text(_controller.isListening ? '발표 중지' : '발표 시작'),
-            ),
-            const SizedBox(height: 16),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                InfoCard(title: '현재 속도', value: _controller.cpmStatus),
-                InfoCard(
-                  title: '진행도',
-                  value:
-                      '${(_controller.scriptProgress * 100).toStringAsFixed(1)}%',
-                ),
-                InfoCard(
-                  title: '정확도',
-                  value:
-                      '${(_controller.scriptAccuracy * 100).toStringAsFixed(1)}%',
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-            Expanded(
-              child: Container(
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  InfoCard(title: '현재 속도', value: _controller.cpmStatus),
+                  InfoCard(
+                    title: '진행도',
+                    value:
+                        '${(_controller.scriptProgress * 100).toStringAsFixed(1)}%',
+                  ),
+                  InfoCard(
+                    title: '정확도',
+                    value:
+                        '${(_controller.scriptAccuracy * 100).toStringAsFixed(1)}%',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.deepPurple),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: SingleChildScrollView(
-                  child: ScriptComparisonView(
-                    scriptChunks: _controller.scriptChunks,
-                    recognizedText: _controller.recognizedText,
-                    isSimilar: _controller.isSimilar,
-                    splitText: _controller.splitText,
-                  ),
+                child: ScriptComparisonView(
+                  scriptChunks: _controller.scriptChunks,
+                  recognizedText: _controller.recognizedText,
+                  isSimilar: _controller.isSimilar,
+                  splitText: _controller.splitText,
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            ResultButton(
-              progress: _controller.scriptProgress,
-              accuracy: _controller.scriptAccuracy,
-              actualCpm: _controller.currentCpm,
-              userCpm: _controller.userCpm,
-              cpmStatus: _controller.cpmStatus,
-              actualDuration: _controller.presentationDuration,
-              expectedDuration: _controller.expectedDuration,
-            ),
-          ],
+              const SizedBox(height: 16),
+              ResultButton(
+                progress: _controller.scriptProgress,
+                accuracy: _controller.scriptAccuracy,
+                actualCpm: _controller.currentCpm,
+                userCpm: _controller.userCpm,
+                cpmStatus: _controller.cpmStatus,
+                actualDuration: _controller.presentationDuration,
+                expectedDuration: _controller.expectedDuration,
+              ),
+            ],
+          ),
         ),
       ),
     );

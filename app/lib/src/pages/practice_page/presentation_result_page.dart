@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:talk_pilot/src/pages/practice_page/widgets/result_summary.dart';
+import 'package:talk_pilot/src/pages/work_page/work_page.dart';
 
 class PresentationResultPage extends StatelessWidget {
   final double scriptAccuracy;
@@ -32,15 +33,38 @@ class PresentationResultPage extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: ResultSummary(
-          scriptAccuracy: scriptAccuracy,
-          actualCpm: actualCpm,
-          userCpm: userCpm,
-          cpmStatus: cpmStatus,
-          actualDuration: actualDuration,
-          expectedDuration: expectedDuration,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ResultSummary(
+                scriptAccuracy: scriptAccuracy,
+                actualCpm: actualCpm,
+                userCpm: userCpm,
+                cpmStatus: cpmStatus,
+                actualDuration: actualDuration,
+                expectedDuration: expectedDuration,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const WorkPage()),
+                    (route) => false,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text('메인 화면으로 이동'),
+              ),
+            ],
+          ),
         ),
       ),
     );

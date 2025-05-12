@@ -1,23 +1,18 @@
 import React from "react";
-<<<<<<< HEAD
 import { useNavigate } from "react-router-dom";
-=======
 import { getAuth } from "firebase/auth";
->>>>>>> 97ecfe092719d57190f4a773d987f067ef40b786
 import { signInWithGoogle } from "../firebase/googleLogin";
 import { signInWithKakao } from "../firebase/kakaoLogin";
 import SocialLoginButton from "../components/SocialLoginButton";
 
 export default function LoginPage() {
-    const navigate = useNavigate();  // ✅ React Router의 navigate hook
+    const navigate = useNavigate();
 
     const handleGoogleLogin = async () => {
         try {
             const user = await signInWithGoogle();
-<<<<<<< HEAD
             console.log("로그인된 사용자:", user.displayName);
-            navigate("/main");  // ✅ 로그인 성공 후 메인 페이지로 이동
-=======
+            navigate("/main");
             console.log("[Google] 로그인 성공");
             console.log("[Google] 사용자 정보:", user);
 
@@ -37,7 +32,6 @@ export default function LoginPage() {
                 이름: userData.name,
                 프로필: userData.picture,
             });
->>>>>>> 97ecfe092719d57190f4a773d987f067ef40b786
         } catch (error) {
             alert("Google 로그인 실패");
             console.error("[Google] 로그인 에러\n", error);
@@ -47,10 +41,8 @@ export default function LoginPage() {
     const handleKakaoLogin = async () => {
         try {
             const authObj = await signInWithKakao();
-<<<<<<< HEAD
             console.log("Kakao 로그인 성공:", authObj);
-            navigate("/main");  // ✅ 로그인 성공 후 메인 페이지로 이동
-=======
+            navigate("/main");
             console.log("[Kakao] 로그인 성공");
             console.log("[Kakao] 액세스 정보:", authObj);
 
@@ -73,7 +65,6 @@ export default function LoginPage() {
                 이름: userData.name,
                 프로필: userData.picture,
             });
->>>>>>> 97ecfe092719d57190f4a773d987f067ef40b786
         } catch (error) {
             alert("카카오 로그인 실패");
             console.error("[Kakao] 로그인 에러\n", error);

@@ -1,58 +1,80 @@
-import React from 'react';
-import { User } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-
 import Sidebar from './SideBar';
 
+const mainColor = '#673AB7';
+
 export default function MainPage() {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isHovered, setIsHovered] = useState(false);
     const navigate = useNavigate();
 
     const handleProfileClick = () => {
         navigate('/profile');
     };
 
+    const handleToggleSidebar = () => {
+        setIsSidebarOpen(prev => !prev);
+    };
+
     return (
         <div style={styles.container}>
             {/* Top Navbar */}
-            <div style={styles.navbar}>
-                <h1 style={styles.title}>TalkPilot</h1>
+            <div style={{ ...styles.navbar, marginLeft: isSidebarOpen ? '240px' : '0' }}>
+                <div
+                    style={styles.arrowToggle}
+                    onClick={handleToggleSidebar}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                >
+                    {isSidebarOpen
+                        ? (isHovered ? <ChevronRight size={20} /> : <ChevronLeft size={20} />)
+                        : (isHovered ? <ChevronLeft size={20} /> : <ChevronRight size={20} />)
+                    }
+                </div>
+
                 <div style={styles.profileIcon} onClick={handleProfileClick}>
-                    <User size={20} color="#673AB7" strokeWidth={2} />
+                    <User size={20} color={mainColor} strokeWidth={2} />
                 </div>
             </div>
 
-            {/* Main */}
-            <div style={styles.wrapper}>
-                <Sidebar />
-                <motion.div
-                    style={styles.mainContent}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                >
-                    <div style={styles.headerSection}>
-                        <h2 style={styles.welcomeText}>Welcome to TalkPilot!</h2>
-                        <button style={styles.startButton}>Start a New Presentation</button>
-                        <p style={styles.emptyMessage}>현재 생성된 프로젝트가 없습니다.</p>
-                    </div>
-                </motion.div>
-            </div>
+            {/* Sidebar */}
+            <Sidebar isOpen={isSidebarOpen} />
 
-            <footer style={styles.footer}>
+            {/* Main Content */}
+            <motion.div
+                style={{
+                    ...styles.mainContent,
+                    marginLeft: isSidebarOpen ? '240px' : '0',
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+            >
+                <div style={styles.headerSection}>
+                    <h2 style={styles.welcomeText}>Welcome to TalkPilot!</h2>
+                    <button style={styles.startButton}>Start a New Presentation</button>
+                    <p style={styles.emptyMessage}>현재 생성된 프로젝트가 없습니다.</p>
+                </div>
+            </motion.div>
+
+            <footer style={{ ...styles.footer, marginLeft: isSidebarOpen ? '240px' : '0' }}>
                 © 2025 TalkPilot. All rights reserved.
             </footer>
         </div>
     );
 }
 
-const mainColor = '#673AB7';
 
 const styles = {
     container: {
-        minHeight: '100vh',
+        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: '#FFFFFF',
+        overflow: 'hidden',
     },
     navbar: {
         display: 'flex',
@@ -60,9 +82,16 @@ const styles = {
         alignItems: 'center',
         padding: '16px 32px',
         backgroundColor: '#FFFFFF',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        height: '64px',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
     },
     title: {
-        fontSize: '28px',
+        fontSize: '24px',
         fontWeight: 'bold',
         color: mainColor,
     },
@@ -77,36 +106,28 @@ const styles = {
         alignItems: 'center',
         cursor: 'pointer',
     },
-    divider: {
-        height: '1px',
-        backgroundColor: '#E0E0E0',
-        width: '100%',
+    menuButton: {
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        marginRight: '12px',
     },
-    wrapper: {
+    arrowToggle: {
+        backgroundColor: '#ffffff',
+        border: `1px solid ${mainColor}`,
+        borderRadius: '50%',
+        width: '36px',
+        height: '36px',
         display: 'flex',
-        minHeight: '100vh',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s ease',
     },
     mainContent: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '48px 16px',
+        padding: '80px 32px 32px',
         flex: 1,
-    },
-    verticalMenu: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        padding: '16px 32px',
-        gap: '8px',
-        backgroundColor: '#FFFFFF',
-    },
-
-    menuItem: {
-        fontSize: '16px',
-        fontWeight: '500',
-        color: '#333333',
-        cursor: 'pointer',
+        transition: 'margin-left 0.3s ease',
     },
     headerSection: {
         display: 'flex',
@@ -136,9 +157,12 @@ const styles = {
     },
     footer: {
         textAlign: 'center',
-        padding: '16px',
+        padding: '8px 0',
         fontSize: '12px',
         color: '#000000',
         backgroundColor: '#FFFFFF',
+        position: 'fixed',
+        bottom: 0,
+        width: '100%',
     },
 };

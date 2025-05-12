@@ -25,26 +25,26 @@ class ResultButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isProgressEnough = progress >= 0.9;
 
+    if (!isProgressEnough) return const SizedBox.shrink(); 
+
     return ElevatedButton(
-      onPressed: isProgressEnough
-          ? () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => PresentationResultPage(
-                    scriptAccuracy: accuracy,
-                    actualCpm: actualCpm,
-                    userCpm: userCpm,
-                    cpmStatus: cpmStatus,
-                    actualDuration: actualDuration,
-                    expectedDuration: expectedDuration,
-                  ),
-                ),
-              );
-            }
-          : null,
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PresentationResultPage(
+              scriptAccuracy: accuracy,
+              actualCpm: actualCpm,
+              userCpm: userCpm,
+              cpmStatus: cpmStatus,
+              actualDuration: actualDuration,
+              expectedDuration: expectedDuration,
+            ),
+          ),
+        );
+      },
       style: ElevatedButton.styleFrom(
-        backgroundColor: isProgressEnough ? Colors.deepPurple : Colors.grey,
+        backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 16),
       ),

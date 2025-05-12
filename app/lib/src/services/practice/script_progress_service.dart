@@ -15,22 +15,25 @@ class ScriptProgressService {
     final recognizedWords = _splitText(recognizedText);
     if (_scriptChunks.isEmpty || recognizedWords.isEmpty) return 0.0;
 
-    int maxMatchedIndex = -1;
+    int scriptIndex = 0;
+    int recognizedIndex = 0;
+    int lastMatchedIndex = -1;
 
-    for (final recognizedWord in recognizedWords) {
-      for (int i = 0; i < _scriptChunks.length; i++) {
-        if (isSimilar(_scriptChunks[i], recognizedWord)) {
-          if (i > maxMatchedIndex) {
-            maxMatchedIndex = i;
-          }
-          break;
-        }
+    while (scriptIndex < _scriptChunks.length &&
+        recognizedIndex < recognizedWords.length) {
+      if (isSimilar(
+        _scriptChunks[scriptIndex],
+        recognizedWords[recognizedIndex],
+      )) {
+        lastMatchedIndex = scriptIndex;
+        recognizedIndex++;
       }
+      scriptIndex++;
     }
 
-    if (maxMatchedIndex == -1) return 0.0;
+    if (lastMatchedIndex == -1) return 0.0;
 
-    return (maxMatchedIndex + 1) / _scriptChunks.length;
+    return (lastMatchedIndex + 1) / _scriptChunks.length;
   }
 
   double calculateAccuracy(String recognizedText) {
@@ -70,7 +73,10 @@ class ScriptProgressService {
     final len1 = s1.length;
     final len2 = s2.length;
 
-    List<List<int>> dp = List.generate(len1 + 1, (_) => List.filled(len2 + 1, 0));
+    List<List<int>> dp = List.generate(
+      len1 + 1,
+      (_) => List.filled(len2 + 1, 0),
+    );
 
     for (int i = 0; i <= len1; i++) {
       for (int j = 0; j <= len2; j++) {
@@ -81,7 +87,13 @@ class ScriptProgressService {
         } else if (s1[i - 1] == s2[j - 1]) {
           dp[i][j] = dp[i - 1][j - 1];
         } else {
-          dp[i][j] = 1 + [dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]].reduce((a, b) => a < b ? a : b);
+          dp[i][j] =
+              1 +
+              [
+                dp[i - 1][j],
+                dp[i][j - 1],
+                dp[i - 1][j - 1],
+              ].reduce((a, b) => a < b ? a : b);
         }
       }
     }

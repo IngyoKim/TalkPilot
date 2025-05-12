@@ -22,7 +22,6 @@ class ScriptComparisonView extends StatelessWidget {
 
     for (int i = 0; i < recognizedWords.length; i++) {
       final word = recognizedWords[i];
-
       final start = (i - 10).clamp(0, scriptChunks.length);
       final end = (i + 10).clamp(0, scriptChunks.length);
 

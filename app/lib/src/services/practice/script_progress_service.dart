@@ -66,7 +66,7 @@ class ScriptProgressService {
       }
     }
 
-    return matched / recognizedWords.length;
+    return matched / matchedScriptIndexes.length;
   }
 
   bool isSimilar(String a, String b) {

@@ -18,17 +18,17 @@ class ScriptComparisonView extends StatelessWidget {
   Widget build(BuildContext context) {
     final recognizedWords = splitText(recognizedText);
     final matchedFlags = List<bool>.filled(scriptChunks.length, false);
+    final usedRecognizedIndexes = <int>{};
 
-    int scriptIndex = 0;
-    int recognizedIndex = 0;
+    for (int i = 0; i < scriptChunks.length; i++) {
+      for (int j = 0; j < recognizedWords.length; j++) {
+        if (usedRecognizedIndexes.contains(j)) continue;
 
-    while (scriptIndex < scriptChunks.length && recognizedIndex < recognizedWords.length) {
-      if (isSimilar(scriptChunks[scriptIndex], recognizedWords[recognizedIndex])) {
-        matchedFlags[scriptIndex] = true;
-        recognizedIndex++;
-        scriptIndex++;
-      } else {
-        scriptIndex++;
+        if (isSimilar(scriptChunks[i], recognizedWords[j])) {
+          matchedFlags[i] = true;
+          usedRecognizedIndexes.add(j);
+          break;
+        }
       }
     }
 
@@ -45,13 +45,13 @@ class ScriptComparisonView extends StatelessWidget {
       );
     });
 
-    // 인식된 텍스트는 기존처럼 그대로 회색으로 출력
-    List<InlineSpan> recognizedSpans = recognizedWords.map((word) {
-      return TextSpan(
-        text: '$word ',
-        style: const TextStyle(fontSize: 16, color: Colors.grey),
-      );
-    }).toList();
+    List<InlineSpan> recognizedSpans =
+        recognizedWords.map((word) {
+          return TextSpan(
+            text: '$word ',
+            style: const TextStyle(fontSize: 16, color: Colors.grey),
+          );
+        }).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

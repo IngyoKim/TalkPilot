@@ -15,44 +15,45 @@ class ScriptProgressService {
     final recognizedWords = _splitText(recognizedText);
     if (_scriptChunks.isEmpty || recognizedWords.isEmpty) return 0.0;
 
-    int scriptIndex = 0;
-    int recognizedIndex = 0;
-    int lastMatchedIndex = -1;
+    int maxMatchedIndex = -1;
+    final matchedScriptIndexes = <int>{};
 
-    while (scriptIndex < _scriptChunks.length &&
-        recognizedIndex < recognizedWords.length) {
-      if (isSimilar(
-        _scriptChunks[scriptIndex],
-        recognizedWords[recognizedIndex],
-      )) {
-        lastMatchedIndex = scriptIndex;
-        recognizedIndex++;
+    for (final recognizedWord in recognizedWords) {
+      for (int i = 0; i < _scriptChunks.length; i++) {
+        if (matchedScriptIndexes.contains(i)) continue;
+
+        if (isSimilar(_scriptChunks[i], recognizedWord)) {
+          matchedScriptIndexes.add(i);
+          if (i > maxMatchedIndex) {
+            maxMatchedIndex = i;
+          }
+          break;
+        }
       }
-      scriptIndex++;
     }
 
-    if (lastMatchedIndex == -1) return 0.0;
+    if (maxMatchedIndex == -1) return 0.0;
 
-    return (lastMatchedIndex + 1) / _scriptChunks.length;
+    return (maxMatchedIndex + 1) / _scriptChunks.length;
   }
 
   double calculateAccuracy(String recognizedText) {
     final recognizedWords = _splitText(recognizedText);
     if (recognizedWords.isEmpty || _scriptChunks.isEmpty) return 0.0;
 
+    final usedScriptIndexes = <int>{};
     int matched = 0;
-    int scriptIndex = 0;
 
     for (final word in recognizedWords) {
-      while (scriptIndex < _scriptChunks.length) {
-        if (isSimilar(_scriptChunks[scriptIndex], word)) {
+      for (int i = 0; i < _scriptChunks.length; i++) {
+        if (usedScriptIndexes.contains(i)) continue;
+
+        if (isSimilar(_scriptChunks[i], word)) {
+          usedScriptIndexes.add(i);
           matched++;
-          scriptIndex++;
           break;
         }
-        scriptIndex++;
       }
-      if (scriptIndex >= _scriptChunks.length) break;
     }
 
     return matched / recognizedWords.length;

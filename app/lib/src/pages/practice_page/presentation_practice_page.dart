@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:talk_pilot/src/pages/practice_page/widgets/presentation_practice_controller.dart';
 import 'package:talk_pilot/src/pages/practice_page/widgets/script_comparison_view.dart';
 import 'package:talk_pilot/src/pages/practice_page/widgets/result_button.dart';
+import 'package:talk_pilot/src/pages/practice_page/widgets/info_card.dart';
 
 class PresentationPracticePage extends StatefulWidget {
   final String projectId;
   const PresentationPracticePage({super.key, required this.projectId});
 
   @override
-  State<PresentationPracticePage> createState() => _PresentationPracticePageState();
+  State<PresentationPracticePage> createState() =>
+      _PresentationPracticePageState();
 }
 
 class _PresentationPracticePageState extends State<PresentationPracticePage> {
@@ -50,30 +52,36 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
           children: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: _controller.isListening ? Colors.grey : Colors.deepPurple,
+                backgroundColor:
+                    _controller.isListening ? Colors.grey : Colors.deepPurple,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
-              onPressed: _controller.isListening
-                  ? _controller.stopListening
-                  : _controller.startListening,
+              onPressed:
+                  _controller.isListening
+                      ? _controller.stopListening
+                      : _controller.startListening,
               child: Text(_controller.isListening ? '발표 중지' : '발표 시작'),
             ),
             const SizedBox(height: 16),
-            Text(
-              '현재 CPM: ${_controller.currentCpm.toStringAsFixed(1)} (${_controller.cpmStatus})',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                InfoCard(title: '현재 속도', value: _controller.cpmStatus),
+                InfoCard(
+                  title: '진행도',
+                  value:
+                      '${(_controller.scriptProgress * 100).toStringAsFixed(1)}%',
+                ),
+                InfoCard(
+                  title: '정확도',
+                  value:
+                      '${(_controller.scriptAccuracy * 100).toStringAsFixed(1)}%',
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              '진행도: ${(_controller.scriptProgress * 100).toStringAsFixed(1)}%',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '정확도: ${(_controller.scriptAccuracy * 100).toStringAsFixed(1)}%',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
+
             const SizedBox(height: 24),
             Expanded(
               child: Container(

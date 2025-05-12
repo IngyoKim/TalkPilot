@@ -35,13 +35,21 @@ class ScriptProgressService {
 
   double calculateAccuracy(String recognizedText) {
     final recognizedWords = _splitText(recognizedText);
-    if (recognizedWords.isEmpty) return 0.0;
+    if (recognizedWords.isEmpty || _scriptChunks.isEmpty) return 0.0;
 
     int matched = 0;
+    int scriptIndex = 0;
+
     for (final word in recognizedWords) {
-      if (_scriptChunks.any((chunk) => isSimilar(chunk, word))) {
-        matched++;
+      while (scriptIndex < _scriptChunks.length) {
+        if (isSimilar(_scriptChunks[scriptIndex], word)) {
+          matched++;
+          scriptIndex++;
+          break;
+        }
+        scriptIndex++;
       }
+      if (scriptIndex >= _scriptChunks.length) break;
     }
 
     return matched / recognizedWords.length;

@@ -17,19 +17,35 @@ class ScriptComparisonView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final recognizedWords = splitText(recognizedText);
+    final matchedFlags = List<bool>.filled(scriptChunks.length, false);
 
-    List<InlineSpan> scriptSpans = scriptChunks.map((scriptWord) {
-      final matched = recognizedWords.any((w) => isSimilar(scriptWord, w));
+    int scriptIndex = 0;
+    int recognizedIndex = 0;
+
+    while (scriptIndex < scriptChunks.length && recognizedIndex < recognizedWords.length) {
+      if (isSimilar(scriptChunks[scriptIndex], recognizedWords[recognizedIndex])) {
+        matchedFlags[scriptIndex] = true;
+        recognizedIndex++;
+        scriptIndex++;
+      } else {
+        scriptIndex++;
+      }
+    }
+
+    List<InlineSpan> scriptSpans = List.generate(scriptChunks.length, (i) {
+      final word = scriptChunks[i];
+      final matched = matchedFlags[i];
       return TextSpan(
-        text: '$scriptWord ',
+        text: '$word ',
         style: TextStyle(
           fontSize: 16,
           fontWeight: matched ? FontWeight.bold : FontWeight.normal,
           color: matched ? Colors.deepPurple : Colors.black,
         ),
       );
-    }).toList();
+    });
 
+    // 인식된 텍스트는 기존처럼 그대로 회색으로 출력
     List<InlineSpan> recognizedSpans = recognizedWords.map((word) {
       return TextSpan(
         text: '$word ',

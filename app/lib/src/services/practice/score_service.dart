@@ -1,5 +1,3 @@
-import 'dart:math';
-
 class ScoreService {
   double calculateScore({
     required double scriptAccuracy,

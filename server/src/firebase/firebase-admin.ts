@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 const serviceAccount = JSON.parse(
-    readFileSync(join(__dirname, '../../firebase-admin-key.json'), 'utf8'),
+    readFileSync(join(__dirname, '../../credentials/firebase-admin-key.json'), 'utf8'),
 );
 
 admin.initializeApp({

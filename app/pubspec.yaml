@@ -53,9 +53,13 @@ dependencies:
 
   archive: ^3.3.7       
   xml: ^6.3.0           
-  file_picker: ^10.1.2
-
+  file_picker: ^10.1.0
+  
   table_calendar: ^3.0.9
+  web_socket_channel: ^3.0.3
+  flutter_sound: ^9.2.13
+  permission_handler: ^11.0.1
+  socket_io_client: ^3.1.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

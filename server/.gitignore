@@ -36,3 +36,7 @@ pnpm-debug.log*
 # firebase
 google-services.json
 firebase-admin-key.json
+
+# 보안 키
+credentials/*
+credentials

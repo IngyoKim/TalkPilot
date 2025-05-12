@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Layers, BarChart2, BookOpen } from 'lucide-react';
+import { Home, Layers, BarChart2, BookOpen, Calendar1 } from 'lucide-react';
 
 export default function Sidebar() {
     return (
@@ -8,7 +8,7 @@ export default function Sidebar() {
             <div style={styles.logoSection}>
                 <button style={styles.practiceBtn}>Add Project</button>
                 <SidebarItem icon={<Home size={18} />} text="Home" />
-                <SidebarItem icon={<Layers size={18} />} text="Builder" />
+                <SidebarItem icon={<Calendar1 size={18} />} text="Schedule" />
                 <SidebarItem icon={<BarChart2 size={18} />} text="Dashboard" />
                 <SidebarItem icon={<BookOpen size={18} />} text="My Learning" />
             </div>
@@ -25,6 +25,8 @@ function SidebarItem({ icon, text }) {
     );
 }
 
+const mainColor = '#673AB7';
+
 const styles = {
     sidebar: {
         width: '240px',
@@ -35,6 +37,7 @@ const styles = {
         padding: '24px 16px',
         boxShadow: '2px 0 6px rgba(0,0,0,0.05)',
         minHeight: '100vh',
+        borderRight: '1px solidrgb(0, 0, 0)',
     },
     logoSection: {
         display: 'flex',
@@ -47,7 +50,7 @@ const styles = {
         color: '#673AB7',
     },
     practiceBtn: {
-        background: 'linear-gradient(to right, #5D5FEF, #7A5FFF)',
+        background: 'linear-gradient(to right, #673AB7, #673AB7)',
         color: '#fff',
         border: 'none',
         borderRadius: '8px',

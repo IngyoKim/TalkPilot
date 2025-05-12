@@ -22,26 +22,21 @@ export default function MainPage() {
                 </div>
             </div>
 
-            {/* Divider */}
+            {/* Main */}
             <div style={styles.wrapper}>
                 <Sidebar />
-                <main style={styles.mainContent}>
-                    <h1>Welcome to TalkPilot!</h1>
-                    <p>현재 생성된 프로젝트가 없습니다.</p>
-                </main>
+                <motion.div
+                    style={styles.mainContent}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                >
+                    <div style={styles.headerSection}>
+                        <h2 style={styles.welcomeText}>Welcome to TalkPilot!</h2>
+                        <button style={styles.startButton}>Start a New Presentation</button>
+                        <p style={styles.emptyMessage}>현재 생성된 프로젝트가 없습니다.</p>
+                    </div>
+                </motion.div>
             </div>
-            {/* Main Content */}
-            <motion.div
-                style={styles.mainContent}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-            >
-                <div style={styles.headerSection}>
-                    <h2 style={styles.welcomeText}>Welcome to TalkPilot!</h2>
-                    <button style={styles.startButton}>Start a New Presentation</button>
-                    <p style={styles.emptyMessage}>현재 생성된 프로젝트가 없습니다.</p>
-                </div>
-            </motion.div>
 
             <footer style={styles.footer}>
                 © 2025 TalkPilot. All rights reserved.

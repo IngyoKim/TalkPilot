@@ -1,7 +1,9 @@
 import React from 'react';
-import { Home, Calendar, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+
+import Sidebar from './SideBar';
 
 export default function MainPage() {
     const navigate = useNavigate();
@@ -20,9 +22,14 @@ export default function MainPage() {
                 </div>
             </div>
 
-            {/* 경계선 */}
-            <div style={styles.divider} />
-
+            {/* Divider */}
+            <div style={styles.wrapper}>
+                <Sidebar />
+                <main style={styles.mainContent}>
+                    <h1>Welcome to TalkPilot!</h1>
+                    <p>현재 생성된 프로젝트가 없습니다.</p>
+                </main>
+            </div>
             {/* Main Content */}
             <motion.div
                 style={styles.mainContent}
@@ -32,19 +39,8 @@ export default function MainPage() {
                 <div style={styles.headerSection}>
                     <h2 style={styles.welcomeText}>Welcome to TalkPilot!</h2>
                     <button style={styles.startButton}>Start a New Presentation</button>
+                    <p style={styles.emptyMessage}>현재 생성된 프로젝트가 없습니다.</p>
                 </div>
-
-                <div style={styles.grid}>
-                    <button style={styles.card}>
-                        <Calendar size={40} style={{ marginBottom: 12, color: '#000000' }} />
-                        <div style={styles.cardText}>Schedule</div>
-                    </button>
-                    <button style={styles.card}>
-                        <Home size={40} style={{ marginBottom: 12, color: '#000000' }} />
-                        <div style={styles.cardText}>Project</div>
-                    </button>
-                </div>
-
             </motion.div>
 
             <footer style={styles.footer}>
@@ -91,19 +87,37 @@ const styles = {
         backgroundColor: '#E0E0E0',
         width: '100%',
     },
+    wrapper: {
+        display: 'flex',
+        minHeight: '100vh',
+    },
     mainContent: {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         padding: '48px 16px',
         flex: 1,
-        color: mainColor,
+    },
+    verticalMenu: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        padding: '16px 32px',
+        gap: '8px',
+        backgroundColor: '#FFFFFF',
+    },
+
+    menuItem: {
+        fontSize: '16px',
+        fontWeight: '500',
+        color: '#333333',
+        cursor: 'pointer',
     },
     headerSection: {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '24px',
+        gap: '16px',
         marginBottom: '48px',
     },
     welcomeText: {
@@ -120,30 +134,10 @@ const styles = {
         cursor: 'pointer',
         fontSize: '16px',
     },
-    grid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-        gap: '16px',
-        width: '100%',
-        maxWidth: '800px',
-    },
-    card: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-        backgroundColor: '#FFFFFF',
-        borderRadius: '12px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        cursor: 'pointer',
-        transition: 'all 0.2s',
-        border: `2px solid #000000`,
-    },
-    cardText: {
-        fontSize: '16px',
-        fontWeight: '500',
-        color: '#000000',
+    emptyMessage: {
+        marginTop: '12px',
+        fontSize: '14px',
+        color: '#888888',
     },
     footer: {
         textAlign: 'center',

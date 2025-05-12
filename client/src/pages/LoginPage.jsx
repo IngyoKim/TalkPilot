@@ -1,5 +1,9 @@
 import React from "react";
+<<<<<<< HEAD
 import { useNavigate } from "react-router-dom";
+=======
+import { getAuth } from "firebase/auth";
+>>>>>>> 97ecfe092719d57190f4a773d987f067ef40b786
 import { signInWithGoogle } from "../firebase/googleLogin";
 import { signInWithKakao } from "../firebase/kakaoLogin";
 import SocialLoginButton from "../components/SocialLoginButton";
@@ -10,22 +14,69 @@ export default function LoginPage() {
     const handleGoogleLogin = async () => {
         try {
             const user = await signInWithGoogle();
+<<<<<<< HEAD
             console.log("로그인된 사용자:", user.displayName);
             navigate("/main");  // ✅ 로그인 성공 후 메인 페이지로 이동
+=======
+            console.log("[Google] 로그인 성공");
+            console.log("[Google] 사용자 정보:", user);
+
+            const idToken = await user.getIdToken();
+
+            const res = await fetch("http://localhost:3000/me", {
+                headers: {
+                    Authorization: `Bearer ${idToken}`,
+                },
+            });
+
+            const userData = await res.json();
+
+            console.log("[Nest] 사용자 정보 수신 완료");
+            console.table({
+                UID: userData.uid,
+                이름: userData.name,
+                프로필: userData.picture,
+            });
+>>>>>>> 97ecfe092719d57190f4a773d987f067ef40b786
         } catch (error) {
             alert("Google 로그인 실패");
-            console.error("Google 로그인 에러:", error);
+            console.error("[Google] 로그인 에러\n", error);
         }
     };
 
     const handleKakaoLogin = async () => {
         try {
             const authObj = await signInWithKakao();
+<<<<<<< HEAD
             console.log("Kakao 로그인 성공:", authObj);
             navigate("/main");  // ✅ 로그인 성공 후 메인 페이지로 이동
+=======
+            console.log("[Kakao] 로그인 성공");
+            console.log("[Kakao] 액세스 정보:", authObj);
+
+            const user = getAuth().currentUser;
+            if (!user) throw new Error("Firebase 사용자 정보 없음");
+
+            const idToken = await user.getIdToken();
+
+            const res = await fetch("http://localhost:3000/me", {
+                headers: {
+                    Authorization: `Bearer ${idToken}`,
+                },
+            });
+
+            const userData = await res.json();
+
+            console.log("[Nest] 사용자 정보 수신 완료");
+            console.table({
+                UID: userData.uid,
+                이름: userData.name,
+                프로필: userData.picture,
+            });
+>>>>>>> 97ecfe092719d57190f4a773d987f067ef40b786
         } catch (error) {
             alert("카카오 로그인 실패");
-            console.error("Kakao 로그인 에러:", error);
+            console.error("[Kakao] 로그인 에러\n", error);
         }
     };
 

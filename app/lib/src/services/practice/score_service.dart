@@ -2,33 +2,32 @@ import 'dart:math';
 
 class ScoreService {
   double calculateScore({
-    required double scriptAccuracy, 
-    required String cpmStatus,   
+    required double scriptAccuracy,
+    required String averageCpmStatus,
+    required double properCpmDurationSeconds,
     required Duration actualDuration,
     required Duration expectedDuration,
   }) {
-    final scriptScore = (scriptAccuracy * 50).clamp(0, 50);
+    final accuracyScore = (scriptAccuracy * 20).clamp(0, 20);
 
-    double speedScore = switch (cpmStatus) {
-      '적당함' => 25,
-      '느림' || '빠름' => 15,
-      _ => 0,
+    final double avgCpmScore = switch (averageCpmStatus) {
+      '적당함' => 25.0,
+      '느림' || '빠름' => 15.0,
+      _ => 5.0,
     };
 
-    final lowerBound = expectedDuration.inSeconds * 0.85;
-    final upperBound = expectedDuration.inSeconds * 1.15;
-    final actualSec = actualDuration.inSeconds;
+    final totalSec = actualDuration.inSeconds.toDouble();
+    final ratio = (properCpmDurationSeconds / totalSec).clamp(0.0, 1.0);
+    final consistencyScore = (ratio * 25).clamp(0, 25);
 
-    final timeScore = (actualSec >= lowerBound && actualSec <= upperBound) ? 25 : 15;
+    final expectedSec = expectedDuration.inSeconds.toDouble();
+    final lowerBound = expectedSec * 0.85;
+    final upperBound = expectedSec * 1.15;
 
-    return min(scriptScore + speedScore + timeScore, 100);
-  }
+    final double timeScore = (totalSec >= lowerBound && totalSec <= upperBound)
+        ? 30.0
+        : 15.0;
 
-  String getGrade(double score) {
-    if (score >= 90) return 'A';
-    if (score >= 80) return 'B';
-    if (score >= 70) return 'C';
-    if (score >= 60) return 'D';
-    return 'F';
+    return (accuracyScore + avgCpmScore + consistencyScore + timeScore).clamp(0, 100);
   }
 }

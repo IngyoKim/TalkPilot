@@ -18,15 +18,20 @@ class ScriptComparisonView extends StatelessWidget {
   Widget build(BuildContext context) {
     final recognizedWords = splitText(recognizedText);
     final matchedFlags = List<bool>.filled(scriptChunks.length, false);
-    final usedRecognizedIndexes = <int>{};
+    final usedScriptIndexes = <int>{};
 
-    for (int i = 0; i < scriptChunks.length; i++) {
-      for (int j = 0; j < recognizedWords.length; j++) {
-        if (usedRecognizedIndexes.contains(j)) continue;
+    for (int i = 0; i < recognizedWords.length; i++) {
+      final word = recognizedWords[i];
 
-        if (isSimilar(scriptChunks[i], recognizedWords[j])) {
-          matchedFlags[i] = true;
-          usedRecognizedIndexes.add(j);
+      final start = (i - 10).clamp(0, scriptChunks.length);
+      final end = (i + 10).clamp(0, scriptChunks.length);
+
+      for (int j = start; j < end; j++) {
+        if (usedScriptIndexes.contains(j)) continue;
+
+        if (isSimilar(scriptChunks[j], word)) {
+          matchedFlags[j] = true;
+          usedScriptIndexes.add(j);
           break;
         }
       }

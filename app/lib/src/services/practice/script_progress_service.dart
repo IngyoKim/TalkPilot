@@ -15,41 +15,51 @@ class ScriptProgressService {
     final recognizedWords = _splitText(recognizedText);
     if (_scriptChunks.isEmpty || recognizedWords.isEmpty) return 0.0;
 
-    int maxMatchedIndex = -1;
+    int lastMatchedScriptIndex = -1;
     final matchedScriptIndexes = <int>{};
 
-    for (final recognizedWord in recognizedWords) {
-      for (int i = 0; i < _scriptChunks.length; i++) {
-        if (matchedScriptIndexes.contains(i)) continue;
+    for (int i = 0; i < recognizedWords.length; i++) {
+      final recognizedWord = recognizedWords[i];
 
-        if (isSimilar(_scriptChunks[i], recognizedWord)) {
-          matchedScriptIndexes.add(i);
-          if (i > maxMatchedIndex) {
-            maxMatchedIndex = i;
+      int start = (i - 10).clamp(0, _scriptChunks.length);
+      int end = (i + 10).clamp(0, _scriptChunks.length);
+
+      for (int j = start; j < end; j++) {
+        if (matchedScriptIndexes.contains(j)) continue;
+
+        if (isSimilar(_scriptChunks[j], recognizedWord)) {
+          matchedScriptIndexes.add(j);
+          if (j > lastMatchedScriptIndex) {
+            lastMatchedScriptIndex = j;
           }
           break;
         }
       }
     }
 
-    if (maxMatchedIndex == -1) return 0.0;
+    if (lastMatchedScriptIndex == -1) return 0.0;
 
-    return (maxMatchedIndex + 1) / _scriptChunks.length;
+    return (lastMatchedScriptIndex + 1) / _scriptChunks.length;
   }
 
   double calculateAccuracy(String recognizedText) {
     final recognizedWords = _splitText(recognizedText);
     if (recognizedWords.isEmpty || _scriptChunks.isEmpty) return 0.0;
 
-    final usedScriptIndexes = <int>{};
+    final matchedScriptIndexes = <int>{};
     int matched = 0;
 
-    for (final word in recognizedWords) {
-      for (int i = 0; i < _scriptChunks.length; i++) {
-        if (usedScriptIndexes.contains(i)) continue;
+    for (int i = 0; i < recognizedWords.length; i++) {
+      final word = recognizedWords[i];
 
-        if (isSimilar(_scriptChunks[i], word)) {
-          usedScriptIndexes.add(i);
+      int start = (i - 10).clamp(0, _scriptChunks.length);
+      int end = (i + 10).clamp(0, _scriptChunks.length);
+
+      for (int j = start; j < end; j++) {
+        if (matchedScriptIndexes.contains(j)) continue;
+
+        if (isSimilar(_scriptChunks[j], word)) {
+          matchedScriptIndexes.add(j);
           matched++;
           break;
         }

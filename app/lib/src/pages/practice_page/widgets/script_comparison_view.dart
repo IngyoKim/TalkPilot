@@ -32,7 +32,7 @@ class ScriptComparisonView extends StatelessWidget {
       }
     }
 
-    List<InlineSpan> scriptSpans = List.generate(scriptChunks.length, (i) {
+    final scriptSpans = List<InlineSpan>.generate(scriptChunks.length, (i) {
       final word = scriptChunks[i];
       final matched = matchedFlags[i];
       return TextSpan(
@@ -45,29 +45,6 @@ class ScriptComparisonView extends StatelessWidget {
       );
     });
 
-    List<InlineSpan> recognizedSpans =
-        recognizedWords.map((word) {
-          return TextSpan(
-            text: '$word ',
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
-          );
-        }).toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          '대본:',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        RichText(text: TextSpan(children: scriptSpans)),
-        const SizedBox(height: 8),
-        const Text(
-          '인식 결과:',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        RichText(text: TextSpan(children: recognizedSpans)),
-      ],
-    );
+    return RichText(text: TextSpan(children: scriptSpans));
   }
 }

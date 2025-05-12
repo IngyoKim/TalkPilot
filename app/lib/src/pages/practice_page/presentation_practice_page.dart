@@ -46,7 +46,7 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,8 +62,8 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                 onPressed: _controller.isListening
                     ? _controller.stopListening
                     : _controller.startListening,
-                child:
-                    Text(_controller.isListening ? '발표 중지' : '발표 시작'),
+                child: Text(
+                    _controller.isListening ? '발표 중지' : '발표 시작'),
               ),
               const SizedBox(height: 16),
               Row(
@@ -83,17 +83,21 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                 ],
               ),
               const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.deepPurple),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: ScriptComparisonView(
-                  scriptChunks: _controller.scriptChunks,
-                  recognizedText: _controller.recognizedText,
-                  isSimilar: _controller.isSimilar,
-                  splitText: _controller.splitText,
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.deepPurple),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: SingleChildScrollView(
+                    child: ScriptComparisonView(
+                      scriptChunks: _controller.scriptChunks,
+                      recognizedText: _controller.recognizedText,
+                      isSimilar: _controller.isSimilar,
+                      splitText: _controller.splitText,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),

@@ -1,6 +1,12 @@
-import React from 'react';
-import { Home, BarChart2, BookOpen, Calendar1 } from 'lucide-react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import {
+    FaHome,
+    FaCalendarAlt,
+    FaChartBar,
+    FaChalkboardTeacher,
+    FaFileAlt,
+} from 'react-icons/fa';
 
 const mainColor = '#673AB7';
 
@@ -12,25 +18,37 @@ export default function Sidebar({ isOpen }) {
             transition={{ duration: 0.3 }}
             style={styles.sidebar}
         >
-            <div style={styles.logo}>TalkPilot</div>
+            <div style={styles.logo} onClick={() => window.location.reload()}>
+                TalkPilot
+            </div>
             <button style={styles.practiceBtn}>Add Project</button>
-            <SidebarItem icon={<Home size={18} />} text="Home" />
-            <SidebarItem icon={<Calendar1 size={18} />} text="Schedule" />
-            <SidebarItem icon={<BarChart2 size={18} />} text="Dashboard" />
-            <SidebarItem icon={<BookOpen size={18} />} text="My Learning" />
+            <SidebarItem icon={<FaHome size={18} />} text="Home" />
+            <SidebarItem icon={<FaCalendarAlt size={18} />} text="Schedule" />
+            <SidebarItem icon={<FaChartBar size={18} />} text="Dashboard" />
+            <SidebarItem icon={<FaChalkboardTeacher size={18} />} text="My Presentation" />
+            <SidebarItem icon={<FaFileAlt size={18} />} text="Extract .txt" />
+            <SidebarItem icon={<FaFileInvoice size={18} />} text="Extract .docx" />
         </motion.aside>
     );
 }
 
 function SidebarItem({ icon, text }) {
+    const [isHovered, setIsHovered] = useState(false);
+
     return (
-        <div style={styles.sidebarItem}>
+        <div
+            style={{
+                ...styles.sidebarItem,
+                backgroundColor: isHovered ? '#e5e7eb' : 'transparent',
+            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
             {icon}
             <span style={{ marginLeft: 12 }}>{text}</span>
         </div>
     );
 }
-
 const styles = {
     sidebar: {
         width: '240px',
@@ -51,6 +69,7 @@ const styles = {
         color: mainColor,
         textAlign: 'center',
         marginBottom: '16px',
+        cursor: 'pointer',
     },
     practiceBtn: {
         background: mainColor,
@@ -65,7 +84,7 @@ const styles = {
     sidebarItem: {
         display: 'flex',
         alignItems: 'center',
-        fontSize: '15px',
+        fontSize: '18px',
         fontWeight: '500',
         color: '#333',
         cursor: 'pointer',

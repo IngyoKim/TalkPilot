@@ -17,13 +17,11 @@ export default function MainPage() {
         <div style={styles.container}>
             {/* Top Navbar */}
             <div style={{ ...styles.navbar, marginLeft: isSidebarOpen ? '240px' : '0' }}>
-                <div style={styles.navbarLeft}>
-                    <NavbarControls
-                        isSidebarOpen={isSidebarOpen}
-                        onToggleSidebar={handleToggleSidebar}
-                        onProfileClick={handleProfileClick}
-                    />
-                </div>
+                <NavbarControls
+                    isSidebarOpen={isSidebarOpen}
+                    onToggleSidebar={handleToggleSidebar}
+                    onProfileClick={handleProfileClick}
+                />
             </div>
 
             {/* Sidebar */}
@@ -64,6 +62,7 @@ const styles = {
     },
     navbar: {
         display: 'flex',
+        justifyContent: 'space-between', // ← 좌우 정렬
         alignItems: 'center',
         padding: '16px 32px',
         backgroundColor: '#FFFFFF',

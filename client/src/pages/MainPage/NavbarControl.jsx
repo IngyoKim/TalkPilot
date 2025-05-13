@@ -16,14 +16,20 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, onProfi
 
     return (
         <div style={styles.container}>
+            {/* 고정된 화살표 */}
             <div
-                style={styles.arrowToggle}
+                style={{
+                    ...styles.arrowToggle,
+                    left: isSidebarOpen ? 260 : 20, // 사이드바 너비
+                }}
                 onClick={onToggleSidebar}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
                 <ArrowIcon />
             </div>
+
+            {/* 오른쪽 프로필 */}
             <div style={styles.profileIcon} onClick={onProfileClick}>
                 <User size={20} color={mainColor} strokeWidth={2} />
             </div>
@@ -33,12 +39,17 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, onProfi
 
 const styles = {
     container: {
+        position: 'relative',
         display: 'flex',
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        marginLeft: '240px',
-        gap: '16px',
+        width: '100%',
+        height: '64px',
     },
     arrowToggle: {
+        position: 'fixed',
+        top: '16px',
+        left: '240px',
         backgroundColor: '#ffffff',
         border: `1px solid ${mainColor}`,
         borderRadius: '50%',
@@ -48,7 +59,8 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
-        transition: 'background-color 0.2s ease',
+        transition: 'left 0.3s ease',
+        zIndex: 1001,
     },
     profileIcon: {
         width: '40px',
@@ -60,5 +72,6 @@ const styles = {
         justifyContent: 'center',
         alignItems: 'center',
         cursor: 'pointer',
+        marginRight: '32px',
     },
 };

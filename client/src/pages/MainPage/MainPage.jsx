@@ -1,42 +1,28 @@
 import React, { useState } from 'react';
-import { User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './SideBar';
+import NavbarControls from './NavbarControl';
 
 const mainColor = '#673AB7';
 
 export default function MainPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [isHovered, setIsHovered] = useState(false);
     const navigate = useNavigate();
 
-    const handleProfileClick = () => {
-        navigate('/profile');
-    };
-
-    const handleToggleSidebar = () => {
-        setIsSidebarOpen(prev => !prev);
-    };
+    const handleProfileClick = () => navigate('/profile');
+    const handleToggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
     return (
         <div style={styles.container}>
             {/* Top Navbar */}
             <div style={{ ...styles.navbar, marginLeft: isSidebarOpen ? '240px' : '0' }}>
-                <div
-                    style={styles.arrowToggle}
-                    onClick={handleToggleSidebar}
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}
-                >
-                    {isSidebarOpen
-                        ? (isHovered ? <ChevronRight size={20} /> : <ChevronLeft size={20} />)
-                        : (isHovered ? <ChevronLeft size={20} /> : <ChevronRight size={20} />)
-                    }
-                </div>
-
-                <div style={styles.profileIcon} onClick={handleProfileClick}>
-                    <User size={20} color={mainColor} strokeWidth={2} />
+                <div style={styles.navbarLeft}>
+                    <NavbarControls
+                        isSidebarOpen={isSidebarOpen}
+                        onToggleSidebar={handleToggleSidebar}
+                        onProfileClick={handleProfileClick}
+                    />
                 </div>
             </div>
 
@@ -60,13 +46,13 @@ export default function MainPage() {
                 </div>
             </motion.div>
 
+            {/* Footer */}
             <footer style={{ ...styles.footer, marginLeft: isSidebarOpen ? '240px' : '0' }}>
                 © 2025 TalkPilot. All rights reserved.
             </footer>
         </div>
     );
 }
-
 
 const styles = {
     container: {
@@ -78,7 +64,6 @@ const styles = {
     },
     navbar: {
         display: 'flex',
-        justifyContent: 'space-between',
         alignItems: 'center',
         padding: '16px 32px',
         backgroundColor: '#FFFFFF',
@@ -90,39 +75,10 @@ const styles = {
         height: '64px',
         boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
     },
-    title: {
-        fontSize: '24px',
-        fontWeight: 'bold',
-        color: mainColor,
-    },
-    profileIcon: {
-        width: '40px',
-        height: '40px',
-        borderRadius: '50%',
-        backgroundColor: '#FFFFFF',
-        border: `2px solid ${mainColor}`,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        cursor: 'pointer',
-    },
-    menuButton: {
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer',
-        marginRight: '12px',
-    },
-    arrowToggle: {
-        backgroundColor: '#ffffff',
-        border: `1px solid ${mainColor}`,
-        borderRadius: '50%',
-        width: '36px',
-        height: '36px',
+    navbarLeft: {
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        transition: 'background-color 0.2s ease',
+        gap: '12px',
     },
     mainContent: {
         padding: '80px 32px 32px',

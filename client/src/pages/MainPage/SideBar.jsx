@@ -6,6 +6,7 @@ import {
     FaChartBar,
     FaChalkboardTeacher,
     FaFileAlt,
+    FaFileInvoice,
 } from 'react-icons/fa';
 
 const mainColor = '#673AB7';
@@ -22,12 +23,10 @@ export default function Sidebar({ isOpen }) {
                 TalkPilot
             </div>
             <button style={styles.practiceBtn}>Add Project</button>
-            <SidebarItem icon={<FaHome size={18} />} text="Home" />
-            <SidebarItem icon={<FaCalendarAlt size={18} />} text="Schedule" />
-            <SidebarItem icon={<FaChartBar size={18} />} text="Dashboard" />
-            <SidebarItem icon={<FaChalkboardTeacher size={18} />} text="My Presentation" />
-            <SidebarItem icon={<FaFileAlt size={18} />} text="Extract .txt" />
-            <SidebarItem icon={<FaFileInvoice size={18} />} text="Extract .docx" />
+
+            {sidebarItems.map(({ icon, text }) => (
+                <SidebarItem key={text} icon={icon} text={text} />
+            ))}
         </motion.aside>
     );
 }
@@ -49,6 +48,16 @@ function SidebarItem({ icon, text }) {
         </div>
     );
 }
+
+const sidebarItems = [
+    { icon: <FaHome size={18} />, text: 'Home' },
+    { icon: <FaCalendarAlt size={18} />, text: 'Schedule' },
+    { icon: <FaChartBar size={18} />, text: 'Dashboard' },
+    { icon: <FaChalkboardTeacher size={18} />, text: 'My Presentation' },
+    { icon: <FaFileAlt size={18} />, text: 'Extract .txt' },
+    { icon: <FaFileInvoice size={18} />, text: 'Extract .docx' },
+];
+
 const styles = {
     sidebar: {
         width: '240px',

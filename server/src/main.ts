@@ -1,16 +1,18 @@
+import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { initializeFirebase } from './firebase/firebase-admin';
 
 async function bootstrap() {
+  await initializeFirebase();
+
   const app = await NestFactory.create(AppModule);
 
-  // CORS 설정
   app.enableCors({
     origin: true,
     credentials: true,
   });
 
-  //await app.listen(3000);
-  await app.listen(3000, '0.0.0.0');
+  await app.listen(process.env.PORT || 3000, '0.0.0.0');
 }
 bootstrap();

@@ -40,3 +40,5 @@ firebase-admin-key.json
 # 보안 키
 credentials/*
 credentials
+secrets/*
+secrets

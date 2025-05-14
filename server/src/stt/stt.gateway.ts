@@ -7,6 +7,8 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { SpeechClient } from '@google-cloud/speech';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 @WebSocketGateway({ cors: true })
 export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -18,9 +20,11 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
     server: Server;
 
     constructor() {
-        this.client = new SpeechClient({
-            keyFilename: 'credentials/stt-service-account.json',
-        });
+        const path = process.env.STT_SERVICE_ACCOUNT_KEY_PATH ?? '/etc/secrets/stt-service-account.json';
+        const fullPath = join(process.cwd(), path);
+        const credentials = JSON.parse(readFileSync(fullPath, 'utf-8'));
+
+        this.client = new SpeechClient({ credentials });
     }
 
     handleConnection(socket: Socket) {
@@ -75,7 +79,6 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
         this.recognizeStreams.set(socket.id, stream);
 
-        // 5분 제한에 대비해 4분 50초마다 자동 스트림 재시작
         const timer = setTimeout(() => {
             console.log(`Auto restart stream for ${socket.id}`);
             this.startNewStream(socket);

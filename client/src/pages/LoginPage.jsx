@@ -1,13 +1,22 @@
-import React from "react";
-import { getAuth } from "firebase/auth";
+import React, { useEffect } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { signInWithGoogle } from "../firebase/googleLogin";
 import { signInWithKakao } from "../firebase/kakaoLogin";
 import SocialLoginButton from "../components/SocialLoginButton";
 import { useNavigate } from "react-router-dom";
 
-
 export default function LoginPage() {
     const navigate = useNavigate();
+
+    // 이미 로그인된 경우 /로 리다이렉트
+    useEffect(() => {
+        const unsub = onAuthStateChanged(getAuth(), (user) => {
+            if (user) {
+                navigate("/");
+            }
+        });
+        return () => unsub();
+    }, [navigate]);
 
     const handleGoogleLogin = async () => {
         try {
@@ -32,7 +41,7 @@ export default function LoginPage() {
                 프로필: userData.picture,
             });
 
-            navigate("/main"); // 로그인 성공 시 메인으로 이동
+            navigate("/"); // 로그인 성공 시 메인(/)으로 이동
         } catch (error) {
             alert("Google 로그인 실패");
             console.error("[Google] 로그인 에러\n", error);
@@ -65,7 +74,7 @@ export default function LoginPage() {
                 프로필: userData.picture,
             });
 
-            navigate("/main"); // 로그인 성공 시 메인으로 이동
+            navigate("/"); // 로그인 성공 시 메인(/)으로 이동
         } catch (error) {
             alert("카카오 로그인 실패");
             console.error("[Kakao] 로그인 에러\n", error);

@@ -20,11 +20,11 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
     server: Server;
 
     constructor() {
-        const path = process.env.STT_SERVICE_ACCOUNT_KEY_PATH ?? '/etc/secrets/stt-service-account.json';
-        const fullPath = join(process.cwd(), path);
-        const credentials = JSON.parse(readFileSync(fullPath, 'utf-8'));
+        const path = process.env.STT_SERVICE_ACCOUNT_KEY_PATH || '/etc/secrets/stt-service-account.json';
+        const credentials = JSON.parse(readFileSync(path, 'utf-8'));
 
         this.client = new SpeechClient({ credentials });
+
     }
 
     handleConnection(socket: Socket) {

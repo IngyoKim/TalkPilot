@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import MainPage from "./pages/MainPage/MainPage";
-import ProfilePage from "./pages/ProfilePage"; // ← 추가
+import ProfilePage from "./pages/ProfilePage";
 import PrivateRoute from "./components/PrivateRoute";
 
 export default function Router() {

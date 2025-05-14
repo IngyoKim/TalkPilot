@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { signInWithGoogle } from "../firebase/googleLogin";
-import { signInWithKakao } from "../firebase/kakaoLogin";
+import { signInWithGoogle } from "../utils/auth/googleLogin";
+import { signInWithKakao } from "../utils/auth/kakaoLogin";
 import SocialLoginButton from "../components/SocialLoginButton";
 import { useNavigate } from "react-router-dom";
 
@@ -18,66 +18,23 @@ export default function LoginPage() {
         return () => unsub();
     }, [navigate]);
 
-    const handleGoogleLogin = async () => {
+    const handleKakaoLogin = async () => {
         try {
-            const user = await signInWithGoogle();
-            console.log("[Google] 로그인 성공");
-            console.log("[Google] 사용자 정보:", user);
-
-            const idToken = await user.getIdToken();
-
-            const res = await fetch("http://localhost:3000/me", {
-                headers: {
-                    Authorization: `Bearer ${idToken}`,
-                },
-            });
-
-            const userData = await res.json();
-
-            console.log("[Nest] 사용자 정보 수신 완료");
-            console.table({
-                UID: userData.uid,
-                이름: userData.name,
-                프로필: userData.picture,
-            });
-
-            navigate("/"); // 로그인 성공 시 메인(/)으로 이동
-        } catch (error) {
-            alert("Google 로그인 실패");
-            console.error("[Google] 로그인 에러\n", error);
+            await signInWithKakao();
+            navigate("/");
+        } catch (err) {
+            alert("Kakao 로그인 실패");
+            console.error(err);
         }
     };
 
-    const handleKakaoLogin = async () => {
+    const handleGoogleLogin = async () => {
         try {
-            const authObj = await signInWithKakao();
-            console.log("[Kakao] 로그인 성공");
-            console.log("[Kakao] 액세스 정보:", authObj);
-
-            const user = getAuth().currentUser;
-            if (!user) throw new Error("Firebase 사용자 정보 없음");
-
-            const idToken = await user.getIdToken();
-
-            const res = await fetch("http://localhost:3000/me", {
-                headers: {
-                    Authorization: `Bearer ${idToken}`,
-                },
-            });
-
-            const userData = await res.json();
-
-            console.log("[Nest] 사용자 정보 수신 완료");
-            console.table({
-                UID: userData.uid,
-                이름: userData.name,
-                프로필: userData.picture,
-            });
-
-            navigate("/"); // 로그인 성공 시 메인(/)으로 이동
-        } catch (error) {
-            alert("카카오 로그인 실패");
-            console.error("[Kakao] 로그인 에러\n", error);
+            await signInWithGoogle();
+            navigate("/");
+        } catch (err) {
+            alert("Google 로그인 실패");
+            console.error(err);
         }
     };
 
@@ -87,8 +44,8 @@ export default function LoginPage() {
             <p style={styles.subtitle}>발표를 더 똑똑하게, 함께 준비해요.</p>
 
             <div style={styles.loginBox}>
-                <SocialLoginButton provider="google" onClick={handleGoogleLogin} />
                 <SocialLoginButton provider="kakao" onClick={handleKakaoLogin} />
+                <SocialLoginButton provider="google" onClick={handleGoogleLogin} />
             </div>
         </div>
     );

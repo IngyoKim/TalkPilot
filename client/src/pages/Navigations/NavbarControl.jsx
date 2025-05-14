@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
     FaChevronLeft,
     FaChevronRight,
@@ -6,9 +6,9 @@ import {
     FaCog,
     FaQuestionCircle,
     FaEnvelope,
-    FaSignOutAlt
+    FaSignOutAlt,
+    FaUserEdit
 } from 'react-icons/fa';
-import AuthContext from '../../Contexts/AuthContext.jsx';
 
 
 const mainColor = '#673AB7';
@@ -42,6 +42,7 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user })
     };
 
     const menuItems = [
+        { icon: <FaUserEdit />, label: 'Account Detail', onClick: () => console.log('계정 더보기') },
         { icon: <FaCog />, label: 'Setting', onClick: () => console.log('설정') },
         { icon: <FaQuestionCircle />, label: 'Help Center', onClick: () => console.log('도움말') },
         { icon: <FaEnvelope />, label: 'Contact us', onClick: () => console.log('문의하기') },

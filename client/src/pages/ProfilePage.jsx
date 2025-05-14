@@ -1,5 +1,4 @@
-import React from "react";
-import { getAuth, signOut } from "firebase/auth";
+import { logout } from "../utils/auth/auth";
 import { useNavigate } from "react-router-dom";
 
 export default function ProfilePage() {
@@ -7,11 +6,9 @@ export default function ProfilePage() {
 
     const handleLogout = async () => {
         try {
-            await signOut(getAuth());
-            console.log("로그아웃 성공");
+            await logout();
             navigate("/login");
         } catch (err) {
-            console.error("로그아웃 실패", err);
             alert("로그아웃 중 오류가 발생했습니다.");
         }
     };

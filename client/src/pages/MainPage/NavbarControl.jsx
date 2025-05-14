@@ -1,10 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, User } from 'lucide-react';
 
 const mainColor = '#673AB7';
 
-export default function NavbarControls({ isSidebarOpen, onToggleSidebar, onProfileClick }) {
+export default function NavbarControls({ isSidebarOpen, onToggleSidebar }) {
     const [isHovered, setIsHovered] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef(null);
+
+    // 바깥 클릭 시 드롭다운 닫기
+    useEffect(() => {
+        function onClickOutside(e) {
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
+                setMenuOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', onClickOutside);
+        return () => document.removeEventListener('mousedown', onClickOutside);
+    }, []);
 
     const ArrowIcon = () => {
         if (isSidebarOpen) {
@@ -14,13 +27,20 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, onProfi
         }
     };
 
+    const menuItems = [
+        { label: 'Setting', onClick: () => console.log('설정') },
+        { label: 'Help Center', onClick: () => console.log('도움말') },
+        { label: 'Contact us', onClick: () => console.log('문의하기') },
+        { label: 'Log Out', onClick: () => console.log('로그아웃') },
+    ];
+
     return (
         <div style={styles.container}>
             {/* 고정된 화살표 */}
             <div
                 style={{
                     ...styles.arrowToggle,
-                    left: isSidebarOpen ? 260 : 20, // 사이드바 너비
+                    left: isSidebarOpen ? 260 : 20,
                 }}
                 onClick={onToggleSidebar}
                 onMouseEnter={() => setIsHovered(true)}
@@ -29,9 +49,31 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, onProfi
                 <ArrowIcon />
             </div>
 
-            {/* 오른쪽 프로필 */}
-            <div style={styles.profileIcon} onClick={onProfileClick}>
-                <User size={20} color={mainColor} strokeWidth={2} />
+            {/* 프로필 + 드롭다운 */}
+            <div style={styles.profileContainer} ref={menuRef}>
+                <div
+                    style={styles.profileIcon}
+                    onClick={() => setMenuOpen(o => !o)}
+                >
+                    <User size={20} color={mainColor} strokeWidth={2} />
+                </div>
+
+                {menuOpen && (
+                    <div style={styles.dropdown}>
+                        {menuItems.map((item, i) => (
+                            <div
+                                key={i}
+                                style={styles.menuItem}
+                                onClick={() => {
+                                    item.onClick?.();
+                                    setMenuOpen(false);
+                                }}
+                            >
+                                {item.widget ?? <span>{item.label}</span>}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -49,7 +91,6 @@ const styles = {
     arrowToggle: {
         position: 'fixed',
         top: '16px',
-        left: '240px',
         backgroundColor: '#ffffff',
         border: `1px solid ${mainColor}`,
         borderRadius: '50%',
@@ -62,6 +103,10 @@ const styles = {
         transition: 'left 0.3s ease',
         zIndex: 1001,
     },
+    profileContainer: {
+        position: 'relative',
+        marginRight: '32px',
+    },
     profileIcon: {
         width: '40px',
         height: '40px',
@@ -72,6 +117,27 @@ const styles = {
         justifyContent: 'center',
         alignItems: 'center',
         cursor: 'pointer',
-        marginRight: '32px',
+    },
+    dropdown: {
+        position: 'absolute',
+        top: '48px',
+        right: '0px',
+        width: '200px',
+        backgroundColor: '#FFFFFF',
+        border: `1px solid ${mainColor}`,
+        borderRadius: '8px',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+        zIndex: 1002,
+        overflow: 'hidden',
+    },
+    menuItem: {
+        padding: '10px 16px',
+        cursor: 'pointer',
+        borderBottom: `1px solid #eee`,
+    },
+    toggleLabel: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
 };

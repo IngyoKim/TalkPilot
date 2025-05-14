@@ -3,8 +3,12 @@ import { getAuth } from "firebase/auth";
 import { signInWithGoogle } from "../firebase/googleLogin";
 import { signInWithKakao } from "../firebase/kakaoLogin";
 import SocialLoginButton from "../components/SocialLoginButton";
+import { useNavigate } from "react-router-dom";
+
 
 export default function LoginPage() {
+    const navigate = useNavigate();
+
     const handleGoogleLogin = async () => {
         try {
             const user = await signInWithGoogle();
@@ -27,6 +31,8 @@ export default function LoginPage() {
                 이름: userData.name,
                 프로필: userData.picture,
             });
+
+            navigate("/main"); // 로그인 성공 시 메인으로 이동
         } catch (error) {
             alert("Google 로그인 실패");
             console.error("[Google] 로그인 에러\n", error);
@@ -58,6 +64,8 @@ export default function LoginPage() {
                 이름: userData.name,
                 프로필: userData.picture,
             });
+
+            navigate("/main"); // 로그인 성공 시 메인으로 이동
         } catch (error) {
             alert("카카오 로그인 실패");
             console.error("[Kakao] 로그인 에러\n", error);

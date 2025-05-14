@@ -1,9 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, User } from 'lucide-react';
+import {
+    FaChevronLeft,
+    FaChevronRight,
+    FaUser,
+    FaCog,
+    FaQuestionCircle,
+    FaEnvelope,
+    FaSignOutAlt
+} from 'react-icons/fa';
+import AuthContext from '../../Contexts/AuthContext.jsx';
+
 
 const mainColor = '#673AB7';
 
-export default function NavbarControls({ isSidebarOpen, onToggleSidebar }) {
+export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user }) {
     const [isHovered, setIsHovered] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
@@ -21,17 +31,21 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar }) {
 
     const ArrowIcon = () => {
         if (isSidebarOpen) {
-            return isHovered ? <ChevronRight size={20} /> : <ChevronLeft size={20} />;
+            return isHovered
+                ? <FaChevronRight size={20} />
+                : <FaChevronLeft size={20} />;
         } else {
-            return isHovered ? <ChevronLeft size={20} /> : <ChevronRight size={20} />;
+            return isHovered
+                ? <FaChevronLeft size={20} />
+                : <FaChevronRight size={20} />;
         }
     };
 
     const menuItems = [
-        { label: 'Setting', onClick: () => console.log('설정') },
-        { label: 'Help Center', onClick: () => console.log('도움말') },
-        { label: 'Contact us', onClick: () => console.log('문의하기') },
-        { label: 'Log Out', onClick: () => console.log('로그아웃') },
+        { icon: <FaCog />, label: 'Setting', onClick: () => console.log('설정') },
+        { icon: <FaQuestionCircle />, label: 'Help Center', onClick: () => console.log('도움말') },
+        { icon: <FaEnvelope />, label: 'Contact us', onClick: () => console.log('문의하기') },
+        { icon: <FaSignOutAlt />, label: 'Log Out', onClick: () => console.log('로그아웃') },
     ];
 
     return (
@@ -55,21 +69,23 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar }) {
                     style={styles.profileIcon}
                     onClick={() => setMenuOpen(o => !o)}
                 >
-                    <User size={20} color={mainColor} strokeWidth={2} />
+                    <FaUser size={20} color={mainColor} />
                 </div>
 
                 {menuOpen && (
                     <div style={styles.dropdown}>
+                        {/* 사용자 정보 헤더 */}
+                        <div style={styles.userInfo}>
+                            <span style={styles.userName}>{user?.name ?? 'Guest'}</span>
+                            <span style={styles.userEmail}>{user?.email ?? 'No Email'}</span>
+                        </div>
+                        <div style={styles.divider} />
+
+                        {/* 기존 메뉴 아이템 */}
                         {menuItems.map((item, i) => (
-                            <div
-                                key={i}
-                                style={styles.menuItem}
-                                onClick={() => {
-                                    item.onClick?.();
-                                    setMenuOpen(false);
-                                }}
-                            >
-                                {item.widget ?? <span>{item.label}</span>}
+                            <div key={i} style={styles.menuItem} onClick={() => { item.onClick(); setMenuOpen(false); }}>
+                                <span style={styles.iconWrapper}>{item.icon}</span>
+                                <span>{item.label}</span>
                             </div>
                         ))}
                     </div>
@@ -131,13 +147,34 @@ const styles = {
         overflow: 'hidden',
     },
     menuItem: {
+        display: 'flex',
+        alignItems: 'center',
         padding: '10px 16px',
         cursor: 'pointer',
         borderBottom: `1px solid #eee`,
     },
-    toggleLabel: {
+    iconWrapper: {
+        marginRight: '8px',
         display: 'flex',
-        justifyContent: 'space-between',
         alignItems: 'center',
     },
+    userInfo: {
+        padding: '12px 16px',
+        backgroundColor: '#f5f5f5',
+        display: 'flex',
+        flexDirection: 'column'
+    },
+    userName: {
+        fontWeight: 'bold',
+        marginBottom: '4px'
+    },
+    userEmail: {
+        fontSize: '12px',
+        color: '#555'
+    },
+    divider: {
+        height: '1px',
+        backgroundColor: '#eee',
+        margin: '4px 0'
+    }
 };

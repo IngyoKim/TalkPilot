@@ -1,10 +1,12 @@
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+// ignore: library_prefixes
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SttSocketService with ChangeNotifier {
   late IO.Socket socket;
-
   bool _connected = false;
   bool get isConnected => _connected;
 
@@ -14,10 +16,16 @@ class SttSocketService with ChangeNotifier {
   bool _disposed = false;
 
   void connect() {
-    debugPrint('WebSocket 연결 시도 중...');
+    final serverUrl = dotenv.env['NEST_SERVER_URL'];
+    if (serverUrl == null || serverUrl.isEmpty) {
+      debugPrint('환경변수 NEST_SERVER_URL 비어있습니다.');
+      return;
+    }
+
+    debugPrint('WebSocket 연결 시도 중... [$serverUrl]');
 
     socket = IO.io(
-      'http://192.168.0.13:3000', // 서버 IP 주소
+      serverUrl,
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()

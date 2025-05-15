@@ -20,6 +20,7 @@ class PresentationPracticeController {
 
   String recognizedText = '';
   bool isListening = false;
+  bool hasUpdatedCpm = false;
   double currentCpm = 0.0;
   String cpmStatus = '적당함';
   double userCpm = 0.0;

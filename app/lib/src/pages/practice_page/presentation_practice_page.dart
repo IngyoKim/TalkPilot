@@ -3,6 +3,7 @@ import 'package:talk_pilot/src/pages/practice_page/widgets/presentation_practice
 import 'package:talk_pilot/src/pages/practice_page/widgets/script_comparison_view.dart';
 import 'package:talk_pilot/src/pages/practice_page/widgets/result_button.dart';
 import 'package:talk_pilot/src/pages/practice_page/widgets/info_card.dart';
+import 'package:talk_pilot/src/pages/practice_page/widgets/cpm_updater.dart';
 
 class PresentationPracticePage extends StatefulWidget {
   final String projectId;
@@ -109,6 +110,15 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                 cpmStatus: _controller.cpmStatus,
                 actualDuration: _controller.presentationDuration,
                 expectedDuration: _controller.expectedDuration,
+              ),
+
+              CpmUpdater(
+                progress: _controller.scriptProgress,
+                currentCpm: _controller.currentCpm,
+                alreadyUpdated: _controller.hasUpdatedCpm,
+                onUpdated: () => setState(() {
+                  _controller.hasUpdatedCpm = true;
+                }),
               ),
             ],
           ),

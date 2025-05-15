@@ -24,7 +24,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
   final _projectService = ProjectService();
   final _estimatedTimeService = EstimatedTimeService();
   bool isLoading = false;
-  bool _estimatedTimeChecked = false;
+  bool _estimatedTimeSubscribed = false;
 
   ProjectRole getUserRole(ProjectModel project, String? uid) {
     final role = project.participants[uid] ?? 'member';
@@ -55,11 +55,9 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
         final isEditable =
             getUserRole(project, currentUid) != ProjectRole.member;
 
-        if (!_estimatedTimeChecked &&
-            (project.script?.trim().isNotEmpty ?? false) &&
-            currentUid != null) {
-          _estimatedTimeChecked = true;
-          _estimatedTimeService.updateEstimatedTimeFromProjectId(project.id);
+        if (!_estimatedTimeSubscribed) {
+          _estimatedTimeSubscribed = true;
+          _estimatedTimeService.streamEstimatedTime(project.id);
         }
 
         return Scaffold(

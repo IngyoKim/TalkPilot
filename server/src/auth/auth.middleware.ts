@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { admin } from '../firebase/firebase-admin';
+import { admin } from './firebase-admin';
 
 @Injectable()
 export class FirebaseAuthMiddleware implements NestMiddleware {

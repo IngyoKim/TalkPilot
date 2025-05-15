@@ -8,7 +8,6 @@ import {
 import { Server, Socket } from 'socket.io';
 import { SpeechClient } from '@google-cloud/speech';
 import { readFileSync } from 'fs';
-import { join } from 'path';
 
 @WebSocketGateway({ cors: true })
 export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {

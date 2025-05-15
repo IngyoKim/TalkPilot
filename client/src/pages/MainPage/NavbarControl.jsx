@@ -20,7 +20,7 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, onProfi
             <div
                 style={{
                     ...styles.arrowToggle,
-                    left: isSidebarOpen ? 260 : 20, // 사이드바 너비
+                    left: isSidebarOpen ? 260 : 20,
                 }}
                 onClick={onToggleSidebar}
                 onMouseEnter={() => setIsHovered(true)}

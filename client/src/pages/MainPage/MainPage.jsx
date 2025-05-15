@@ -62,7 +62,7 @@ const styles = {
     },
     navbar: {
         display: 'flex',
-        justifyContent: 'space-between', // ← 좌우 정렬
+        justifyContent: 'space-between',
         alignItems: 'center',
         padding: '16px 32px',
         backgroundColor: '#FFFFFF',

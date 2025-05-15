@@ -10,6 +10,7 @@ import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart
 import 'package:talk_pilot/src/pages/project_page/widgets/script_upload_button.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/editable/editable_text_editor.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/practice_button.dart';
+import 'package:talk_pilot/src/services/project/estimated_time_service.dart';
 
 class ProjectDetailPage extends StatefulWidget {
   final String projectId;
@@ -21,7 +22,9 @@ class ProjectDetailPage extends StatefulWidget {
 
 class _ProjectDetailPageState extends State<ProjectDetailPage> {
   final _projectService = ProjectService();
+  final _estimatedTimeService = EstimatedTimeService();
   bool isLoading = false;
+  bool _estimatedTimeChecked = false;
 
   ProjectRole getUserRole(ProjectModel project, String? uid) {
     final role = project.participants[uid] ?? 'member';
@@ -51,6 +54,13 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
         final project = snapshot.data!;
         final isEditable =
             getUserRole(project, currentUid) != ProjectRole.member;
+
+        if (!_estimatedTimeChecked &&
+            (project.script?.trim().isNotEmpty ?? false) &&
+            currentUid != null) {
+          _estimatedTimeChecked = true;
+          _estimatedTimeService.updateEstimatedTimeFromProjectId(project.id);
+        }
 
         return Scaffold(
           appBar: AppBar(
@@ -118,7 +128,6 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
                 ),
               ].expand((widget) => [widget, const SizedBox(height: 16)]),
               const SizedBox(height: 24),
-
               PracticeButton(project: project),
             ],
           ),

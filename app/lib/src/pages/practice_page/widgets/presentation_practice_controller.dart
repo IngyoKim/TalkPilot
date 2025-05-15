@@ -3,9 +3,9 @@ import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/services/stt/stt_service.dart';
-import 'package:talk_pilot/src/services/practice/live_cpm_service.dart';
+import 'package:talk_pilot/src/services/project/live_cpm_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
-import 'package:talk_pilot/src/services/practice/script_progress_service.dart';
+import 'package:talk_pilot/src/services/project/script_progress_service.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 
 class PresentationPracticeController {

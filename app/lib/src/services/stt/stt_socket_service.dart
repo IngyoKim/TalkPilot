@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 // ignore: library_prefixes
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SttSocketService with ChangeNotifier {
@@ -15,12 +16,21 @@ class SttSocketService with ChangeNotifier {
 
   bool _disposed = false;
 
-  void connect() {
+  Future<void> connect() async {
     final serverUrl = dotenv.env['NEST_SERVER_URL'];
     if (serverUrl == null || serverUrl.isEmpty) {
       debugPrint('환경변수 NEST_SERVER_URL 비어있습니다.');
       return;
     }
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      debugPrint('Firebase 로그인 상태가 아닙니다.');
+      return;
+    }
+
+    final idToken = await user.getIdToken();
+    final authHeader = 'Bearer $idToken';
 
     debugPrint('WebSocket 연결 시도 중... [$serverUrl]');
 
@@ -29,6 +39,7 @@ class SttSocketService with ChangeNotifier {
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
+          .setAuth({'token': authHeader})
           .build(),
     );
 

@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { admin } from './firebase-admin';
 
 @Injectable()
-export class FirebaseAuthMiddleware implements NestMiddleware {
+export class AuthMiddleware implements NestMiddleware {
     async use(req: Request, res: Response, next: NextFunction) {
         const authHeader = req.headers.authorization;
         if (!authHeader?.startsWith('Bearer ')) {

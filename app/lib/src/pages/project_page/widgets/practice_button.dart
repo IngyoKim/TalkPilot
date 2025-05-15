@@ -7,6 +7,7 @@ import 'package:talk_pilot/src/pages/practice_page/presentation_practice_page.da
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
 
+// ignore_for_file: use_build_context_synchronously
 class PracticeButton extends StatelessWidget {
   final ProjectModel project;
 
@@ -31,30 +32,29 @@ class PracticeButton extends StatelessWidget {
         if (userCpm == null || userCpm == 0.0) {
           showDialog(
             context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('CPM 정보가 없습니다'),
-              content: const Text(
-                '발표 연습을 시작하기 전에\nCPM을 먼저 측정해주세요.',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('취소'),
+            builder:
+                (context) => AlertDialog(
+                  title: const Text('CPM 정보가 없습니다'),
+                  content: const Text('발표 연습을 시작하기 전에\nCPM을 먼저 측정해주세요.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('취소'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CpmCalculatePage(),
+                          ),
+                        );
+                      },
+                      child: const Text('측정하러 가기'),
+                    ),
+                  ],
                 ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const CpmCalculatePage(),
-                      ),
-                    );
-                  },
-                  child: const Text('측정하러 가기'),
-                ),
-              ],
-            ),
           );
           return;
         }
@@ -62,8 +62,7 @@ class PracticeButton extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) =>
-                PresentationPracticePage(projectId: project.id),
+            builder: (_) => PresentationPracticePage(projectId: project.id),
           ),
         );
       },

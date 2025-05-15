@@ -71,8 +71,8 @@ class KakaoLogin implements SocialLogin {
       try {
         await serverLogin(); // /me 요청
         debugPrint("[Nest] 서버 인증 성공");
-      } catch (e) {
-        debugPrint("[Nest] 서버 인증 실패: $e");
+      } catch (error) {
+        debugPrint("[Nest] 서버 인증 실패: $error");
       }
 
       /// Update user information

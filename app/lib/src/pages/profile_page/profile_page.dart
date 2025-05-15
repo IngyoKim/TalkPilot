@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:talk_pilot/src/models/user_model.dart';
+import 'package:talk_pilot/src/pages/stt_page.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
 
@@ -11,7 +12,6 @@ import 'package:talk_pilot/src/pages/profile_page/widgets/profile_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/stats_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_drawer.dart';
 import 'package:talk_pilot/src/pages/profile_page/docx_text_page.dart';
-import 'package:talk_pilot/src/pages/profile_page/txt_text_page.dart';
 
 // ignore_for_file: use_build_context_synchronously
 class ProfilePage extends StatefulWidget {
@@ -204,7 +204,7 @@ class _ProfilePageState extends State<ProfilePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const TxtTextPage()),
+                  MaterialPageRoute(builder: (_) => const SttPage()),
                 );
               },
               icon: const Icon(Icons.note_alt, color: Colors.white),

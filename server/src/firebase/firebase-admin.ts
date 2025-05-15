@@ -1,13 +1,15 @@
 import * as admin from 'firebase-admin';
 import { readFileSync } from 'fs';
-import { join } from 'path';
 
-const serviceAccount = JSON.parse(
-    readFileSync(join(__dirname, '../../firebase-admin-key.json'), 'utf8'),
-);
+export function initializeFirebase() {
+    const keyPath = process.env.FIREBASE_ADMIN_KEY_PATH || '/etc/secrets/firebase-admin-key.json';
+    const parsed = JSON.parse(readFileSync(keyPath, 'utf-8'));
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-});
+    if (admin.apps.length === 0) {
+        admin.initializeApp({
+            credential: admin.credential.cert(parsed),
+        });
+    }
+}
 
 export { admin };

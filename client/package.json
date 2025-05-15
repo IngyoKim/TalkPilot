@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "firebase": "^11.6.1",
-    "framer-motion": "^12.10.4",
+    "framer-motion": "^12.11.3",
     "lucide-react": "^0.508.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

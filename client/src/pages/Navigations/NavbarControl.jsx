@@ -9,14 +9,28 @@ import {
     FaSignOutAlt,
     FaUserEdit
 } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../../utils/auth/auth';
 
 
 const mainColor = '#673AB7';
 
 export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user }) {
+    const navigate = useNavigate();
     const [isHovered, setIsHovered] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
+
+    const handleLogout = async () => {
+        const confirmed = window.confirm("로그아웃을 하시겠습니까?");
+        if (!confirmed) return;
+        try {
+            await logout();
+            navigate('/login');
+        } catch (err) {
+            alert('로그아웃 중 오류가 발생했습니다.');
+        }
+    };
 
     // 바깥 클릭 시 드롭다운 닫기
     useEffect(() => {
@@ -46,7 +60,7 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user })
         { icon: <FaCog />, label: 'Setting', onClick: () => console.log('설정') },
         { icon: <FaQuestionCircle />, label: 'Help Center', onClick: () => console.log('도움말') },
         { icon: <FaEnvelope />, label: 'Contact us', onClick: () => console.log('문의하기') },
-        { icon: <FaSignOutAlt />, label: 'Log Out', onClick: () => console.log('로그아웃') },
+        { icon: <FaSignOutAlt />, label: 'Log Out', onClick: handleLogout, isDanger: true },
     ];
 
     return (
@@ -66,25 +80,32 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user })
 
             {/* 프로필 + 드롭다운 */}
             <div style={styles.profileContainer} ref={menuRef}>
-                <div
-                    style={styles.profileIcon}
-                    onClick={() => setMenuOpen(o => !o)}
-                >
+                <div style={styles.profileIcon} onClick={() => setMenuOpen(o => !o)}>
                     <FaUser size={20} color={mainColor} />
                 </div>
 
                 {menuOpen && (
                     <div style={styles.dropdown}>
-                        {/* 사용자 정보 헤더 */}
+                        {/* 사용자 정보 */}
                         <div style={styles.userInfo}>
-                            <span style={styles.userName}>{user?.name ?? 'Guest'}</span>
-                            <span style={styles.userEmail}>{user?.email ?? 'No Email'}</span>
+                            <span style={styles.userName}>{user?.name || 'Guest'}</span>
+                            <span style={styles.userEmail}>{user?.email || 'guest@example.com'}</span>
                         </div>
                         <div style={styles.divider} />
 
-                        {/* 기존 메뉴 아이템 */}
+                        {/* 메뉴 항목 */}
                         {menuItems.map((item, i) => (
-                            <div key={i} style={styles.menuItem} onClick={() => { item.onClick(); setMenuOpen(false); }}>
+                            <div
+                                key={i}
+                                style={{
+                                    ...styles.menuItem,
+                                    color: item.isDanger ? '#e53935' : '#333', // 빨간색
+                                }}
+                                onClick={() => {
+                                    item.onClick();
+                                    setMenuOpen(false);
+                                }}
+                            >
                                 <span style={styles.iconWrapper}>{item.icon}</span>
                                 <span>{item.label}</span>
                             </div>

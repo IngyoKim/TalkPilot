@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Sidebar from '../Navigations/SideBar';
 import NavbarControls from '../Navigations/NavbarControl';
 
-import { FaEdit, FaCheckCircle, FaChartLine, FaBullseye, FaPoll, FaAngellist } from 'react-icons/fa';
+import { FaEdit, FaCheckCircle, FaChartLine, FaBullseye, FaPoll, FaAngellist, FaTachometerAlt } from 'react-icons/fa';
 
 const mainColor = '#673AB7';
 
@@ -43,7 +43,7 @@ export default function AccountDetailPage() {
 
         <div style={styles.container}>
             {/* Navbar */}
-            <div style={{ ...styles.navbar, marginLeft: isSidebarOpen ? 240 : 0 }}>
+            <div style={{ ...styles.navbar, marginLeft: isSidebarOpen ? 240 : 0, transition: 'all 0.3s ease', }}>
                 <NavbarControls
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={handleToggleSidebar}
@@ -109,22 +109,32 @@ export default function AccountDetailPage() {
                         </div>
                     </div>
                 </div>
-            </div>
-            <div style={styles.bottomSection}>{/*기록, 테스트 영역*/}
-                <div style={styles.gridBox}>
-                    <div style={styles.boxTitle}>발표 기록 보기</div>
-                    <div style={styles.placeholder}>기록 데이터</div>
-                </div>
-                <div style={styles.gridBox}>
-                    <div style={styles.boxTitle}>임시 STT 테스트 페이지</div>
-                    <div style={styles.placeholder}>STT 기능 미리보기</div>
-                </div>
-                <div style={styles.gridBox}>
-                    <div style={styles.boxTitle}>CPM 계산 페이지</div>
-                    <div style={styles.placeholder}>계산 결과</div>
+                <div style={styles.bottomSection}>{/*기록, 테스트 영역*/}
+                    <div style={styles.gridBox}>
+                        <div style={styles.boxTitle}>
+                            <FaCheckCircle style={styles.icon} />
+                            발표 기록 보기
+                        </div>
+                        <div style={styles.placeholder}>기록 데이터</div>
+                    </div>
+                    <div style={styles.gridBox}>
+                        <div style={styles.boxTitle}>
+                            <FaPoll style={styles.icon} />
+                            임시 STT 테스트 페이지
+                        </div>
+                        <div style={styles.placeholder}>STT 기능 미리보기</div>
+                    </div>
+                    <div style={styles.gridBox}>
+                        <div style={styles.boxTitle}>
+                            <FaTachometerAlt style={styles.icon} />
+                            CPM 계산 페이지
+                        </div>
+                        <div style={styles.placeholder}>계산 결과</div>
+                    </div>
                 </div>
             </div>
         </div>
+
     );
 }
 
@@ -150,8 +160,12 @@ const styles = {
         padding: '0 32px',
     },
     mainContent: {
+        display: 'flex',
+        flexDirection: 'column',
         padding: '96px 48px 32px',
-        transition: 'margin-left 0.3s ease',
+        boxSizing: 'border-box',
+        transition: 'all 0.3s ease',
+        overflowX: 'auto', // 잘릴 경우 대비 스크롤 허용
     },
     topSection: {
         display: 'flex',
@@ -160,9 +174,10 @@ const styles = {
     },
     bottomSection: {
         display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
+        gridTemplateColumns: 'repeat(3, 1fr)', // 고정 3개
         gap: '24px',
         marginTop: '24px',
+        width: '100%',
     },
     profileCard: {
         backgroundColor: '#fff',

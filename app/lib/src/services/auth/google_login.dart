@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
 import 'package:talk_pilot/src/services/auth/social_login.dart';
+import 'package:talk_pilot/src/services/auth/server_auth_service.dart';
 
 /// Google Login을 수행
 class GoogleLogin implements SocialLogin {
@@ -30,6 +32,14 @@ class GoogleLogin implements SocialLogin {
         credential,
       );
       debugPrint("Successed to login with Google.");
+
+      try {
+        await serverLogin();
+        debugPrint("[Nest] 서버 인증 성공");
+      } catch (error) {
+        debugPrint("[Nest] 서버 인증 실패: $error");
+      }
+
       return userCredential.user;
     } catch (error) {
       debugPrint("Google Sign-In Error: $error");

@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { initializeFirebase } from './firebase/firebase-admin';
+import { initializeFirebase } from './auth/firebase-admin';
 
 async function bootstrap() {
   await initializeFirebase();

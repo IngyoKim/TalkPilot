@@ -15,7 +15,7 @@ export default function AccountDetailPage() {
         friendCode: '123213213121',
         joinedAt: '2024-01-15',
     };
-    const handleEditName = () => {
+    const handleEdit = () => {
         alert('구현할까 고민중.');
     };
     const metricsData = [
@@ -77,7 +77,7 @@ export default function AccountDetailPage() {
 
                             {/* 텍스트 정보 */}
                             <div style={styles.infoText}>
-                                <div style={styles.infoRow}><strong>이름:</strong> {user.name}<FaEdit style={styles.editIcon} onClick={handleEditName} />
+                                <div style={styles.infoRow}><strong>이름:</strong> {user.name}<FaEdit style={styles.editIcon} onClick={handleEdit} />
                                 </div>
                                 <div style={styles.infoRow}><strong>이메일:</strong> {user.email}</div>
                                 <div style={styles.infoRow}><strong>친구 코드:</strong> {user.friendCode}</div>
@@ -101,7 +101,7 @@ export default function AccountDetailPage() {
                         </div>
                         <div style={styles.metricsItem}>
                             <FaBullseye style={styles.icon} />
-                            <span><strong>목표 점수:</strong> 90점</span>
+                            <span><strong>목표 점수:</strong> 90점<FaEdit style={styles.editIcon} onClick={handleEdit} /></span>
                         </div>
                         <div style={styles.metricsItem}>
                             <FaPoll style={styles.icon} />
@@ -111,9 +111,17 @@ export default function AccountDetailPage() {
                 </div>
             </div>
             <div style={styles.bottomSection}>{/*기록, 테스트 영역*/}
-                <div style={styles.noteBox}>
-                    <div style={styles.boxTitle}>메모</div>
-                    <div style={styles.placeholder}>메모 내용</div>
+                <div style={styles.gridBox}>
+                    <div style={styles.boxTitle}>발표 기록 보기</div>
+                    <div style={styles.placeholder}>기록 데이터</div>
+                </div>
+                <div style={styles.gridBox}>
+                    <div style={styles.boxTitle}>임시 STT 테스트 페이지</div>
+                    <div style={styles.placeholder}>STT 기능 미리보기</div>
+                </div>
+                <div style={styles.gridBox}>
+                    <div style={styles.boxTitle}>CPM 계산 페이지</div>
+                    <div style={styles.placeholder}>계산 결과</div>
                 </div>
             </div>
         </div>
@@ -151,19 +159,21 @@ const styles = {
         marginBottom: '32px',
     },
     bottomSection: {
-        display: 'flex',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
         gap: '24px',
+        marginTop: '24px',
     },
     profileCard: {
         backgroundColor: '#fff',
         borderRadius: '12px',
         padding: '24px 32px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-        flex: 2, // 수정: 비율 2
+        flex: 2,
         minWidth: '300px',
     },
-    profileSideBox: { // 기존: profilePhotoBox
-        flex: 1, // 추가: 비율 1
+    profileSideBox: {
+        flex: 1,
         backgroundColor: '#fff',
         borderRadius: '12px',
         padding: '24px',
@@ -279,5 +289,19 @@ const styles = {
         marginBottom: '12px',
         paddingBottom: '8px',
         borderBottom: '1px solid #ddd',
+    },
+    bottomGrid: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, minmax(220px, 1fr))', // 최소 220px 확보
+        gap: '24px',
+        marginTop: '24px',
+    },
+    gridBox: {
+        backgroundColor: '#fff',
+        borderRadius: '12px',
+        padding: '24px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+        minHeight: '180px',
+        boxSizing: 'border-box',
     }
 };

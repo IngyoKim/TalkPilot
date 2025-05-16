@@ -23,7 +23,6 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user })
     const handleLogout = async () => {
         const confirmed = window.confirm("로그아웃을 하시겠습니까?");
         if (!confirmed) return;
-
         try {
             await logout();
             navigate('/login');
@@ -56,7 +55,7 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user })
     };
 
     const menuItems = [
-        { icon: <FaUserEdit />, label: 'Account Detail', onClick: () => navigate('../AccountDetail') },
+        { icon: <FaUserEdit />, label: 'Account Detail', onClick: () => navigate('../AccountDetail'), },
         { icon: <FaCog />, label: 'Setting', onClick: () => console.log('설정') },
         { icon: <FaQuestionCircle />, label: 'Help Center', onClick: () => console.log('도움말') },
         { icon: <FaEnvelope />, label: 'Contact us', onClick: () => console.log('문의하기') },

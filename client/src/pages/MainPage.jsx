@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
+import Sidebar from './Navigations/SideBar';
+import NavbarControls from './Navigations/NavbarControl';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './Navigations/SideBar';
 import NavbarControls from './Navigations/NavbarControl';
@@ -8,9 +10,9 @@ const mainColor = '#673AB7';
 
 export default function MainPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const navigate = useNavigate();
-
-    const handleProfileClick = () => navigate('/profile');
+    const handleProfileClick = () => {
+        console.log('프로필 클릭!');
+    };
     const handleToggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
     return (

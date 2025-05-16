@@ -18,10 +18,11 @@ export class UserService {
     }
 
     async updateUser(uid: string, updates: Record<string, any>): Promise<void> {
-        await this.db.update(`users/${uid}`, {
+        const fullUpdates = {
             ...updates,
             updatedAt: new Date().toISOString(),
-        });
+        };
+        await this.db.update(`users/${uid}`, fullUpdates);
     }
 
     async deleteUser(uid: string): Promise<void> {

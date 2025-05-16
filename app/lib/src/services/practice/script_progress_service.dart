@@ -12,7 +12,7 @@ class ScriptProgressService {
   }
 
   double calculateProgressByLastMatch(String recognizedText) {
-    final recognizedWords = _splitText(recognizedText);
+    final recognizedWords = _prepareRecognizedWords(recognizedText);
     if (_scriptChunks.isEmpty || recognizedWords.isEmpty) return 0.0;
 
     final usedRecognizedIndexes = <int>{};
@@ -20,14 +20,8 @@ class ScriptProgressService {
     int lastMatchedScriptIndex = -1;
 
     for (int i = 0; i < _scriptChunks.length; i++) {
-      final start = (lastMatchedRecognizedIndex + 1 - 10).clamp(
-        0,
-        recognizedWords.length,
-      );
-      final end = (lastMatchedRecognizedIndex + 1 + 10).clamp(
-        0,
-        recognizedWords.length,
-      );
+      final start = (lastMatchedRecognizedIndex + 1 - 10).clamp(0, recognizedWords.length);
+      final end = (lastMatchedRecognizedIndex + 1 + 10).clamp(0, recognizedWords.length);
 
       for (int j = start; j < end; j++) {
         if (usedRecognizedIndexes.contains(j)) continue;
@@ -47,7 +41,7 @@ class ScriptProgressService {
   }
 
   double calculateAccuracy(String recognizedText) {
-    final recognizedWords = _splitText(recognizedText);
+    final recognizedWords = _prepareRecognizedWords(recognizedText);
     if (recognizedWords.isEmpty || _scriptChunks.isEmpty) return 1.0;
 
     final matchedFlags = List<bool>.filled(_scriptChunks.length, false);
@@ -55,14 +49,8 @@ class ScriptProgressService {
     int lastMatchedRecognizedIndex = -1;
 
     for (int i = 0; i < _scriptChunks.length; i++) {
-      final start = (lastMatchedRecognizedIndex + 1 - 10).clamp(
-        0,
-        recognizedWords.length,
-      );
-      final end = (lastMatchedRecognizedIndex + 1 + 10).clamp(
-        0,
-        recognizedWords.length,
-      );
+      final start = (lastMatchedRecognizedIndex + 1 - 10).clamp(0, recognizedWords.length);
+      final end = (lastMatchedRecognizedIndex + 1 + 10).clamp(0, recognizedWords.length);
 
       for (int j = start; j < end; j++) {
         if (usedRecognizedIndexes.contains(j)) continue;
@@ -81,6 +69,23 @@ class ScriptProgressService {
 
     final matchedCount = matchedFlags.where((flag) => flag).length;
     return matchedCount / (lastMatchedScriptIndex + 1);
+  }
+
+  List<String> _prepareRecognizedWords(String recognizedText) {
+    final rawWords = _splitText(recognizedText);
+    final seen = <String>{};
+    final deduplicated = <String>[];
+
+    for (final word in rawWords) {
+      if (!seen.contains(word)) {
+        seen.add(word);
+        deduplicated.add(word);
+      }
+    }
+
+    return deduplicated.length > 100
+        ? deduplicated.sublist(deduplicated.length - 100)
+        : deduplicated;
   }
 
   bool isSimilar(String a, String b) {

@@ -15,7 +15,9 @@ class SttSocketService with ChangeNotifier {
 
   bool _disposed = false;
 
+  final Set<String> _sentWords = {};
   Function(String)? _onTranscript;
+
   void setOnTranscript(Function(String) callback) {
     _onTranscript = callback;
   }
@@ -52,9 +54,17 @@ class SttSocketService with ChangeNotifier {
     });
 
     socket.on('stt-result', (data) {
-      _transcript += '$data\n';
-      _onTranscript?.call(data.toString());
-      _safeNotify();
+      final full = data.toString().trim();
+      final words = full.split(' ');
+
+      for (final word in words) {
+        if (!_sentWords.contains(word)) {
+          _sentWords.add(word);
+          _transcript += '$word ';
+          _onTranscript?.call(_transcript.trim());
+          _safeNotify();
+        }
+      }
     });
 
     socket.onConnectError((err) {
@@ -90,6 +100,7 @@ class SttSocketService with ChangeNotifier {
 
   void clearTranscript() {
     _transcript = '';
+    _sentWords.clear();
     _safeNotify();
   }
 

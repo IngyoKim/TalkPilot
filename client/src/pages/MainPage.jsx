@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Sidebar from './Navigations/SideBar';
 import NavbarControls from './Navigations/NavbarControl';
-import { useNavigate } from 'react-router-dom';
 
 const mainColor = '#673AB7';
 
@@ -62,7 +61,7 @@ const styles = {
     },
     navbar: {
         display: 'flex',
-        justifyContent: 'space-between', // ← 좌우 정렬
+        justifyContent: 'space-between',
         alignItems: 'center',
         padding: '16px 32px',
         backgroundColor: '#FFFFFF',

@@ -4,10 +4,13 @@ import MainPage from "./pages/MainPage";
 import ProfilePage from "./pages/ProfilePage";
 import PrivateRoute from "./components/PrivateRoute";
 
+import AccountDetailPage from './pages/NavBarControls/AccountDetail';
+
 export default function Router() {
     return (
         <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/AccountDetail" element={<AccountDetailPage />} />
             <Route
                 path="/"
                 element={

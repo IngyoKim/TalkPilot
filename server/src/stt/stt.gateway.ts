@@ -39,6 +39,7 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
             const decoded = await admin.auth().verifyIdToken(idToken);
             socket.data.user = decoded;
             console.log(`소켓 연결된 사용자: ${decoded.uid}`);
+            console.log(`소켓 연결됨: ${socket.id}`);
         } catch (err) {
             console.warn(`토큰 인증 실패: ${err.message}`);
             socket.disconnect();

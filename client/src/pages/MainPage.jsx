@@ -2,9 +2,6 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Sidebar from './Navigations/SideBar';
 import NavbarControls from './Navigations/NavbarControl';
-import { useNavigate } from 'react-router-dom';
-import Sidebar from './Navigations/SideBar';
-import NavbarControls from './Navigations/NavbarControl';
 
 const mainColor = '#673AB7';
 

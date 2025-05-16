@@ -14,7 +14,7 @@ export class DatabaseService {
             if (value === null || value === undefined) {
                 this.logger.warn(`[READ] ${path} - no data`);
             } else {
-                this.logger.log(`[READ] ${path}`, JSON.stringify(value));
+                this.logger.log(`[READ] ${path}\n${JSON.stringify(value, null, 2)}`);
             }
 
             return value;
@@ -27,7 +27,7 @@ export class DatabaseService {
     async write(path: string, data: any): Promise<void> {
         try {
             await this.db.ref(path).set(data);
-            this.logger.log(`[WRITE] ${path}`, JSON.stringify(data));
+            this.logger.log(`[WRITE] ${path}\n${JSON.stringify(data, null, 2)}`);
         } catch (error) {
             this.logger.error(`[WRITE] ${path}`, error instanceof Error ? error.stack : String(error));
             throw error;
@@ -37,7 +37,7 @@ export class DatabaseService {
     async update(path: string, data: any): Promise<void> {
         try {
             await this.db.ref(path).update(data);
-            this.logger.log(`[UPDATE] ${path}`, JSON.stringify(data));
+            this.logger.log(`[UPDATE] ${path}\n${JSON.stringify(data, null, 2)}`);
         } catch (error) {
             this.logger.error(`[UPDATE] ${path}`, error instanceof Error ? error.stack : String(error));
             throw error;
@@ -61,7 +61,7 @@ export class DatabaseService {
                 map ? map(value, key) : value,
             ) as T[];
 
-            this.logger.log(`[FETCH] ${path}`, JSON.stringify(result));
+            this.logger.log(`[FETCH] ${path}\n${JSON.stringify(result, null, 2)}`);
             return result;
         } catch (error) {
             this.logger.error(`[FETCH] ${path}`, error instanceof Error ? error.stack : String(error));

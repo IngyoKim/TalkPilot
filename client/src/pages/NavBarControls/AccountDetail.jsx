@@ -17,11 +17,15 @@ export default function AccountDetailPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [profileImage] = useState(null);
 
-    const user = {
+    const user = { //DB연결하면 삭제예정
         name: '홍길동',
         email: 'hong@example.com',
         friendCode: '123213213121',
         joinedAt: '2024-01-15',
+        completedPresentation: 12,
+        averageScore: 87,
+        targetScore: 90,
+        averageCPM: 152,
     };
 
     const handleEdit = () => alert('구현할까 고민중.');
@@ -67,26 +71,30 @@ export default function AccountDetailPage() {
                         </div>
                     </div>
 
-                    <div style={styles.profileSideBox}>{/*발표 관련 통계계*/}
+                    <div style={styles.profileSideBox}>
                         <div style={styles.header}>
                             <FaAngellist style={styles.avatar} />
-                            <span style={styles.accountTitle}>Statistics</span>
+                            <span style={styles.accountTitle}>Statistics</span> {/*발표 관련 통계*/}
                         </div>
+
                         <div style={styles.metricsItem}>
                             <FaCheckCircle style={styles.icon} />
-                            <span><strong>완료한 발표:</strong> 12회</span>
+                            <span><strong>완료한 발표:</strong> {user.completedPresentation}회</span>
                         </div>
                         <div style={styles.metricsItem}>
                             <FaChartLine style={styles.icon} />
-                            <span><strong>평균 발표 점수:</strong> 87점</span>
+                            <span><strong>평균 발표 점수:</strong> {user.averageScore}점</span>
                         </div>
                         <div style={styles.metricsItem}>
                             <FaBullseye style={styles.icon} />
-                            <span><strong>목표 점수:</strong> 90점 <FaEdit style={styles.editIcon} onClick={handleEdit} /></span>
+                            <span>
+                                <strong>목표 점수:</strong> {user.targetScore}점
+                                <FaEdit style={styles.editIcon} onClick={handleEdit} />
+                            </span>
                         </div>
                         <div style={styles.metricsItem}>
                             <FaPoll style={styles.icon} />
-                            <span><strong>평균 CPM:</strong> 152</span>
+                            <span><strong>평균 CPM:</strong> {user.averageCPM}</span>
                         </div>
                     </div>
                 </div>
@@ -98,7 +106,7 @@ export default function AccountDetailPage() {
                             발표 기록 보기
                         </div>
                         <div style={styles.placeholder}>당신의 발표 기록 데이터를 확인할 수 있습니다.</div>
-                        <button style={styles.actionButton}>확인인</button>
+                        <button style={styles.actionButton}>확인하기</button>
                     </div>
 
                     <div style={styles.gridBox}>

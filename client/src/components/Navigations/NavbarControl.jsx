@@ -10,16 +10,31 @@ import {
     FaUserEdit
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { logout } from '../../utils/auth/auth';
-
+import { logout, getCurrentUid } from '../../utils/auth/auth';
+import { fetchUserByUid } from '../../utils/api/user';
 
 const mainColor = '#673AB7';
 
-export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user }) {
+export default function NavbarControls({ isSidebarOpen, onToggleSidebar }) {
     const navigate = useNavigate();
+    const [user, setUser] = useState(null);
     const [isHovered, setIsHovered] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
+
+    // 사용자 정보 로딩
+    useEffect(() => {
+        async function loadUser() {
+            try {
+                const uid = await getCurrentUid();
+                const userData = await fetchUserByUid(uid);
+                setUser(userData);
+            } catch (err) {
+                console.error('NavbarControls - 사용자 정보 로딩 실패:', err);
+            }
+        }
+        loadUser();
+    }, []);
 
     const handleLogout = async () => {
         const confirmed = window.confirm("로그아웃을 하시겠습니까?");
@@ -99,7 +114,7 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user })
                                 key={i}
                                 style={{
                                     ...styles.menuItem,
-                                    color: item.isDanger ? '#e53935' : '#333', // 빨간색
+                                    color: item.isDanger ? '#e53935' : '#333',
                                 }}
                                 onClick={() => {
                                     item.onClick();
@@ -184,19 +199,19 @@ const styles = {
         padding: '12px 16px',
         backgroundColor: '#f5f5f5',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
     },
     userName: {
         fontWeight: 'bold',
-        marginBottom: '4px'
+        marginBottom: '4px',
     },
     userEmail: {
         fontSize: '12px',
-        color: '#555'
+        color: '#555',
     },
     divider: {
         height: '1px',
         backgroundColor: '#eee',
-        margin: '4px 0'
-    }
+        margin: '4px 0',
+    },
 };

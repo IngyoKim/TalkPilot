@@ -8,6 +8,7 @@ export function initializeFirebase() {
     if (admin.apps.length === 0) {
         admin.initializeApp({
             credential: admin.credential.cert(parsed),
+            databaseURL: process.env.FIREBASE_DATABASE_URL,
         });
     }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Req, Body, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Req, Body, Logger, NotFoundException, Param } from '@nestjs/common';
 import { Request } from 'express';
 import { UserService } from './user.service';
 import { admin } from '../auth/firebase-admin';
@@ -19,18 +19,22 @@ export class UserController {
 
     constructor(private readonly userService: UserService) { }
 
-    /// 현재 로그인한 사용자 정보 조회
+    /// Firebase 인증 확인용 (간단한 사용자 식별 정보만 제공)
     @Get('me')
     getCurrentUser(@Req() req: Request) {
         const user = req['user'] as DecodedUser;
-        this.logger.log(`요청된 사용자 정보: ${JSON.stringify(user)}`);
-        return {
-            uid: user.uid,
-            email: user.email ?? null,
-            name: user.name ?? null,
-            picture: user.picture ?? null,
-        };
+        this.logger.log(`인증 확인: ${user.uid}`);
+        return { uid: user.uid };
     }
+
+    /// 사용자 정보 조회
+    @Get('user/:uid')
+    async getUserById(@Param('uid') uid: string) {
+        const user = await this.userService.readUser(uid);
+        if (!user) throw new NotFoundException('User not found');
+        return user;
+    }
+
 
     /// Firebase 인증 후 최초 로그인 시 사용자 초기화
     @Post('user/init')
@@ -49,7 +53,7 @@ export class UserController {
         return { success: true };
     }
 
-    /// 사용자 삭제(아마 쓸 일은 없을 듯?)
+    /// 사용자 삭제
     @Delete('user')
     async deleteUser(@Req() req: Request) {
         const uid = (req.user as admin.auth.DecodedIdToken).uid;

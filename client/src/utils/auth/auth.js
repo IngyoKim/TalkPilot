@@ -1,4 +1,4 @@
-import { signOut } from "firebase/auth";
+import { signOut, getAuth } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -31,4 +31,17 @@ export const logout = async () => {
     } catch (error) {
         console.error("로그아웃 실패", error);
     }
+};
+
+/// Firebase에서 uid를 가져옴
+export const getCurrentUid = () => {
+    const user = getAuth().currentUser;
+    if (!user) throw new Error("로그인된 사용자가 없습니다.");
+    return user.uid;
+};
+
+export const getIdToken = async () => {
+    const user = getAuth().currentUser;
+    if (!user) throw new Error('로그인된 사용자가 없습니다.');
+    return await user.getIdToken();
 };

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import Sidebar from '../Navigations/SideBar';
 import NavbarControls from '../Navigations/NavbarControl';
 
+import { FaEdit, FaCheckCircle, FaChartLine, FaBullseye, FaPoll, FaAngellist } from 'react-icons/fa';
+
 const mainColor = '#673AB7';
 
 export default function AccountDetailPage() {
@@ -13,6 +15,15 @@ export default function AccountDetailPage() {
         friendCode: '123213213121',
         joinedAt: '2024-01-15',
     };
+    const handleEditName = () => {
+        alert('구현할까 고민중.');
+    };
+    const metricsData = [
+        { icon: <FaCheckCircle style={styles.icon} />, label: '완료한 발표', value: '12회' },
+        { icon: <FaChartLine style={styles.icon} />, label: '평균 발표 점수', value: '87점' },
+        { icon: <FaBullseye style={styles.icon} />, label: '목표 점수', value: '90점' },
+        { icon: <FaPoll style={styles.icon} />, label: '평균 CPM', value: '152' },
+    ];
 
     const handleToggleSidebar = () => setIsSidebarOpen(prev => !prev);
     const [profileImage, setProfileImage] = useState(null);
@@ -61,42 +72,48 @@ export default function AccountDetailPage() {
                                 ) : (
                                     <div style={styles.imagePlaceholder}>이미지 없음</div>
                                 )}
-                                <>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleImageUpload}
-                                    />
-                                </>
-                                <label htmlFor="upload" style={styles.uploadLabel}>사진 업로드</label>
-                                <input
-                                    id="upload"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    style={{ display: 'none' }}
-                                />
+
                             </div>
 
                             {/* 텍스트 정보 */}
                             <div style={styles.infoText}>
-                                <div style={styles.infoRow}><strong>이름:</strong> {user.name}</div>
+                                <div style={styles.infoRow}><strong>이름:</strong> {user.name}<FaEdit style={styles.editIcon} onClick={handleEditName} />
+                                </div>
                                 <div style={styles.infoRow}><strong>이메일:</strong> {user.email}</div>
                                 <div style={styles.infoRow}><strong>친구 코드:</strong> {user.friendCode}</div>
                                 <div style={styles.infoRow}><strong>가입일:</strong> {user.joinedAt}</div>
                             </div>
                         </div>
                     </div>
-                    <div style={styles.profilePhotoBox}>{/*CPM 영역*/}
-                        <div style={styles.boxTitle}>CPM</div>
-                        <div style={styles.placeholder}>목표, 평균 등</div>
+                    <div style={styles.profileSideBox}>{/*CPM 영역*/}
+                        <div style={styles.header}>
+                            <FaAngellist style={styles.avatar} />
+                            <span style={styles.accountTitle}>Statistics</span>
+                        </div>
+
+                        <div style={styles.metricsItem}>
+                            <FaCheckCircle style={styles.icon} />
+                            <span><strong>완료한 발표:</strong> 12회</span>
+                        </div>
+                        <div style={styles.metricsItem}>
+                            <FaChartLine style={styles.icon} />
+                            <span><strong>평균 발표 점수:</strong> 87점</span>
+                        </div>
+                        <div style={styles.metricsItem}>
+                            <FaBullseye style={styles.icon} />
+                            <span><strong>목표 점수:</strong> 90점</span>
+                        </div>
+                        <div style={styles.metricsItem}>
+                            <FaPoll style={styles.icon} />
+                            <span><strong>평균 CPM:</strong> 152</span>
+                        </div>
                     </div>
                 </div>
-                <div style={styles.bottomSection}>{/*기록, 테스트 영역*/}
-                    <div style={styles.noteBox}>
-                        <div style={styles.boxTitle}>메모</div>
-                        <div style={styles.placeholder}>메모 내용</div>
-                    </div>
+            </div>
+            <div style={styles.bottomSection}>{/*기록, 테스트 영역*/}
+                <div style={styles.noteBox}>
+                    <div style={styles.boxTitle}>메모</div>
+                    <div style={styles.placeholder}>메모 내용</div>
                 </div>
             </div>
         </div>
@@ -142,8 +159,22 @@ const styles = {
         borderRadius: '12px',
         padding: '24px 32px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-        flex: 1,
+        flex: 2, // 수정: 비율 2
         minWidth: '300px',
+    },
+    profileSideBox: { // 기존: profilePhotoBox
+        flex: 1, // 추가: 비율 1
+        backgroundColor: '#fff',
+        borderRadius: '12px',
+        padding: '24px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+        minWidth: '200px',
+    },
+    accountTitle: {
+        fontSize: '20px',
+        fontWeight: '600',
+        color: '#333',
+        letterSpacing: '0.5px',
     },
     header: {
         display: 'flex',
@@ -151,8 +182,10 @@ const styles = {
         marginBottom: '16px',
         gap: '12px',
     },
+
     avatar: {
-        fontSize: '28px',
+        fontSize: '26px',
+        color: '#673AB7',
     },
     title: {
         fontSize: '22px',
@@ -203,6 +236,7 @@ const styles = {
         fontSize: '16px',
         color: '#444',
     },
+
     infoRow: {
         fontSize: '16px',
         color: '#444',
@@ -229,4 +263,21 @@ const styles = {
         boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
         minHeight: '200px',
     },
+    icon: {
+        fontSize: '16px',
+        marginRight: '8px',
+        color: mainColor,
+        flexShrink: 0,
+    },
+
+    metricsItem: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        fontSize: '14px',
+        color: '#444',
+        marginBottom: '12px',
+        paddingBottom: '8px',
+        borderBottom: '1px solid #ddd',
+    }
 };

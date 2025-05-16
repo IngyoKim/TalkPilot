@@ -1,11 +1,12 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:talk_pilot/src/services/auth/custom_token_service.dart';
-import 'package:talk_pilot/src/services/auth/social_login.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
+
+import 'package:talk_pilot/src/services/auth/social_login.dart';
+import 'package:talk_pilot/src/services/auth/server_auth_service.dart';
+import 'package:talk_pilot/src/services/auth/custom_token_service.dart';
 
 /// Kakao Login을 수행
 class KakaoLogin implements SocialLogin {
@@ -65,6 +66,14 @@ class KakaoLogin implements SocialLogin {
         customToken,
       );
       await _auth.currentUser?.reload(); //Firebase 인증 상태 갱신
+
+      /// Nest server 인증
+      try {
+        await serverLogin(); // /me 요청
+        debugPrint("[Nest] 서버 인증 성공");
+      } catch (error) {
+        debugPrint("[Nest] 서버 인증 실패: $error");
+      }
 
       /// Update user information
       return userCredential.user;

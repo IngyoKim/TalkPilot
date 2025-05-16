@@ -1,8 +1,7 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { SttModule } from './stt/stt.module';
-
-import { FirebaseAuthMiddleware } from './middleware/firebase-auth.middleware';
+import { AuthMiddleware } from './auth/auth.middleware';
 
 @Module({
   imports: [
@@ -13,7 +12,7 @@ import { FirebaseAuthMiddleware } from './middleware/firebase-auth.middleware';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(FirebaseAuthMiddleware)
-      .forRoutes('me');
+      .apply(AuthMiddleware)
+      .forRoutes({ path: 'me', method: RequestMethod.ALL });
   }
 }

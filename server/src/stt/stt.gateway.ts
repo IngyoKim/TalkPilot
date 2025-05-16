@@ -8,7 +8,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { SpeechClient } from '@google-cloud/speech';
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { admin } from '../auth/firebase-admin';
 
 @WebSocketGateway({ cors: true })
 export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -22,17 +22,32 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor() {
         const path = process.env.STT_SERVICE_ACCOUNT_KEY_PATH || '/etc/secrets/stt-service-account.json';
         const credentials = JSON.parse(readFileSync(path, 'utf-8'));
-
         this.client = new SpeechClient({ credentials });
-
     }
 
-    handleConnection(socket: Socket) {
-        console.log(`Client connected: ${socket.id}`);
+    async handleConnection(socket: Socket) {
+        const token = socket.handshake.auth?.token;
+        if (!token?.startsWith('Bearer ')) {
+            console.warn(`인증 실패(토큰 없음): ${socket.id}`);
+            socket.disconnect();
+            return;
+        }
+
+        const idToken = token.split('Bearer ')[1];
+
+        try {
+            const decoded = await admin.auth().verifyIdToken(idToken);
+            socket.data.user = decoded;
+            console.log(`소켓 연결된 사용자: ${decoded.uid}`);
+            console.log(`소켓 연결됨: ${socket.id}`);
+        } catch (err) {
+            console.warn(`토큰 인증 실패: ${err.message}`);
+            socket.disconnect();
+        }
     }
 
     handleDisconnect(socket: Socket) {
-        console.log(`Client disconnected: ${socket.id}`);
+        console.log(`소켓 연결 해제됨: ${socket.id}`);
         this.closeStream(socket.id);
     }
 
@@ -73,17 +88,16 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 }
             })
             .on('error', (err) => {
-                console.error(`Stream error: ${err.message}`);
-                this.startNewStream(socket);
+                console.error(`STT 스트림 오류: ${err.message}`);
+                this.startNewStream(socket); // 자동 재시작
             });
 
         this.recognizeStreams.set(socket.id, stream);
 
         const timer = setTimeout(() => {
-            console.log(`Auto restart stream for ${socket.id}`);
+            console.log(`5분 자동 재연결: ${socket.id}`);
             this.startNewStream(socket);
         }, 290_000);
-
         this.streamTimers.set(socket.id, timer);
     }
 

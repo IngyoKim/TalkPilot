@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
     FaHome,
     FaCalendarAlt,
@@ -33,7 +34,13 @@ export default function Sidebar({ isOpen }) {
 
 function SidebarItem({ icon, text }) {
     const [isHovered, setIsHovered] = useState(false);
+    const navigate = useNavigate();
 
+    const handleClick = () => {
+        if (text === 'Home') {
+            navigate('/'); // 🔥 MainPage 경로로 이동
+        }
+    };
     return (
         <div
             style={{
@@ -42,6 +49,7 @@ function SidebarItem({ icon, text }) {
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onClick={handleClick} // 🔥 클릭 이벤트 등록
         >
             {icon}
             <span style={{ marginLeft: 12 }}>{text}</span>

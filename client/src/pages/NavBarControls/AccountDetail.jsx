@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Sidebar from '../Navigations/SideBar';
 import NavbarControls from '../Navigations/NavbarControl';
 import {
@@ -15,7 +15,7 @@ const mainColor = '#673AB7';
 
 export default function AccountDetailPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [profileImage, setProfileImage] = useState(null);
+    const [profileImage] = useState(null);
 
     const user = {
         name: '홍길동',
@@ -27,15 +27,6 @@ export default function AccountDetailPage() {
     const handleEdit = () => alert('구현할까 고민중.');
 
     const handleToggleSidebar = () => setIsSidebarOpen(prev => !prev);
-
-    const handleImageUpload = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => setProfileImage(reader.result);
-            reader.readAsDataURL(file);
-        }
-    };
 
     return (
         <div style={styles.container}>
@@ -51,7 +42,7 @@ export default function AccountDetailPage() {
 
             <div style={{ ...styles.mainContent, marginLeft: isSidebarOpen ? 240 : 0 }}>
                 <div style={styles.topSection}>
-                    <div style={styles.profileCard}>
+                    <div style={styles.profileCard}> {/*상세 계정 정보*/}
                         <div style={styles.header}>
                             <span role="img" aria-label="user" style={styles.avatar}>👤</span>
                             <h2 style={styles.title}>Account Detail</h2>
@@ -76,7 +67,7 @@ export default function AccountDetailPage() {
                         </div>
                     </div>
 
-                    <div style={styles.profileSideBox}>
+                    <div style={styles.profileSideBox}>{/*발표 관련 통계계*/}
                         <div style={styles.header}>
                             <FaAngellist style={styles.avatar} />
                             <span style={styles.accountTitle}>Statistics</span>
@@ -102,23 +93,32 @@ export default function AccountDetailPage() {
 
                 <div style={styles.bottomSection}>
                     <div style={styles.gridBox}>
-                        <div style={styles.boxTitle}>
-                            <FaCheckCircle style={styles.icon} /> 발표 기록 보기
+                        <div style={styles.boxTitle}>{/*발표 기록*/}
+                            <FaCheckCircle style={styles.icon} />
+                            발표 기록 보기
                         </div>
-                        <div style={styles.placeholder}>기록 데이터</div>
+                        <div style={styles.placeholder}>당신의 발표 기록 데이터를 확인할 수 있습니다.</div>
+                        <button style={styles.actionButton}>확인인</button>
                     </div>
+
                     <div style={styles.gridBox}>
-                        <div style={styles.boxTitle}>
-                            <FaPoll style={styles.icon} /> 임시 STT 테스트 페이지
+                        <div style={styles.boxTitle}>{/*STT*/}
+                            <FaPoll style={styles.icon} />
+                            임시 STT 테스트
                         </div>
-                        <div style={styles.placeholder}>STT 기능 미리보기</div>
+                        <div style={styles.placeholder}>STT 기능을 확인할 수 있습니다.</div>
+                        <button style={styles.actionButton}>테스트</button>
                     </div>
+
                     <div style={styles.gridBox}>
-                        <div style={styles.boxTitle}>
-                            <FaTachometerAlt style={styles.icon} /> CPM 계산 페이지
+                        <div style={styles.boxTitle}>{/*CPM 측정*/}
+                            <FaTachometerAlt style={styles.icon} />
+                            CPM 계산 페이지
                         </div>
-                        <div style={styles.placeholder}>계산 결과</div>
+                        <div style={styles.placeholder}>당신의 CPM이 몇인지 측정하세요.</div>
+                        <button style={styles.actionButton}>테스트</button>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -292,5 +292,16 @@ const styles = {
         marginLeft: '6px',
         cursor: 'pointer',
         color: mainColor,
+    },
+    actionButton: {
+        marginTop: '16px',
+        padding: '8px 16px',
+        backgroundColor: mainColor,
+        color: '#fff',
+        border: 'none',
+        borderRadius: '6px',
+        cursor: 'pointer',
+        fontSize: '14px',
+        alignSelf: 'flex-start',
     },
 };

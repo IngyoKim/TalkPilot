@@ -56,9 +56,9 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user })
 
     const menuItems = [
         { icon: <FaUserEdit />, label: 'Account Detail', onClick: () => navigate('../AccountDetail'), },
-        { icon: <FaCog />, label: 'Setting', onClick: () => console.log('설정') },
-        { icon: <FaQuestionCircle />, label: 'Help Center', onClick: () => console.log('도움말') },
-        { icon: <FaEnvelope />, label: 'Contact us', onClick: () => console.log('문의하기') },
+        { icon: <FaCog />, label: 'Setting', onClick: () => navigate('../Setting') },
+        { icon: <FaQuestionCircle />, label: 'Help Center', onClick: () => navigate('../HelpCenter') },
+        { icon: <FaEnvelope />, label: 'Contact us', onClick: () => navigate('../ContactUs') },
         { icon: <FaSignOutAlt />, label: 'Log Out', onClick: handleLogout, isDanger: true },
     ];
 

@@ -11,11 +11,15 @@ export default function HelpCenter() {
         <div style={{ display: 'flex' }}>
             <Sidebar isOpen={isSidebarOpen} />
             <div
-                style={{ flex: 1, marginLeft: isSidebarOpen ? 240 : 0, transition: 'margin-left 0.3s ease', }}
+                style={{
+                    flex: 1,
+                    marginLeft: isSidebarOpen ? 240 : 0,
+                    transition: 'margin-left 0.3s ease',
+                }}
             >
                 <NavbarControls
                     isSidebarOpen={isSidebarOpen}
-                    onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+                    onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
                 />
                 <div style={styles.container}>
                     {/* 왼쪽 폼 */}
@@ -41,14 +45,8 @@ export default function HelpCenter() {
                         <img
                             src="/assets/CBNU_white.png"
                             alt="Chungbuk National University Logo"
-                            style={{
-                                width: 120,
-                                opacity: 0.8,
-                                marginBottom: '10px',
-                                alignItems: 'flex-end',
-                            }}
+                            style={styles.logo}
                         />
-                        <div style={{ height: 40 }} />
                     </div>
                 </div>
             </div>
@@ -61,7 +59,13 @@ function OfficeCard({ city, address, phone, hours }) {
         <div style={styles.officeCard}>
             <h3 style={styles.officeCity}>{city}</h3>
             <p style={styles.officeText}>{address}</p>
-            {phone && <p style={styles.officeText}><b>일반 문의 및 청구:</b><br />{phone}<br />{hours}</p>}
+            {phone && (
+                <p style={styles.officeText}>
+                    <b>일반 문의 및 청구:</b><br />
+                    {phone}<br />
+                    {hours}
+                </p>
+            )}
             <button style={styles.viewMapBtn}>View Map</button>
         </div>
     );
@@ -84,10 +88,10 @@ const styles = {
         maxWidth: 500,
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: '#fff',          // ✅ 배경 추가
+        backgroundColor: '#fff',
         padding: '30px',
         borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.05)', // ✅ 살짝 입체감
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
         boxSizing: 'border-box',
     },
     heading: {
@@ -128,18 +132,25 @@ const styles = {
     right: {
         flex: 1,
         minWidth: 300,
-        backgroundColor: '#008c4a',
+        backgroundColor: mainColor,
         padding: '30px',
         borderRadius: '8px',
         color: 'white',
         boxSizing: 'border-box',
         display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',          // 가운데 정렬
-        height: '100%',                  // 필요 시 높이 고정
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: '100%',
     },
     officeCard: {
-        marginBottom: '20px',
+        margin: 0,
+        flex: 1,
+    },
+    logo: {
+        width: 160,
+        opacity: 0.8,
+        marginLeft: '20px',
     },
     officeCity: {
         fontSize: '22px',

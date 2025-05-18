@@ -1,7 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import {
-    FaChevronLeft, FaChevronRight, FaUser, FaCog,
-    FaQuestionCircle, FaEnvelope, FaSignOutAlt, FaUserEdit
+    FaChevronLeft,
+    FaChevronRight,
+    FaUser,
+    FaCog,
+    FaQuestionCircle,
+    FaEnvelope,
+    FaSignOutAlt,
+    FaUserEdit
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../utils/auth/auth';
@@ -11,7 +17,7 @@ const mainColor = '#673AB7';
 
 export default function NavbarControls({ isSidebarOpen, onToggleSidebar }) {
     const navigate = useNavigate();
-    const { user } = useUser();
+    const { user } = useUser(); // ✅ UserContext에서 가져옴
     const [isHovered, setIsHovered] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
@@ -22,14 +28,14 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar }) {
         try {
             await logout();
             navigate('/login');
-        } catch (error) {
+        } catch (err) {
             alert('로그아웃 중 오류가 발생했습니다.');
         }
     };
 
     useEffect(() => {
-        function onClickOutside(error) {
-            if (menuRef.current && !menuRef.current.contains(error.target)) {
+        function onClickOutside(e) {
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
                 setMenuOpen(false);
             }
         }
@@ -56,7 +62,10 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar }) {
     return (
         <div style={styles.container}>
             <div
-                style={{ ...styles.arrowToggle, left: isSidebarOpen ? 260 : 20 }}
+                style={{
+                    ...styles.arrowToggle,
+                    left: isSidebarOpen ? 260 : 20,
+                }}
                 onClick={onToggleSidebar}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
@@ -98,3 +107,87 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar }) {
         </div>
     );
 }
+
+const styles = {
+    container: {
+        position: 'relative',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        width: '100%',
+        height: '64px',
+    },
+    arrowToggle: {
+        position: 'fixed',
+        top: '16px',
+        backgroundColor: '#ffffff',
+        border: `1px solid ${mainColor}`,
+        borderRadius: '50%',
+        width: '36px',
+        height: '36px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        transition: 'left 0.3s ease',
+        zIndex: 1001,
+    },
+    profileContainer: {
+        position: 'relative',
+        marginRight: '32px',
+    },
+    profileIcon: {
+        width: '40px',
+        height: '40px',
+        borderRadius: '50%',
+        backgroundColor: '#FFFFFF',
+        border: `2px solid ${mainColor}`,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        cursor: 'pointer',
+    },
+    dropdown: {
+        position: 'absolute',
+        top: '48px',
+        right: '0px',
+        width: '200px',
+        backgroundColor: '#FFFFFF',
+        border: `1px solid ${mainColor}`,
+        borderRadius: '8px',
+        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+        zIndex: 1002,
+        overflow: 'hidden',
+    },
+    menuItem: {
+        display: 'flex',
+        alignItems: 'center',
+        padding: '10px 16px',
+        cursor: 'pointer',
+        borderBottom: `1px solid #eee`,
+    },
+    iconWrapper: {
+        marginRight: '8px',
+        display: 'flex',
+        alignItems: 'center',
+    },
+    userInfo: {
+        padding: '12px 16px',
+        backgroundColor: '#f5f5f5',
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    userName: {
+        fontWeight: 'bold',
+        marginBottom: '4px',
+    },
+    userEmail: {
+        fontSize: '12px',
+        color: '#555',
+    },
+    divider: {
+        height: '1px',
+        backgroundColor: '#eee',
+        margin: '4px 0',
+    },
+};

@@ -1,7 +1,6 @@
-// src/App.jsx
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './Contexts/AuthContext';
-import { UserProvider } from './Contexts/UserContext';
+import { UserProvider } from './contexts/UserContext';
 import { ProjectProvider } from './Contexts/ProjectContext';
 import Router from './Router';
 

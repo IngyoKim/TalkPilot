@@ -1,16 +1,9 @@
-import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../utils/auth/firebaseConfig";
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function PrivateRoute({ children }) {
-    const [user, setUser] = useState(undefined);
+    const { authUser } = useAuth();
 
-    useEffect(() => {
-        const unsub = onAuthStateChanged(auth, (u) => setUser(u ?? null));
-        return () => unsub();
-    }, []);
-
-    if (user === undefined) return null;
-    return user ? children : <Navigate to="/login" />;
+    if (authUser === null) return <Navigate to="/login" />;
+    return children;
 }

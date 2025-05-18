@@ -52,7 +52,7 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar }) {
     };
 
     const menuItems = [
-        { icon: <FaUserEdit />, label: 'Account Detail', onClick: () => console.log('계정 더보기') },
+        { icon: <FaUserEdit />, label: 'Account Detail', onClick: () => navigate('../AccountDetail'), },
         { icon: <FaCog />, label: 'Setting', onClick: () => console.log('설정') },
         { icon: <FaQuestionCircle />, label: 'Help Center', onClick: () => console.log('도움말') },
         { icon: <FaEnvelope />, label: 'Contact us', onClick: () => console.log('문의하기') },

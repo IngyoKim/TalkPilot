@@ -9,12 +9,12 @@ export class UserService {
         return await this.db.read(`users/${uid}`);
     }
 
-    async writeUser(uid: string, data: any, onlyIfAbsent = false): Promise<void> {
+    async writeUser(uid: string, userData: Record<string, any>, onlyIfAbsent = false): Promise<void> {
         if (onlyIfAbsent) {
             const existing = await this.readUser(uid);
-            if (existing) return;
+            if (existing !== null) return;
         }
-        await this.db.write(`users/${uid}`, data);
+        await this.db.write(`users/${uid}`, userData);
     }
 
     async updateUser(uid: string, updates: Record<string, any>): Promise<void> {
@@ -29,22 +29,24 @@ export class UserService {
         await this.db.delete(`users/${uid}`);
     }
 
-    async initUser(user: {
+    async initUser(decodedUser: {
         uid: string;
         email?: string;
         name?: string;
         picture?: string;
-        [key: string]: any;
+        firebase?: {
+            sign_in_provider?: string;
+        };
     }, loginMethod?: string): Promise<void> {
-        const existing = await this.readUser(user.uid);
+        const existing = await this.readUser(decodedUser.uid);
         const now = new Date().toISOString();
 
-        const defaultData = {
-            name: user.name ?? '',
-            email: user.email ?? '',
-            nickname: user.name ?? '',
-            photoUrl: user.picture ?? '',
-            loginMethod,
+        const newFields = {
+            name: decodedUser.name ?? '',
+            email: decodedUser.email ?? '',
+            nickname: decodedUser.name ?? '',
+            photoUrl: decodedUser.picture ?? '',
+            loginMethod: loginMethod ?? decodedUser.firebase?.sign_in_provider ?? 'unknown',
             createdAt: now,
             updatedAt: now,
             projectIds: {},
@@ -54,15 +56,15 @@ export class UserService {
         };
 
         if (!existing) {
-            await this.writeUser(user.uid, defaultData);
+            await this.writeUser(decodedUser.uid, newFields);
         } else {
-            const missingFields = Object.entries(defaultData).reduce((acc, [key, value]) => {
+            const missingFields = Object.entries(newFields).reduce((acc, [key, value]) => {
                 if (!(key in existing)) acc[key] = value;
                 return acc;
             }, {} as Record<string, any>);
 
             if (Object.keys(missingFields).length > 0) {
-                await this.updateUser(user.uid, missingFields);
+                await this.updateUser(decodedUser.uid, missingFields);
             }
         }
     }

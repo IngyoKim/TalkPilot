@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { useUser } from '../../contexts/UserContext';
 import Sidebar from './SideBar';
 import NavbarControls from './NavbarControl';
+import { FaUserCircle } from 'react-icons/fa';
+
 import {
     FaEdit,
     FaCheckCircle,
@@ -16,21 +19,14 @@ const mainColor = '#673AB7';
 export default function AccountDetailPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [profileImage] = useState(null);
-
-    const user = { //DB연결하면 삭제예정
-        name: '홍길동',
-        email: 'hong@example.com',
-        friendCode: '123213213121',
-        joinedAt: '2024-01-15',
-        completedPresentation: 12,
-        averageScore: 87,
-        targetScore: 90,
-        averageCPM: 152,
-    };
+    const { user } = useUser();
 
     const handleEdit = () => alert('구현할까 고민중.');
-
     const handleToggleSidebar = () => setIsSidebarOpen(prev => !prev);
+
+    if (!user) {
+        return <div style={{ padding: 40 }}>사용자 정보를 불러오는 중입니다...</div>;
+    }
 
     return (
         <div style={styles.container}>
@@ -38,7 +34,6 @@ export default function AccountDetailPage() {
                 <NavbarControls
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={handleToggleSidebar}
-                    user={user}
                 />
             </div>
 
@@ -46,17 +41,22 @@ export default function AccountDetailPage() {
 
             <div style={{ ...styles.mainContent, marginLeft: isSidebarOpen ? 240 : 0 }}>
                 <div style={styles.topSection}>
-                    <div style={styles.profileCard}> {/*상세 계정 정보*/}
+                    <div style={styles.profileCard}>
                         <div style={styles.header}>
                             <span role="img" aria-label="user" style={styles.avatar}>👤</span>
                             <h2 style={styles.title}>Account Detail</h2>
                         </div>
                         <div style={styles.infoSection}>
                             <div style={styles.photoBox}>
-                                {profileImage ? (
-                                    <img src={profileImage} alt="프로필" style={styles.image} />
+                                {profileImage && !imgError ? (
+                                    <img
+                                        src={profileImage}
+                                        alt="프로필"
+                                        style={styles.image}
+                                        onError={() => setImgError(true)}
+                                    />
                                 ) : (
-                                    <div style={styles.imagePlaceholder}>이미지 없음</div>
+                                    <FaUserCircle size={100} color="#bbb" />
                                 )}
                             </div>
                             <div style={styles.infoText}>
@@ -65,8 +65,8 @@ export default function AccountDetailPage() {
                                     <FaEdit style={styles.editIcon} onClick={handleEdit} />
                                 </div>
                                 <div style={styles.infoRow}><strong>이메일:</strong> {user.email}</div>
-                                <div style={styles.infoRow}><strong>친구 코드:</strong> {user.friendCode}</div>
-                                <div style={styles.infoRow}><strong>가입일:</strong> {user.joinedAt}</div>
+                                <div style={styles.infoRow}><strong>친구 코드:</strong> {user.friendCode ?? '없음'}</div>
+                                <div style={styles.infoRow}><strong>가입일:</strong> {user.createdAt?.slice(0, 10)}</div>
                             </div>
                         </div>
                     </div>
@@ -74,34 +74,33 @@ export default function AccountDetailPage() {
                     <div style={styles.profileSideBox}>
                         <div style={styles.header}>
                             <FaAngellist style={styles.avatar} />
-                            <span style={styles.accountTitle}>Statistics</span> {/*발표 관련 통계*/}
+                            <span style={styles.accountTitle}>Statistics</span>
                         </div>
-
                         <div style={styles.metricsItem}>
                             <FaCheckCircle style={styles.icon} />
-                            <span><strong>완료한 발표:</strong> {user.completedPresentation}회</span>
+                            <span><strong>완료한 발표:</strong> {user.completedPresentation ?? 0}회</span>
                         </div>
                         <div style={styles.metricsItem}>
                             <FaChartLine style={styles.icon} />
-                            <span><strong>평균 발표 점수:</strong> {user.averageScore}점</span>
+                            <span><strong>평균 발표 점수:</strong> {user.averageScore ?? 0}점</span>
                         </div>
                         <div style={styles.metricsItem}>
                             <FaBullseye style={styles.icon} />
                             <span>
-                                <strong>목표 점수:</strong> {user.targetScore}점
+                                <strong>목표 점수:</strong> {user.targetScore ?? 0}점
                                 <FaEdit style={styles.editIcon} onClick={handleEdit} />
                             </span>
                         </div>
                         <div style={styles.metricsItem}>
                             <FaPoll style={styles.icon} />
-                            <span><strong>평균 CPM:</strong> {user.averageCPM}</span>
+                            <span><strong>평균 CPM:</strong> {user.averageCPM ?? 0}</span>
                         </div>
                     </div>
                 </div>
 
                 <div style={styles.bottomSection}>
                     <div style={styles.gridBox}>
-                        <div style={styles.boxTitle}>{/*발표 기록*/}
+                        <div style={styles.boxTitle}>
                             <FaCheckCircle style={styles.icon} />
                             발표 기록 보기
                         </div>
@@ -110,7 +109,7 @@ export default function AccountDetailPage() {
                     </div>
 
                     <div style={styles.gridBox}>
-                        <div style={styles.boxTitle}>{/*STT*/}
+                        <div style={styles.boxTitle}>
                             <FaPoll style={styles.icon} />
                             임시 STT 테스트
                         </div>
@@ -119,14 +118,13 @@ export default function AccountDetailPage() {
                     </div>
 
                     <div style={styles.gridBox}>
-                        <div style={styles.boxTitle}>{/*CPM 측정*/}
+                        <div style={styles.boxTitle}>
                             <FaTachometerAlt style={styles.icon} />
                             CPM 계산 페이지
                         </div>
                         <div style={styles.placeholder}>당신의 CPM이 몇인지 측정하세요.</div>
                         <button style={styles.actionButton}>테스트</button>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -204,7 +202,7 @@ const styles = {
     },
     avatar: {
         fontSize: '26px',
-        color: '#673AB7',
+        color: mainColor,
     },
     title: {
         fontSize: '22px',
@@ -239,14 +237,6 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         color: '#999',
-    },
-    uploadLabel: {
-        backgroundColor: '#673AB7',
-        color: '#fff',
-        padding: '6px 12px',
-        borderRadius: '6px',
-        cursor: 'pointer',
-        fontSize: '12px',
     },
     infoText: {
         display: 'flex',

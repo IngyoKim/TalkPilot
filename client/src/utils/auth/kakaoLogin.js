@@ -25,11 +25,19 @@ async function initializeAndLogin(resolve, reject) {
 
     window.Kakao.Auth.login({
         success: async () => {
-            try {
-                console.log("[Kakao] 로그인 성공");
-                const userInfo = await window.Kakao.API.request({ url: "/v2/user/me" });
-                console.log("[Kakao] 사용자 정보:", userInfo);
+            let userInfo;
 
+            try {
+                console.log("[Kakao] 로그인 시도");
+                userInfo = await window.Kakao.API.request({ url: "/v2/user/me" });
+                console.log("[Kakao] 사용자 정보:", userInfo);
+            } catch (error) {
+                console.error("[Kakao] 로그인 실패:", error);
+                return reject(error);
+            }
+
+            let token;
+            try {
                 const payload = {
                     uid: userInfo.id.toString(),
                     displayName: userInfo.kakao_account?.profile?.nickname || "",
@@ -44,28 +52,47 @@ async function initializeAndLogin(resolve, reject) {
                     body: JSON.stringify(payload),
                 });
 
-                const { token } = await tokenRes.json();
-                if (!token) throw new Error("Custom token is empty");
-                console.log("[Firebase] 커스텀 토큰 수신 완료");
+                if (!tokenRes.ok) {
+                    const text = await tokenRes.text();
+                    throw new Error(`Token fetch 실패: ${text}`);
+                }
 
+                const json = await tokenRes.json();
+                token = json.token;
+                if (!token) throw new Error("커스텀 토큰이 비어 있음");
+
+                console.log("[Firebase] 커스텀 토큰 수신 완료");
+            } catch (error) {
+                console.error("[Firebase] 커스텀 토큰 생성 실패:", error);
+                return reject(error);
+            }
+
+            let firebaseUser;
+            try {
                 const auth = getAuth();
                 const userCredential = await signInWithCustomToken(auth, token);
-                const user = userCredential.user;
-                console.log("[Firebase] 로그인 성공:", user);
+                firebaseUser = userCredential.user;
+                console.log("[Firebase] 로그인 성공:", firebaseUser);
+            } catch (error) {
+                console.error("[Firebase] 로그인 실패:", error);
+                return reject(error);
+            }
 
-                const idToken = await user.getIdToken();
+            try {
+                const idToken = await firebaseUser.getIdToken();
                 console.log("[Firebase] ID 토큰 발급 완료:", idToken);
 
                 await serverLogin(idToken);
-                resolve(user);
-            } catch (err) {
-                console.error("[Kakao → Firebase] 인증 실패", err);
-                reject(err);
+                console.log("[Nest] 서버 로그인 성공");
+                resolve(firebaseUser);
+            } catch (error) {
+                console.error("[Nest] 서버 인증 실패:", error);
+                reject(error);
             }
         },
-        fail: (err) => {
-            console.error("[Kakao] 로그인 실패", err);
-            reject(err);
+        fail: (error) => {
+            console.error("[Kakao] 로그인 실패", error);
+            reject(error);
         },
     });
 }

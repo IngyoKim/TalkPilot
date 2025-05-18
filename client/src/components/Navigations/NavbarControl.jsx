@@ -17,7 +17,7 @@ const mainColor = '#673AB7';
 
 export default function NavbarControls({ isSidebarOpen, onToggleSidebar }) {
     const navigate = useNavigate();
-    const { user } = useUser(); // ✅ UserContext에서 가져옴
+    const { user } = useUser();
     const [isHovered, setIsHovered] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);

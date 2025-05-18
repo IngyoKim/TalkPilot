@@ -1,11 +1,13 @@
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { SttModule } from './stt/stt.module';
+import { AuthModule } from './auth/auth.module';
 import { AuthMiddleware } from './auth/auth.middleware';
 import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
+    AuthModule,
     UserModule,
     SttModule,
     DatabaseModule,

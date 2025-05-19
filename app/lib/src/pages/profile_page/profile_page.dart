@@ -1,3 +1,4 @@
+// profile_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -9,6 +10,8 @@ import 'package:talk_pilot/src/pages/profile_page/cpm_calculate_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/stats_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_drawer.dart';
+
+import 'presentation_history_page.dart'; // 새 페이지 import
 
 // ignore_for_file: use_build_context_synchronously
 class ProfilePage extends StatefulWidget {
@@ -88,10 +91,6 @@ class _ProfilePageState extends State<ProfilePage> {
               },
               onNicknameSubmit: (value) async {
                 if (userModel != null) {
-                  // final updated = userModel.copyWith(
-                  //   nickname: value,
-                  //   updatedAt: DateTime.now(),
-                  // );
                   await context.read<UserProvider>().updateUser({
                     UserField.nickname: value,
                   });
@@ -113,7 +112,14 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 30),
             ElevatedButton.icon(
-              onPressed: () => debugPrint('발표 기록 보기 버튼 클릭'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PresentationHistoryPage(),
+                  ),
+                );
+              },
               icon: const Icon(Icons.history, color: Colors.white),
               label: const Text(
                 '발표 기록 보기',

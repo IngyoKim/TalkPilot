@@ -2,16 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:talk_pilot/src/models/user_model.dart';
-import 'package:talk_pilot/src/pages/stt_page.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
 
-import 'package:talk_pilot/src/pages/profile_page/stt_test_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/cpm_calculate_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/stats_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_drawer.dart';
-import 'package:talk_pilot/src/pages/profile_page/docx_text_page.dart';
 
 // ignore_for_file: use_build_context_synchronously
 class ProfilePage extends StatefulWidget {
@@ -132,27 +129,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SttTestPage()),
-                );
-              },
-              icon: const Icon(Icons.mic, color: Colors.white),
-              label: const Text(
-                '임시 STT 테스트 페이지',
-                style: TextStyle(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurpleAccent,
-                minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
               onPressed: () async {
                 final result = await Navigator.push(
                   context,
@@ -172,48 +148,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.indigo,
-                minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const DocxTextPage()),
-                );
-              },
-              icon: const Icon(Icons.description, color: Colors.white),
-              label: const Text(
-                'DOCX 텍스트 추출 테스트',
-                style: TextStyle(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueGrey,
-                minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SttPage()),
-                );
-              },
-              icon: const Icon(Icons.note_alt, color: Colors.white),
-              label: const Text(
-                'TXT 텍스트 추출 테스트',
-                style: TextStyle(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
                 minimumSize: const Size.fromHeight(50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

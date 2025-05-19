@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import Sidebar from '../../components/SideBar';
-import ProfileDropDown from './ProfileDropdown';
+import ProfileDropdown from './ProfileDropdown';
 
 const mainColor = '#673AB7';
 
-export default function HelpCenter() {
+export default function Help() {
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -19,7 +19,7 @@ export default function HelpCenter() {
                     transition: 'margin-left 0.3s ease',
                 }}
             >
-                <ProfileDropDown
+                <ProfileDropdown
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
                 />

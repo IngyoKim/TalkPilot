@@ -14,7 +14,7 @@ import { logout } from '../../utils/auth/auth';
 
 const mainColor = '#673AB7';
 
-export default function ProfileDropDown({ isSidebarOpen, onToggleSidebar, user }) {
+export default function ProfileDropdown({ isSidebarOpen, onToggleSidebar, user }) {
     const navigate = useNavigate();
     const [isHovered, setIsHovered] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Sidebar from '../../components/SideBar';
-import ProfileDropDown from './ProfileDropdown';
+import ProfileDropdown from './ProfileDropdown';
 import {
     FaEdit,
     FaCheckCircle,
@@ -35,7 +35,7 @@ export default function ProfilePage() {
     return (
         <div style={styles.container}>
             <div style={{ ...styles.navbar, marginLeft: isSidebarOpen ? 240 : 0, transition: 'all 0.3s ease' }}>
-                <ProfileDropDown
+                <ProfileDropdown
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={handleToggleSidebar}
                     user={user}

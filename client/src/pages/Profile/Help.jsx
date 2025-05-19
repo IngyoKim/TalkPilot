@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import Sidebar from '../../components/SideBar';
 import { FaSearch } from "react-icons/fa";
-import ProfileDropDown from './ProfileDropdown';
+import ProfileDropdown from './ProfileDropdown';
 
-export default function ContactUs() {
+export default function Contact() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [query, setQuery] = useState('');
 
@@ -27,7 +27,7 @@ export default function ContactUs() {
                     marginLeft: isSidebarOpen ? styles.sidebarWidth : 0,
                 }}
             >
-                <ProfileDropDown
+                <ProfileDropdown
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
                 />

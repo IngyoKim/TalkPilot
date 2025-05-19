@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/models/script_part_model.dart';
+import 'package:talk_pilot/src/services/database/project_service.dart';
 
 class EditableTextEditor extends StatefulWidget {
   final String projectId;
@@ -28,11 +29,13 @@ class EditableTextEditor extends StatefulWidget {
 
 class _EditableTextEditorState extends State<EditableTextEditor> {
   late TextEditingController _controller;
+  late String _oldText;
   late List<ScriptPartModel> _scriptParts;
 
   @override
   void initState() {
     super.initState();
+    _oldText = widget.value;
     _scriptParts = List.from(widget.scriptParts);
     _controller = TextEditingController(text: widget.value);
   }
@@ -52,6 +55,7 @@ class _EditableTextEditorState extends State<EditableTextEditor> {
       final newPos = oldSelection.baseOffset.clamp(0, widget.value.length);
       _controller.selection = TextSelection.collapsed(offset: newPos);
 
+      _oldText = widget.value;
       _scriptParts = List.from(widget.scriptParts);
     }
   }
@@ -59,8 +63,8 @@ class _EditableTextEditorState extends State<EditableTextEditor> {
   Color getColorForUid(String uid) {
     final colors = [
       Colors.blue,
-      Colors.green,
       Colors.orange,
+      Colors.green,
       Colors.purple,
       Colors.red,
       Colors.teal,
@@ -101,6 +105,7 @@ class _EditableTextEditorState extends State<EditableTextEditor> {
         final segmentText = text.substring(segmentStart, i);
         final bgColor =
             currentUid != null
+                // ignore: deprecated_member_use
                 ? getColorForUid(currentUid).withOpacity(0.3)
                 : Colors.transparent;
 
@@ -123,7 +128,76 @@ class _EditableTextEditorState extends State<EditableTextEditor> {
     return spans;
   }
 
-  // 텍스트 수정 시 파트 인덱스 자동 보정 함수 (생략 - 기존 코드 사용)
+  /// 텍스트 수정 시 파트 인덱스 자동 보정 함수
+  List<ScriptPartModel> adjustScriptParts(
+    List<ScriptPartModel> parts,
+    int changePos,
+    int changeLen,
+  ) {
+    if (changeLen == 0) return parts;
+
+    List<ScriptPartModel> adjusted = [];
+    int absLen = changeLen.abs();
+
+    for (var part in parts) {
+      int start = part.startIndex;
+      int end = part.endIndex;
+
+      if (changeLen > 0) {
+        // 삽입: 단순 인덱스 증가
+        if (start >= changePos) start += changeLen;
+        if (end >= changePos) end += changeLen;
+        adjusted.add(
+          ScriptPartModel(uid: part.uid, startIndex: start, endIndex: end),
+        );
+      } else {
+        if (end <= changePos) {
+          adjusted.add(part);
+        } else if (start >= changePos + absLen) {
+          start -= absLen;
+          end -= absLen;
+          if (start < end) {
+            adjusted.add(
+              ScriptPartModel(uid: part.uid, startIndex: start, endIndex: end),
+            );
+          }
+        } else if (start < changePos && end > changePos + absLen) {
+          adjusted.add(
+            ScriptPartModel(
+              uid: part.uid,
+              startIndex: start,
+              endIndex: changePos,
+            ),
+          );
+          adjusted.add(
+            ScriptPartModel(
+              uid: part.uid,
+              startIndex: changePos,
+              endIndex: end - absLen,
+            ),
+          );
+        } else if (start < changePos && end > changePos) {
+          adjusted.add(
+            ScriptPartModel(
+              uid: part.uid,
+              startIndex: start,
+              endIndex: changePos,
+            ),
+          );
+        } else if (start >= changePos && end > changePos + absLen) {
+          start = changePos;
+          end -= absLen;
+          if (start < end) {
+            adjusted.add(
+              ScriptPartModel(uid: part.uid, startIndex: start, endIndex: end),
+            );
+          }
+        }
+      }
+    }
+
+    return adjusted;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +219,30 @@ class _EditableTextEditorState extends State<EditableTextEditor> {
                 fillColor: Colors.grey[100],
               ),
               onChanged: (text) async {
-                // 변경 처리 등 기존 로직 유지
+                int changePos = 0;
+                while (changePos < _oldText.length &&
+                    changePos < text.length &&
+                    _oldText[changePos] == text[changePos]) {
+                  changePos++;
+                }
+                int oldLenRem = _oldText.length - changePos;
+                int newLenRem = text.length - changePos;
+
+                int changeLen = newLenRem - oldLenRem;
+
+                _scriptParts = adjustScriptParts(
+                  _scriptParts,
+                  changePos,
+                  changeLen,
+                );
+
+                await ProjectService().updateProject(widget.projectId, {
+                  widget.field.key: text,
+                  ProjectField.scriptParts.key:
+                      _scriptParts.map((e) => e.toMap()).toList(),
+                });
+
+                _oldText = text;
               },
             )
             : Container(

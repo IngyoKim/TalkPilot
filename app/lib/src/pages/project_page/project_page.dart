@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:talk_pilot/src/models/project_model.dart';
+import 'package:talk_pilot/src/pages/project_page/widgets/script_part_page.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
@@ -118,6 +119,27 @@ class _ProjectPageState extends State<ProjectPage> {
                 ),
               ].expand((widget) => [widget, const SizedBox(height: 16)]),
               const SizedBox(height: 24),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ElevatedButton(
+                    onPressed:
+                        isEditable
+                            ? () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) =>
+                                          ScriptPartPage(projectId: project.id),
+                                ),
+                              );
+                            }
+                            : null,
+                    child: const Text('대본 파트 할당하기'),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
 
               PracticeButton(project: project),
             ],

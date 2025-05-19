@@ -71,7 +71,11 @@ class ProjectModel {
       ownerUid: map['ownerUid'] ?? '',
       participants:
           map['participants'] != null
-              ? Map<String, String>.from(map['participants'])
+              ? Map<String, String>.from(
+                (map['participants'] as Map).map(
+                  (k, v) => MapEntry(k.toString(), v.toString()),
+                ),
+              )
               : {},
       status: map['status'] ?? 'preparing',
       estimatedTime:
@@ -87,9 +91,13 @@ class ProjectModel {
       memo: map['memo'] ?? '',
       scriptParts:
           map['scriptParts'] != null
-              ? List<Map<String, dynamic>>.from(
-                map['scriptParts'],
-              ).map((e) => ScriptPartModel.fromMap(e)).toList()
+              ? (map['scriptParts'] as List)
+                  .map(
+                    (error) => ScriptPartModel.fromMap(
+                      Map<String, dynamic>.from(error),
+                    ),
+                  )
+                  .toList()
               : null,
     );
   }

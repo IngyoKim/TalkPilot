@@ -19,6 +19,7 @@ export class AppModule implements NestModule {
       .apply(AuthMiddleware)
       .forRoutes(
         { path: 'me', method: RequestMethod.ALL },
+        { path: 'user', method: RequestMethod.ALL },
       );
   }
 }

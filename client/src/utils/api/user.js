@@ -13,7 +13,7 @@ export async function fetchUserByUid(uid) {
     return await res.json();
 }
 
-
+/// Nest에서 user의 [updates]를 업데이트함.
 export async function updateUser(updates) {
     const token = await getIdToken();
 

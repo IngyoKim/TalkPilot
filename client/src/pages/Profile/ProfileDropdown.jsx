@@ -14,7 +14,7 @@ import { logout } from '../../utils/auth/auth';
 
 const mainColor = '#673AB7';
 
-export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user }) {
+export default function ProfileDropdown({ isSidebarOpen, onToggleSidebar, user }) {
     const navigate = useNavigate();
     const [isHovered, setIsHovered] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -55,10 +55,9 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user })
     };
 
     const menuItems = [
-        { icon: <FaUserEdit />, label: 'Account Detail', onClick: () => navigate('../AccountDetail'), },
-        { icon: <FaCog />, label: 'Setting', onClick: () => console.log('설정') },
-        { icon: <FaQuestionCircle />, label: 'Help Center', onClick: () => console.log('도움말') },
-        { icon: <FaEnvelope />, label: 'Contact us', onClick: () => console.log('문의하기') },
+        { icon: <FaUserEdit />, label: 'Account Detail', onClick: () => navigate('../profile'), },
+        { icon: <FaQuestionCircle />, label: 'Help', onClick: () => navigate('../help') },
+        { icon: <FaEnvelope />, label: 'Contact us', onClick: () => navigate('../contact') },
         { icon: <FaSignOutAlt />, label: 'Log Out', onClick: handleLogout, isDanger: true },
     ];
 

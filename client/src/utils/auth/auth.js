@@ -35,6 +35,7 @@ export const getCurrentUid = () => {
     return user.uid;
 };
 
+/// Firebase에서 Id token을 가져옴
 export const getIdToken = async () => {
     const user = getAuth().currentUser;
     if (!user) throw new Error('로그인된 사용자가 없습니다.');

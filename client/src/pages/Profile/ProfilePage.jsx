@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { useUser } from '../../contexts/UserContext';
-import Sidebar from './SideBar';
-import NavbarControls from './NavbarControl';
 import { FaUserCircle } from 'react-icons/fa';
-
+import Sidebar from '../../components/SideBar';
+import ProfileDropdown from './ProfileDropdown';
+import { useUser } from '../../contexts/UserContext';
 import {
     FaEdit,
     FaCheckCircle,
@@ -16,7 +15,7 @@ import {
 
 const mainColor = '#673AB7';
 
-export default function AccountDetailPage() {
+export default function ProfilePage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [profileImage] = useState(null);
     const { user } = useUser();
@@ -31,7 +30,7 @@ export default function AccountDetailPage() {
     return (
         <div style={styles.container}>
             <div style={{ ...styles.navbar, marginLeft: isSidebarOpen ? 240 : 0, transition: 'all 0.3s ease' }}>
-                <NavbarControls
+                <ProfileDropdown
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={handleToggleSidebar}
                 />

@@ -3,7 +3,6 @@ import {
     FaChevronLeft,
     FaChevronRight,
     FaUser,
-    FaCog,
     FaQuestionCircle,
     FaEnvelope,
     FaSignOutAlt,
@@ -15,7 +14,7 @@ import { useUser } from '../../contexts/UserContext';
 
 const mainColor = '#673AB7';
 
-export default function NavbarControls({ isSidebarOpen, onToggleSidebar }) {
+export default function ProfileDropdown({ isSidebarOpen, onToggleSidebar }) {
     const navigate = useNavigate();
     const { user } = useUser();
     const [isHovered, setIsHovered] = useState(false);
@@ -52,11 +51,27 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar }) {
     };
 
     const menuItems = [
-        { icon: <FaUserEdit />, label: 'Account Detail', onClick: () => navigate('../AccountDetail'), },
-        { icon: <FaCog />, label: 'Setting', onClick: () => console.log('설정') },
-        { icon: <FaQuestionCircle />, label: 'Help Center', onClick: () => console.log('도움말') },
-        { icon: <FaEnvelope />, label: 'Contact us', onClick: () => console.log('문의하기') },
-        { icon: <FaSignOutAlt />, label: 'Log Out', onClick: handleLogout, isDanger: true },
+        {
+            icon: <FaUserEdit />,
+            label: 'Account Detail',
+            onClick: () => navigate('../profile'),
+        },
+        {
+            icon: <FaQuestionCircle />,
+            label: 'Help',
+            onClick: () => navigate('../help'),
+        },
+        {
+            icon: <FaEnvelope />,
+            label: 'Contact us',
+            onClick: () => navigate('../contact'),
+        },
+        {
+            icon: <FaSignOutAlt />,
+            label: 'Log Out',
+            onClick: handleLogout,
+            isDanger: true,
+        },
     ];
 
     return (

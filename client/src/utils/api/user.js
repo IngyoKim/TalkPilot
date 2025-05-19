@@ -1,5 +1,6 @@
 import { getIdToken } from '../auth/auth';
 
+/// Nest에서 uid로 유저 정보를 가져옴.
 export async function fetchUserByUid(uid) {
     const token = await getIdToken();
     const res = await fetch(`/api/user/${uid}`, {

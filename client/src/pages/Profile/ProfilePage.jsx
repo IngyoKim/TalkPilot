@@ -79,7 +79,7 @@ export default function ProfilePage() {
                             </div>
                             <div style={styles.infoText}>
                                 <div style={styles.infoRow}>
-                                    <strong>이름:</strong>{' '}
+                                    <strong>닉네임:</strong>{' '}
                                     {isEditingNickname ? (
                                         <>
                                             <input
@@ -98,8 +98,8 @@ export default function ProfilePage() {
                                         </>
                                     )}
                                 </div>
+                                <div style={styles.infoRow}><strong>이름:</strong> {user.name ?? ''}</div>
                                 <div style={styles.infoRow}><strong>이메일:</strong> {user.email}</div>
-                                <div style={styles.infoRow}><strong>친구 코드:</strong> {user.friendCode ?? '없음'}</div>
                                 <div style={styles.infoRow}><strong>가입일:</strong> {user.createdAt?.slice(0, 10)}</div>
                             </div>
                         </div>

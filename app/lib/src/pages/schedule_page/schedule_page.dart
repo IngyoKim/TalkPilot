@@ -28,14 +28,14 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Future<void> _initialize() async {
-    await controller.loadColors();
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid != null) {
-      await controller.loadEvents(uid);
-      setState(() {});
-    }
+  await controller.loadColors();
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+  if (uid != null) {
+    await controller.loadEvents(uid);
+    if (!mounted) return;
+    setState(() {});
   }
-
+}
   void _onDayTapped(DateTime selected, DateTime focused) {
     setState(() {
       _selectedDay = controller.normalize(selected);

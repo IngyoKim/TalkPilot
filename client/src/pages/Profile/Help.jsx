@@ -3,7 +3,7 @@ import Sidebar from '../../components/SideBar';
 import { FaSearch } from "react-icons/fa";
 import ProfileDropdown from './ProfileDropdown';
 
-export default function Contact() {
+export default function Help() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [query, setQuery] = useState('');
 

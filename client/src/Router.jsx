@@ -12,7 +12,7 @@ export default function Router() {
         <Routes>
             <Route path="/login" element={<LoginPage />} />
 
-            <Route path="/profilepage" element={<ProfilePage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/help" element={<Help />} />
             <Route path="/contact" element={<Contact />} />
 

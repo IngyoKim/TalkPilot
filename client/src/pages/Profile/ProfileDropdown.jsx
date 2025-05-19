@@ -14,7 +14,7 @@ import { logout } from '../../utils/auth/auth';
 
 const mainColor = '#673AB7';
 
-export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user }) {
+export default function ProfileDropDown({ isSidebarOpen, onToggleSidebar, user }) {
     const navigate = useNavigate();
     const [isHovered, setIsHovered] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -56,7 +56,6 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user })
 
     const menuItems = [
         { icon: <FaUserEdit />, label: 'Account Detail', onClick: () => navigate('../AccountDetail'), },
-        { icon: <FaCog />, label: 'Setting', onClick: () => navigate('../Setting') },
         { icon: <FaQuestionCircle />, label: 'Help Center', onClick: () => navigate('../HelpCenter') },
         { icon: <FaEnvelope />, label: 'Contact us', onClick: () => navigate('../ContactUs') },
         { icon: <FaSignOutAlt />, label: 'Log Out', onClick: handleLogout, isDanger: true },

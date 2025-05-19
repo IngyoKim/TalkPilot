@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import Sidebar from '../Navigations/SideBar';
-import NavbarControls from '../Navigations/NavbarControl';
+import Sidebar from '../../components/SideBar';
+import NavbarControls from './ProfileDropdown';
 import { FaSearch } from "react-icons/fa";
+import ProfileDropDown from './ProfileDropdown';
 
 export default function ContactUs() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -10,7 +11,8 @@ export default function ContactUs() {
     const items = [
         'TalkPilot이 뭔가요?',
         '처음엔 어떻게 사용하나요?',
-        '다른 사용자들은 어떻게 초대하나요?'
+        '다른 사용자들은 어떻게 초대하나요?',
+        ''
     ];
 
     const filteredItems = items.filter(item =>
@@ -26,7 +28,7 @@ export default function ContactUs() {
                     marginLeft: isSidebarOpen ? styles.sidebarWidth : 0,
                 }}
             >
-                <NavbarControls
+                <ProfileDropDown
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
                 />

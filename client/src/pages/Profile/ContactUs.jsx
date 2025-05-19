@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import Sidebar from '../Navigations/SideBar';
-import NavbarControls from '../Navigations/NavbarControl';
+import Sidebar from '../../components/SideBar';
+import NavbarControls from './ProfileDropdown';
+import ProfileDropDown from './ProfileDropdown';
 
 const mainColor = '#673AB7';
 
 export default function HelpCenter() {
 
-    // 사이드바 열림/닫힘 상태 관리
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     return (
@@ -22,8 +22,7 @@ export default function HelpCenter() {
                     transition: 'margin-left 0.3s ease',
                 }}
             >
-                {/* 상단 바 제어 버튼 */}
-                <NavbarControls
+                <ProfileDropDown
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
                 />
@@ -31,14 +30,14 @@ export default function HelpCenter() {
                 <div style={styles.container}>
                     {/* 왼쪽: 사용자 입력 폼 */}
                     <div style={styles.left}>
-                        <h2 style={styles.heading}>How can we help?</h2>
+                        <h2 style={styles.heading}>뭘 도와드릴까요?</h2>
                         <p style={styles.description}>
-                            Send us a message or question and we’ll help you as soon as we can.
+                            메시지나 질문을 보내주시면 저희가 도와드리겠습니다.
                         </p>
                         <input style={styles.input} placeholder="이름" />
                         <input style={styles.input} placeholder="이메일 주소" />
                         <textarea style={styles.textarea} placeholder="내용" />
-                        <button style={styles.sendBtn}>전달</button>
+                        <button style={styles.sendBtn}>전달하기</button>
                     </div>
 
                     {/* 오른쪽: 오피스 정보 카드 및 로고 */}
@@ -52,7 +51,7 @@ export default function HelpCenter() {
                         {/* 대학교 로고 */}
                         <img
                             src="/assets/CBNU_white.png"
-                            alt="Chungbuk National University Logo"
+                            alt="CBNU Logo"
                             style={styles.logo}
                         />
                     </div>
@@ -73,12 +72,12 @@ function OfficeCard({ city, address, phone, hours }) {
             <p style={styles.officeText}>{address}</p>
             {phone && (
                 <p style={styles.officeText}>
-                    <b>일반 문의 및 청구:</b><br />
+                    <b>일반 문의:</b><br />
                     {phone}<br />
                     {hours}
                 </p>
             )}
-            <button style={styles.viewMapBtn}>View Map</button>
+            <button style={styles.viewMapBtn}>위치 확인</button>
         </div>
     );
 }
@@ -138,7 +137,7 @@ const styles = {
         borderRadius: '24px',
         fontSize: '16px',
         cursor: 'pointer',
-        width: '150px',
+        width: '100px',
     },
     right: {
         flex: 1,

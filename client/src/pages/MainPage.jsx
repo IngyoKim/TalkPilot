@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import Sidebar from './Navigations/SideBar';
-import NavbarControls from './Navigations/NavbarControl';
+import Sidebar from '../components/SideBar';
+import ProfileDropdown from './Profile/ProfileDropdown';
 
 const mainColor = '#673AB7';
 
@@ -16,7 +16,7 @@ export default function MainPage() {
         <div style={styles.container}>
             {/* Top Navbar */}
             <div style={{ ...styles.navbar, marginLeft: isSidebarOpen ? '240px' : '0' }}>
-                <NavbarControls
+                <ProfileDropdown
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={handleToggleSidebar}
                     onProfileClick={handleProfileClick}

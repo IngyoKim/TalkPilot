@@ -86,6 +86,7 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
     return map;
   }
 
+  /// 텍스트 배경색
   List<InlineSpan> buildTextSpans(
     ProjectModel project,
     List<ScriptPartModel> scriptParts,
@@ -180,14 +181,13 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
     return spans;
   }
 
-  int _getBestTextPositionFromLocalOffset(Offset localOffset) {
+  int _getTextLocalOffset(Offset localOffset) {
     final renderObject = _richTextKey.currentContext?.findRenderObject();
     if (renderObject == null || renderObject is! RenderParagraph) {
       return 0;
     }
     final renderParagraph = renderObject;
 
-    // 후보 좌표: 현재 위치와 왼쪽 1~2글자 범위로 보정 (글자 넓이 기준으로)
     final textStyle = _textStyle;
     final textPainter = TextPainter(
       text: TextSpan(text: _text, style: textStyle),
@@ -197,7 +197,6 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
     textPainter.layout(maxWidth: renderParagraph.size.width);
 
     double avgCharWidth = textPainter.size.width / _text.length;
-    // 보정할 오프셋 후보군 생성 (현재 위치와 왼쪽으로 1, 2 글자 너비만큼 이동한 위치)
     final candidates = [
       localOffset,
       Offset(localOffset.dx - avgCharWidth, localOffset.dy),
@@ -225,26 +224,27 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
     return bestOffset.clamp(0, _text.length);
   }
 
-  int _getTextPositionFromGlobalOffset(Offset globalPosition) {
+  int _getTextGlobalOffset(Offset globalPosition) {
     final box = _richTextKey.currentContext?.findRenderObject() as RenderBox?;
     if (box == null) return 0;
 
     final localOffset = box.globalToLocal(globalPosition);
-    return _getBestTextPositionFromLocalOffset(localOffset);
+    return _getTextLocalOffset(localOffset);
   }
 
+  /// 파트 덮어쓰기
   void _overwriteParts(int start, int end) {
     final s = start < end ? start : end;
     final e = start > end ? start : end;
 
-    // 겹치는 기존 파트를 겹치지 않는 영역만 남기도록 수정
+    /// 겹치는 기존 파트를 겹치지 않는 영역만 남기도록 수정
     final List<ScriptPartModel> newParts = [];
     for (final part in scriptParts) {
       if (e <= part.startIndex || s >= part.endIndex) {
-        // 겹치지 않는 부분은 그대로 유지
+        /// 겹치지 않는 부분은 그대로 유지
         newParts.add(part);
       } else {
-        // 겹치는 부분은 기존 파트를 잘라서 겹치지 않는 부분만 남김
+        /// 겹치는 부분은 기존 파트를 잘라서 겹치지 않는 부분만 남김
         if (part.startIndex < s) {
           newParts.add(
             ScriptPartModel(
@@ -266,7 +266,7 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
       }
     }
 
-    // 새 파트 추가
+    /// 새 파트 추가
     newParts.add(
       ScriptPartModel(uid: selectedUid!, startIndex: s, endIndex: e),
     );
@@ -304,6 +304,7 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
                 ProjectField.scriptParts:
                     scriptParts.map((e) => e.toMap()).toList(),
               });
+              // ignore: use_build_context_synchronously
               Navigator.pop(context);
             },
             tooltip: '저장',
@@ -320,38 +321,45 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
                   children: [
                     Row(
                       children: [
-                        DropdownButton<String>(
-                          value: selectedUid,
-                          hint: const Text('참여자 선택'),
-                          isExpanded: false,
-                          items:
-                              participants.entries
-                                  .map(
-                                    (e) => DropdownMenuItem(
-                                      value: e.key,
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 14,
-                                            height: 14,
-                                            margin: const EdgeInsets.only(
-                                              right: 8,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: getColorForUid(
-                                                e.key,
-                                                project,
+                        Expanded(
+                          child: DropdownButton<String>(
+                            value: selectedUid,
+                            hint: const Text('참여자 선택'),
+                            isExpanded: true,
+                            items:
+                                participants.entries
+                                    .map(
+                                      (e) => DropdownMenuItem(
+                                        value: e.key,
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 14,
+                                              height: 14,
+                                              margin: const EdgeInsets.only(
+                                                right: 8,
                                               ),
-                                              shape: BoxShape.circle,
+                                              decoration: BoxDecoration(
+                                                color: getColorForUid(
+                                                  e.key,
+                                                  project,
+                                                ),
+                                                shape: BoxShape.circle,
+                                              ),
                                             ),
-                                          ),
-                                          Text('${e.value} (${e.key})'),
-                                        ],
+                                            Flexible(
+                                              child: Text(
+                                                '${e.value} (${e.key})',
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                  .toList(),
-                          onChanged: (v) => setState(() => selectedUid = v),
+                                    )
+                                    .toList(),
+                            onChanged: (v) => setState(() => selectedUid = v),
+                          ),
                         ),
                         const SizedBox(width: 12),
                         if (selectedUid != null)
@@ -381,7 +389,7 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
                           return GestureDetector(
                             behavior: HitTestBehavior.translucent,
                             onPanStart: (details) {
-                              final startPos = _getTextPositionFromGlobalOffset(
+                              final startPos = _getTextGlobalOffset(
                                 details.globalPosition,
                               );
                               setState(() {
@@ -391,7 +399,7 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
                             },
                             onPanUpdate: (details) {
                               if (dragStartIndex == null) return;
-                              final pos = _getTextPositionFromGlobalOffset(
+                              final pos = _getTextGlobalOffset(
                                 details.globalPosition,
                               );
                               setState(() {

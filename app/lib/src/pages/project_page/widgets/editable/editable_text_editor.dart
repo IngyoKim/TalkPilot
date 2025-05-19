@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
+import 'package:talk_pilot/src/models/script_part_model.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 
 class EditableTextEditor extends StatefulWidget {
@@ -9,6 +10,7 @@ class EditableTextEditor extends StatefulWidget {
   final String value;
   final int maxLength;
   final bool editable;
+  final List<ScriptPartModel> scriptParts;
 
   const EditableTextEditor({
     super.key,
@@ -18,6 +20,7 @@ class EditableTextEditor extends StatefulWidget {
     required this.value,
     required this.maxLength,
     this.editable = false,
+    this.scriptParts = const [],
   });
 
   @override
@@ -45,6 +48,74 @@ class _EditableTextEditorState extends State<EditableTextEditor> {
     if (widget.value != oldWidget.value && widget.value != _controller.text) {
       _controller.text = widget.value;
     }
+  }
+
+  Color getColorForUid(String uid) {
+    final colors = [
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.red,
+      Colors.teal,
+      Colors.brown,
+    ];
+    final uids = widget.scriptParts.map((e) => e.uid).toSet().toList();
+    final index = uids.indexOf(uid);
+    if (index == -1) return Colors.grey; // 안전망
+    return colors[index % colors.length];
+  }
+
+  List<String?> _mapTextIndicesToUid(List<ScriptPartModel> parts, String text) {
+    List<String?> map = List<String?>.filled(text.length, null);
+    for (final part in parts) {
+      final start = part.startIndex.clamp(0, text.length);
+      final end = part.endIndex.clamp(0, text.length);
+      for (int i = start; i < end; i++) {
+        map[i] = part.uid;
+      }
+    }
+    return map;
+  }
+
+  List<InlineSpan> buildTextSpans(List<ScriptPartModel> parts, String text) {
+    if (text.isEmpty) {
+      return [const TextSpan(text: '(대본이 없습니다.)')];
+    }
+
+    final uidMap = _mapTextIndicesToUid(parts, text);
+    List<InlineSpan> spans = [];
+    String? currentUid = uidMap[0];
+    int segmentStart = 0;
+
+    for (int i = 1; i <= text.length; i++) {
+      final uid = (i < text.length) ? uidMap[i] : null;
+
+      if (uid != currentUid || i == text.length) {
+        final segmentText = text.substring(segmentStart, i);
+        final bgColor =
+            currentUid != null
+                // ignore: deprecated_member_use
+                ? getColorForUid(currentUid).withOpacity(0.3)
+                : Colors.transparent;
+
+        spans.add(
+          TextSpan(
+            text: segmentText,
+            style: TextStyle(
+              backgroundColor: bgColor,
+              fontWeight:
+                  currentUid != null ? FontWeight.bold : FontWeight.normal,
+              color: Colors.black,
+            ),
+          ),
+        );
+        currentUid = uid;
+        segmentStart = i;
+      }
+    }
+
+    return spans;
   }
 
   @override
@@ -80,9 +151,11 @@ class _EditableTextEditorState extends State<EditableTextEditor> {
                 border: Border.all(color: Colors.grey[300]!),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(
-                widget.value.isEmpty ? '(입력 없음)' : widget.value,
-                style: const TextStyle(fontSize: 14, color: Colors.black87),
+              child: RichText(
+                text: TextSpan(
+                  children: buildTextSpans(widget.scriptParts, widget.value),
+                  style: const TextStyle(fontSize: 14),
+                ),
               ),
             ),
       ],

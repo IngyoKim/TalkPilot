@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:talk_pilot/src/models/project_model.dart';
-import 'package:talk_pilot/src/pages/project_page/widgets/script_part_page.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/database/project_stream_service.dart';
+
+import 'package:talk_pilot/src/pages/project_page/widgets/practice_button.dart';
+import 'package:talk_pilot/src/pages/project_page/widgets/script_part_page.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/script_upload_button.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/editable/editable_text_editor.dart';
-import 'package:talk_pilot/src/pages/project_page/widgets/practice_button.dart';
 
 class ProjectPage extends StatefulWidget {
   final String projectId;
@@ -23,6 +24,8 @@ class ProjectPage extends StatefulWidget {
 class _ProjectPageState extends State<ProjectPage> {
   final _projectService = ProjectService();
   bool isLoading = false;
+
+  bool isScriptEditable = false; // 추가
 
   ProjectRole getUserRole(ProjectModel project, String? uid) {
     final role = project.participants[uid] ?? 'member';
@@ -109,37 +112,57 @@ class _ProjectPageState extends State<ProjectPage> {
                   maxLength: 1000,
                   editable: isEditable,
                 ),
-                EditableTextEditor(
-                  projectId: project.id,
-                  field: ProjectField.script,
-                  label: '대본',
-                  value: project.script ?? '',
-                  maxLength: 3000,
-                  editable: isEditable,
-                ),
               ].expand((widget) => [widget, const SizedBox(height: 16)]),
               const SizedBox(height: 24),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+
+              // 대본 편집 모드 토글 버튼
+              Row(
                 children: [
-                  ElevatedButton(
-                    onPressed:
-                        isEditable
-                            ? () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder:
-                                      (_) =>
-                                          ScriptPartPage(projectId: project.id),
-                                ),
-                              );
-                            }
-                            : null,
-                    child: const Text('대본 파트 할당하기'),
+                  const SizedBox(width: 12),
+                  const Text(
+                    '대본',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
-                  const SizedBox(height: 24),
+                  Expanded(flex: 1, child: Container()),
+                  if (isEditable)
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          isScriptEditable = !isScriptEditable;
+                        });
+                      },
+                      child: Text(isScriptEditable ? '편집 종료' : '편집 시작'),
+                    ),
+                  const SizedBox(width: 12),
                 ],
               ),
+              const SizedBox(height: 8),
+
+              EditableTextEditor(
+                projectId: project.id,
+                field: ProjectField.script,
+                label: '',
+                value: project.script ?? '',
+                maxLength: 3000,
+                editable: isEditable && isScriptEditable,
+                scriptParts: project.scriptParts ?? [],
+              ),
+
+              const SizedBox(height: 24),
+
+              if (isEditable)
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ScriptPartPage(projectId: project.id),
+                      ),
+                    );
+                  },
+                  child: const Text('대본 파트 할당하기'),
+                ),
+
+              const SizedBox(height: 24),
 
               PracticeButton(project: project),
             ],

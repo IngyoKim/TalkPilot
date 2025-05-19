@@ -55,8 +55,8 @@ export default function ProfileDropDown({ isSidebarOpen, onToggleSidebar, user }
     };
 
     const menuItems = [
-        { icon: <FaUserEdit />, label: 'Account Detail', onClick: () => navigate('../AccountDetail'), },
-        { icon: <FaQuestionCircle />, label: 'Help Center', onClick: () => navigate('../HelpCenter') },
+        { icon: <FaUserEdit />, label: 'Account Detail', onClick: () => navigate('../ProfilePage'), },
+        { icon: <FaQuestionCircle />, label: 'Help', onClick: () => navigate('../Help') },
         { icon: <FaEnvelope />, label: 'Contact us', onClick: () => navigate('../ContactUs') },
         { icon: <FaSignOutAlt />, label: 'Log Out', onClick: handleLogout, isDanger: true },
     ];

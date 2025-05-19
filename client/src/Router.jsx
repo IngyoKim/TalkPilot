@@ -4,7 +4,7 @@ import MainPage from "./pages/MainPage";
 import PrivateRoute from "./components/PrivateRoute";
 
 import ProfilePage from './pages//Profile/ProfilePage';
-import HelpCenter from './pages/Profile/HelpCenter';
+import Help from './pages/Profile/Help';
 import ContactUs from "./pages/Profile/ContactUs";
 
 export default function Router() {
@@ -13,7 +13,7 @@ export default function Router() {
             <Route path="/login" element={<LoginPage />} />
 
             <Route path="/ProfilePage" element={<ProfilePage />} />
-            <Route path="/HelpCenter" element={<HelpCenter />} />
+            <Route path="/Help" element={<Help />} />
             <Route path="/ContactUs" element={<ContactUs />} />
 
             <Route

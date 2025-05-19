@@ -13,7 +13,7 @@ import {
 
 const mainColor = '#673AB7';
 
-export default function AccountDetailPage() {
+export default function ProfilePage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [profileImage] = useState(null);
 

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import Sidebar from '../../components/SideBar';
-import NavbarControls from './ProfileDropdown';
 import { FaSearch } from "react-icons/fa";
 import ProfileDropDown from './ProfileDropdown';
 

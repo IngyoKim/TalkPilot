@@ -1,28 +1,45 @@
-import { Controller, Get, Req, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Req, Body, Param, NotFoundException } from '@nestjs/common';
 import { Request } from 'express';
+import { UserService } from './user.service';
 
 interface DecodedUser {
     uid: string;
     email?: string;
     name?: string;
     picture?: string;
+    firebase?: { sign_in_provider?: string };
 }
 
-@Controller('me')
+@Controller('user')
 export class UserController {
-    private readonly logger = new Logger(UserController.name);
+    constructor(private readonly userService: UserService) { }
 
-    @Get()
-    getCurrentUser(@Req() req: Request) {
+    @Get(':uid')
+    async getUserById(@Param('uid') uid: string) {
+        const user = await this.userService.readUser(uid);
+        if (!user) throw new NotFoundException('User not found');
+        return { uid, ...user };
+    }
+
+    @Post('init')
+    async initUser(@Req() req: Request) {
         const user = req['user'] as DecodedUser;
+        const loginMethod = user.firebase?.sign_in_provider ?? 'unknown';
+        await this.userService.initUser(user, loginMethod);
+        return { success: true };
+    }
 
-        this.logger.log(`요청된 사용자 정보: ${JSON.stringify(user)}`);
+    @Patch()
+    async updateUser(@Req() req: Request, @Body() updates: Record<string, any>) {
+        const uid = (req['user'] as DecodedUser).uid;
+        await this.userService.updateUser(uid, updates);
+        return { success: true };
+    }
 
-        return {
-            uid: user.uid,
-            email: user.email ?? null,
-            name: user.name ?? null,
-            picture: user.picture ?? null,
-        };
+    @Delete()
+    async deleteUser(@Req() req: Request) {
+        const uid = (req['user'] as DecodedUser).uid;
+        await this.userService.deleteUser(uid);
+        return { success: true };
     }
 }

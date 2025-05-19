@@ -16,15 +16,27 @@ class ScriptComparisonView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final recognizedWords = splitText(recognizedText);
+    final rawWords = splitText(recognizedText);
+    final seen = <String>{};
+    final recognizedWords = <String>[];
+
+    for (final word in rawWords) {
+      if (!seen.contains(word)) {
+        seen.add(word);
+        recognizedWords.add(word);
+      }
+    }
+
     final matchedFlags = List<bool>.filled(scriptChunks.length, false);
     final usedRecognizedIndexes = <int>{};
-
+    final usedScriptIndexes = <int>{};
     int lastMatchedRecognizedIndex = -1;
 
     for (int i = 0; i < scriptChunks.length; i++) {
-      final start = (lastMatchedRecognizedIndex + 1 - 10).clamp(0, recognizedWords.length);
-      final end = (lastMatchedRecognizedIndex + 1 + 10).clamp(0, recognizedWords.length);
+      if (usedScriptIndexes.contains(i)) continue;
+
+      final start = (lastMatchedRecognizedIndex + 1 - 5).clamp(0, recognizedWords.length);
+      final end = (lastMatchedRecognizedIndex + 1 + 5).clamp(0, recognizedWords.length);
 
       for (int j = start; j < end; j++) {
         if (usedRecognizedIndexes.contains(j)) continue;
@@ -32,6 +44,7 @@ class ScriptComparisonView extends StatelessWidget {
         if (isSimilar(scriptChunks[i], recognizedWords[j])) {
           matchedFlags[i] = true;
           usedRecognizedIndexes.add(j);
+          usedScriptIndexes.add(i);
           lastMatchedRecognizedIndex = j;
           break;
         }

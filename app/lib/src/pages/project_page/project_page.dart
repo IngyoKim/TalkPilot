@@ -11,15 +11,15 @@ import 'package:talk_pilot/src/pages/project_page/widgets/script_upload_button.d
 import 'package:talk_pilot/src/pages/project_page/widgets/editable/editable_text_editor.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/practice_button.dart';
 
-class ProjectDetailPage extends StatefulWidget {
+class ProjectPage extends StatefulWidget {
   final String projectId;
-  const ProjectDetailPage({super.key, required this.projectId});
+  const ProjectPage({super.key, required this.projectId});
 
   @override
-  State<ProjectDetailPage> createState() => _ProjectDetailPageState();
+  State<ProjectPage> createState() => _ProjectPageState();
 }
 
-class _ProjectDetailPageState extends State<ProjectDetailPage> {
+class _ProjectPageState extends State<ProjectPage> {
   final _projectService = ProjectService();
   bool isLoading = false;
 

@@ -12,7 +12,7 @@ enum ProjectField {
   script,
   scheduledDate,
   memo,
-  scriptPart,
+  scriptParts,
 }
 
 extension ProjectFieldExt on ProjectField {

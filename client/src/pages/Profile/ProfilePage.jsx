@@ -1,27 +1,47 @@
+// pages/ProfilePage.jsx
 import { useState } from 'react';
-import { FaUserCircle } from 'react-icons/fa';
+import { FaUserCircle, FaEdit, FaCheckCircle, FaChartLine, FaBullseye, FaPoll, FaAngellist, FaTachometerAlt } from 'react-icons/fa';
 import Sidebar from '../../components/SideBar';
 import ProfileDropdown from './ProfileDropdown';
 import { useUser } from '../../contexts/UserContext';
-import {
-    FaEdit,
-    FaCheckCircle,
-    FaChartLine,
-    FaBullseye,
-    FaPoll,
-    FaAngellist,
-    FaTachometerAlt,
-} from 'react-icons/fa';
+import { updateUser } from '../../utils/api/user';
 
 const mainColor = '#673AB7';
 
 export default function ProfilePage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [profileImage] = useState(null);
-    const { user } = useUser();
+    const { user, setUser } = useUser();
 
-    const handleEdit = () => alert('구현할까 고민중.');
+    const [isEditingNickname, setIsEditingNickname] = useState(false);
+    const [nickname, setNickname] = useState(user?.name ?? '');
+
     const handleToggleSidebar = () => setIsSidebarOpen(prev => !prev);
+
+    // 닉네임 수정 시작
+    const startEditNickname = () => {
+        setNickname(user?.nickname ?? '');
+        setIsEditingNickname(true);
+    };
+
+    // 닉네임 저장
+    const saveNickname = async () => {
+        try {
+            await updateUser({ nickname: nickname });
+            setUser(prev => ({ ...prev, nickname: nickname }));
+            setIsEditingNickname(false);
+            alert('닉네임이 수정되었습니다.');
+        } catch (err) {
+            alert('닉네임 수정에 실패했습니다.');
+            console.error(err);
+        }
+    };
+
+    // 닉네임 편집 취소
+    const cancelEdit = () => {
+        setIsEditingNickname(false);
+        setNickname(user?.nickname ?? '');
+    };
 
     if (!user) {
         return <div style={{ padding: 40 }}>사용자 정보를 불러오는 중입니다...</div>;
@@ -47,12 +67,11 @@ export default function ProfilePage() {
                         </div>
                         <div style={styles.infoSection}>
                             <div style={styles.photoBox}>
-                                {profileImage && !imgError ? (
+                                {profileImage ? (
                                     <img
                                         src={profileImage}
                                         alt="프로필"
                                         style={styles.image}
-                                        onError={() => setImgError(true)}
                                     />
                                 ) : (
                                     <FaUserCircle size={100} color="#bbb" />
@@ -60,8 +79,24 @@ export default function ProfilePage() {
                             </div>
                             <div style={styles.infoText}>
                                 <div style={styles.infoRow}>
-                                    <strong>이름:</strong> {user.name}
-                                    <FaEdit style={styles.editIcon} onClick={handleEdit} />
+                                    <strong>이름:</strong>{' '}
+                                    {isEditingNickname ? (
+                                        <>
+                                            <input
+                                                type="text"
+                                                value={nickname}
+                                                onChange={e => setNickname(e.target.value)}
+                                                style={{ fontSize: 16, padding: 4, width: 180 }}
+                                            />
+                                            <button onClick={saveNickname} style={{ marginLeft: 8 }}>저장</button>
+                                            <button onClick={cancelEdit} style={{ marginLeft: 4 }}>취소</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            {user.nickname}
+                                            <FaEdit style={styles.editIcon} onClick={startEditNickname} />
+                                        </>
+                                    )}
                                 </div>
                                 <div style={styles.infoRow}><strong>이메일:</strong> {user.email}</div>
                                 <div style={styles.infoRow}><strong>친구 코드:</strong> {user.friendCode ?? '없음'}</div>
@@ -87,7 +122,7 @@ export default function ProfilePage() {
                             <FaBullseye style={styles.icon} />
                             <span>
                                 <strong>목표 점수:</strong> {user.targetScore ?? 0}점
-                                <FaEdit style={styles.editIcon} onClick={handleEdit} />
+                                <FaEdit style={styles.editIcon} onClick={() => alert('목표 점수 수정 구현 예정')} />
                             </span>
                         </div>
                         <div style={styles.metricsItem}>

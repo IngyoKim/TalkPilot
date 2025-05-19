@@ -29,7 +29,7 @@ export function AuthProvider({ children }) {
                 const idToken = await user.getIdToken();
                 console.log('[Firebase] ID 토큰 발급 성공:', idToken.slice(0, 30) + '...');
 
-                const userData = await serverLogin(idToken);  // ← 이 값을 받아서
+                const userData = await serverLogin(idToken);
                 console.log('[Nest] 서버 인증 성공');
                 console.table({
                     UID: userData.uid,

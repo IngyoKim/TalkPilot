@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'section_expansion_tile.dart';
 
 class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
@@ -21,15 +22,16 @@ class _AboutPageState extends State<AboutPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildExpansionTile(
+          SectionExpansionTile(
             index: 0,
             title: 'TalkPilot 소개',
             content:
                 '발표를 더 똑똑하게, 함께 준비하는 발표 도우미\n'
                 '발표의 자율주행화를 목표로 하는 올인원 발표 연습 플랫폼입니다.\n'
                 '현대오토에버 배리어프리 앱 개발 콘테스트 출품작입니다.',
+            initiallyExpanded: _isExpanded[0],
           ),
-          _buildExpansionTile(
+          SectionExpansionTile(
             index: 1,
             title: '주요 기능',
             content:
@@ -45,8 +47,9 @@ class _AboutPageState extends State<AboutPage> {
                 '  - 2인 이상의 발표자가 있는 경우도 처리 가능\n\n'
                 '• 멀티 플랫폼 지원\n'
                 '  - Flutter 기반 모바일 앱과 React + NestJS 기반 웹 클라이언트 제공',
+            initiallyExpanded: _isExpanded[1],
           ),
-          _buildExpansionTile(
+          SectionExpansionTile(
             index: 2,
             title: '기술 스택',
             content:
@@ -56,8 +59,9 @@ class _AboutPageState extends State<AboutPage> {
                 '인증: Firebase Authentication\n'
                 'DB: Realtime Database\n'
                 '음성 인식: Google Cloud STT',
+            initiallyExpanded: _isExpanded[2],
           ),
-          _buildExpansionTile(
+          SectionExpansionTile(
             index: 3,
             title: '개발자 정보',
             content:
@@ -65,57 +69,22 @@ class _AboutPageState extends State<AboutPage> {
                 '팀장: 김인교 (https://github.com/IngyoKim)\n'
                 '팀원: 김민규 (https://github.com/Asdfuxk)\n'
                 '         전상민 (https://github.com/A-X-Y-S-T)',
+            initiallyExpanded: _isExpanded[3],
           ),
-          _buildExpansionTile(index: 4, title: '버전', content: 'v1.0.0'),
-          _buildExpansionTile(
+          SectionExpansionTile(
+            index: 4,
+            title: '버전',
+            content: 'v1.0.0',
+            initiallyExpanded: _isExpanded[4],
+          ),
+          SectionExpansionTile(
             index: 5,
             title: '라이선스',
             content: 'MIT License © 2025 OmO Team',
+            initiallyExpanded: _isExpanded[5],
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildExpansionTile({
-    required int index,
-    required String title,
-    required String content,
-  }) {
-    return ExpansionTile(
-      key: PageStorageKey(index),
-      tilePadding: EdgeInsets.zero,
-      title: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.deepPurple,
-          ),
-        ),
-      ),
-      childrenPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-      initiallyExpanded: _isExpanded[index],
-      onExpansionChanged: (bool expanded) {
-        setState(() {
-          _isExpanded[index] = expanded;
-        });
-      },
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              content,
-              style: const TextStyle(fontSize: 16, height: 1.5),
-              textAlign: TextAlign.left,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

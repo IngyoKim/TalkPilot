@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import Sidebar from '../../components/SideBar';
-import NavbarControls from './ProfileDropdown';
 import ProfileDropDown from './ProfileDropdown';
 
 const mainColor = '#673AB7';
@@ -11,8 +10,6 @@ export default function HelpCenter() {
 
     return (
         <div style={{ display: 'flex' }}>
-            {/* 사이드바 */}
-            <Sidebar isOpen={isSidebarOpen} />
 
             {/* 메인 컨텐츠 영역 */}
             <div
@@ -26,13 +23,15 @@ export default function HelpCenter() {
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
                 />
+                {/* 사이드바 */}
+                <Sidebar isOpen={isSidebarOpen} />
 
                 <div style={styles.container}>
                     {/* 왼쪽: 사용자 입력 폼 */}
                     <div style={styles.left}>
-                        <h2 style={styles.heading}>뭘 도와드릴까요?</h2>
+                        <h2 style={styles.heading}>물어보실게 있으신가요?</h2>
                         <p style={styles.description}>
-                            메시지나 질문을 보내주시면 저희가 도와드리겠습니다.
+                            메시지나 질문을 보내주시면 저희가 도와드리겠습니다. 협업 관련 연락도 받습니다.
                         </p>
                         <input style={styles.input} placeholder="이름" />
                         <input style={styles.input} placeholder="이메일 주소" />

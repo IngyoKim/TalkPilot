@@ -5,16 +5,16 @@ import PrivateRoute from "./components/PrivateRoute";
 
 import ProfilePage from './pages//Profile/ProfilePage';
 import Help from './pages/Profile/Help';
-import ContactUs from "./pages/Profile/ContactUs";
+import Contact from "./pages/Profile/Contact";
 
 export default function Router() {
     return (
         <Routes>
             <Route path="/login" element={<LoginPage />} />
 
-            <Route path="/ProfilePage" element={<ProfilePage />} />
-            <Route path="/Help" element={<Help />} />
-            <Route path="/ContactUs" element={<ContactUs />} />
+            <Route path="/profilepage" element={<ProfilePage />} />
+            <Route path="/help" element={<Help />} />
+            <Route path="/contact" element={<Contact />} />
 
             <Route
                 path="/"

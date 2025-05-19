@@ -11,7 +11,7 @@ export default function ContactUs() {
         'TalkPilot이 뭔가요?',
         '처음엔 어떻게 사용하나요?',
         '다른 사용자들은 어떻게 초대하나요?',
-        ''
+        '프로젝트는 무슨 기능이 있나요?'
     ];
 
     const filteredItems = items.filter(item =>
@@ -37,7 +37,7 @@ export default function ContactUs() {
                     <FaSearch style={styles.searchIcon} />
                     <input
                         type="text"
-                        placeholder="검색어를 입력하세요"
+                        placeholder="검색어를 입력하세요, 만약 없으면 Contact Us에 들어가서 문의하세요"
                         value={query}
                         onChange={e => setQuery(e.target.value)}
                         style={styles.input}

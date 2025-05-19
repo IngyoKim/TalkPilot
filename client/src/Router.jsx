@@ -5,7 +5,9 @@ import PrivateRoute from "./components/PrivateRoute";
 
 import ProfilePage from './pages//Profile/ProfilePage';
 import Help from './pages/Profile/Help';
-import Contact from "./pages/Profile/Contact";
+import Contact from './pages/Profile/Contact';
+
+import Schedule from './pages/SidebarOP/Schedule';
 
 export default function Router() {
     return (
@@ -16,6 +18,7 @@ export default function Router() {
             <Route path="/help" element={<Help />} />
             <Route path="/contact" element={<Contact />} />
 
+            <Route path="/schedule" element={<Schedule />} />
             <Route
                 path="/"
                 element={

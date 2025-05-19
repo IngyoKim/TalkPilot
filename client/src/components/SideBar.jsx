@@ -40,6 +40,9 @@ function SidebarItem({ icon, text }) {
         if (text === 'Home') {
             navigate('/'); // 🔥 MainPage 경로로 이동
         }
+        else if (text === 'Schedule') {
+            navigate('schedule');
+        }
     };
     return (
         <div
@@ -49,7 +52,7 @@ function SidebarItem({ icon, text }) {
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            onClick={handleClick} // 🔥 클릭 이벤트 등록
+            onClick={handleClick}
         >
             {icon}
             <span style={{ marginLeft: 12 }}>{text}</span>
@@ -59,7 +62,7 @@ function SidebarItem({ icon, text }) {
 
 const sidebarItems = [
     { icon: <FaHome size={18} />, text: 'Home' },
-    { icon: <FaCalendarAlt size={18} />, text: 'Schedule' },
+    { icon: <FaCalendarAlt size={18} />, text: 'Schedule', onClick: () => navigate('/schedule') },
     { icon: <FaChartBar size={18} />, text: 'Dashboard' },
     { icon: <FaChalkboardTeacher size={18} />, text: 'My Presentation' },
     { icon: <FaFileAlt size={18} />, text: 'Extract .txt' },

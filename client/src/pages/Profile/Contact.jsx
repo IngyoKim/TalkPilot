@@ -4,7 +4,7 @@ import ProfileDropdown from './ProfileDropdown';
 
 const mainColor = '#673AB7';
 
-export default function Help() {
+export default function Contact() {
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 

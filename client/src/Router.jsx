@@ -3,7 +3,7 @@ import LoginPage from "./pages/LoginPage";
 import MainPage from "./pages/MainPage";
 import PrivateRoute from "./components/PrivateRoute";
 
-import ProfilePage from './pages//Profile/ProfilePage';
+import ProfilePage from './pages/Profile/ProfilePage';
 import Help from './pages/Profile/Help';
 import Contact from './pages/Profile/Contact';
 
@@ -35,6 +35,8 @@ export default function Router() {
                     </PrivateRoute>
                 }
             />
+            <Route path="/help" element={<Help />} />
+            <Route path="/contact" element={<Contact />} />
         </Routes>
     );
 }

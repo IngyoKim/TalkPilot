@@ -38,7 +38,7 @@ function SidebarItem({ icon, text }) {
 
     const handleClick = () => {
         if (text === 'Home') {
-            navigate('/'); // 🔥 MainPage 경로로 이동
+            navigate('/');
         }
         else if (text === 'Schedule') {
             navigate('schedule');

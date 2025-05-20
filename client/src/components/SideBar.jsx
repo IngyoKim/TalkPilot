@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import {
     FaHome,
     FaCalendarAlt,
-    FaChartBar,
     FaChalkboardTeacher,
     FaFileAlt,
     FaFileInvoice,
@@ -41,7 +40,10 @@ function SidebarItem({ icon, text }) {
             navigate('/');
         }
         else if (text === 'Schedule') {
-            navigate('schedule');
+            navigate('/schedule');
+        }
+        else if (text === 'My Presentation') {
+            navigate('/presentation');
         }
     };
     return (
@@ -62,8 +64,7 @@ function SidebarItem({ icon, text }) {
 
 const sidebarItems = [
     { icon: <FaHome size={18} />, text: 'Home' },
-    { icon: <FaCalendarAlt size={18} />, text: 'Schedule', onClick: () => navigate('../schedule') },
-    { icon: <FaChartBar size={18} />, text: 'Dashboard' },
+    { icon: <FaCalendarAlt size={18} />, text: 'Schedule' },
     { icon: <FaChalkboardTeacher size={18} />, text: 'My Presentation' },
     { icon: <FaFileAlt size={18} />, text: 'Extract .txt' },
     { icon: <FaFileInvoice size={18} />, text: 'Extract .docx' },

@@ -54,17 +54,26 @@ export default function ProfileDropdown({ isSidebarOpen, onToggleSidebar }) {
         {
             icon: <FaUserEdit />,
             label: 'Account Detail',
-            onClick: () => navigate('../profile'),
+            onClick: () => {
+                console.log('Navigating to /profile');
+                navigate('/profile');
+            },
         },
         {
             icon: <FaQuestionCircle />,
             label: 'Help',
-            onClick: () => navigate('../help'),
+            onClick: () => {
+                console.log('Navigating to /help');
+                navigate('/help');
+            },
         },
         {
             icon: <FaEnvelope />,
             label: 'Contact us',
-            onClick: () => navigate('../contact'),
+            onClick: () => {
+                console.log('Navigating to /contact');
+                navigate('/contact');
+            },
         },
         {
             icon: <FaSignOutAlt />,
@@ -73,6 +82,7 @@ export default function ProfileDropdown({ isSidebarOpen, onToggleSidebar }) {
             isDanger: true,
         },
     ];
+
 
     return (
         <div style={styles.container}>

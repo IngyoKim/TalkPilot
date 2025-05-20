@@ -8,6 +8,7 @@ import Help from './pages/Profile/Help';
 import Contact from './pages/Profile/Contact';
 
 import Schedule from './pages/SidebarOP/Schedule';
+import MyPresentation from './pages/SidebarOP/MyPresentation';
 
 export default function Router() {
     return (
@@ -19,6 +20,7 @@ export default function Router() {
             <Route path="/contact" element={<Contact />} />
 
             <Route path="/schedule" element={<Schedule />} />
+            <Route path="/presentation" element={<MyPresentation />} />
             <Route
                 path="/"
                 element={
@@ -35,8 +37,6 @@ export default function Router() {
                     </PrivateRoute>
                 }
             />
-            <Route path="/help" element={<Help />} />
-            <Route path="/contact" element={<Contact />} />
         </Routes>
     );
 }

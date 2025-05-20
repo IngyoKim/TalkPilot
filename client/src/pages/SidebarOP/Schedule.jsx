@@ -40,7 +40,6 @@ export default function SchedulePage() {
                 <ProfileDropdown
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
-                    user={{ name: '홍길동', email: 'hong@example.com' }}
                 />
                 <div style={styles.calendarWrapper}>
                     <h2>스케줄</h2>
@@ -51,6 +50,22 @@ export default function SchedulePage() {
                         dateClick={handleDateClick}
                         events={events}
                         height="auto"
+                        dayHeaderDidMount={(args) => {
+                            const day = args.date.getDay();
+                            if (day === 0) {
+                                args.el.style.color = 'red';
+                            } else if (day === 6) {
+                                args.el.style.color = 'blue';
+                            }
+                        }}
+                        dayCellDidMount={(args) => {
+                            const day = args.date.getDay();
+                            if (day === 0) {
+                                args.el.style.color = 'red';
+                            } else if (day === 6) {
+                                args.el.style.color = 'blue';
+                            }
+                        }}
                     />
                 </div>
             </div>

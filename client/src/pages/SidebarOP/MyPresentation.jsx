@@ -1,31 +1,59 @@
-import { useState } from "react";
+import { useState } from 'react';
+import Sidebar from '../../components/SideBar';
+import ProfileDropdown from '../Profile/ProfileDropdown';
 
-export default function ProjectForm({ onSubmit }) {
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [date, setDate] = useState("");
-    const [presenters, setPresenters] = useState("");
+export default function MyPresentation() {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [projects, setProjects] = useState([]);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSubmit({ title, description, date, presenters: presenters.split(',') });
+    const handleAddProject = () => {
+        const newProject = `Project ${projects.length + 1}`;
+        setProjects(prev => [...prev, newProject]);
     };
 
     return (
-        <form onSubmit={handleSubmit} className="project-form">
-            <label>프로젝트 제목</label>
-            <input value={title} onChange={e => setTitle(e.target.value)} required />
+        <div style={styles.container}>
+            <Sidebar isOpen={isSidebarOpen} onAddProject={handleAddProject} />
+            <div
+                style={{
+                    ...styles.content,
+                    marginLeft: isSidebarOpen ? 240 : 0,
+                }}
+            >
+                <ProfileDropdown
+                    isSidebarOpen={isSidebarOpen}
+                    onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+                />
 
-            <label>발표 날짜</label>
-            <input type="date" value={date} onChange={e => setDate(e.target.value)} required />
-
-            <label>설명</label>
-            <textarea value={description} onChange={e => setDescription(e.target.value)} />
-
-            <label>발표자 (쉼표로 구분)</label>
-            <input value={presenters} onChange={e => setPresenters(e.target.value)} />
-
-            <button type="submit">프로젝트 생성</button>
-        </form>
+                <div style={styles.projectSection}>
+                    <h2>프로젝트 목록</h2>
+                    <ul>
+                        {projects.map((project, index) => (
+                            <li key={index} style={styles.projectItem}>
+                                {project}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
+        </div>
     );
 }
+
+const styles = {
+    container: {
+        display: 'flex',
+    },
+    content: {
+        flex: 1,
+        transition: 'margin-left 0.3s ease',
+        padding: '20px',
+    },
+    projectSection: {
+        marginTop: '20px',
+    },
+    projectItem: {
+        padding: '8px 0',
+        borderBottom: '1px solid #ccc',
+    },
+};

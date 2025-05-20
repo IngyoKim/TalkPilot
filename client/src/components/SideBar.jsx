@@ -62,7 +62,7 @@ function SidebarItem({ icon, text }) {
 
 const sidebarItems = [
     { icon: <FaHome size={18} />, text: 'Home' },
-    { icon: <FaCalendarAlt size={18} />, text: 'Schedule', onClick: () => navigate('/schedule') },
+    { icon: <FaCalendarAlt size={18} />, text: 'Schedule', onClick: () => navigate('../schedule') },
     { icon: <FaChartBar size={18} />, text: 'Dashboard' },
     { icon: <FaChalkboardTeacher size={18} />, text: 'My Presentation' },
     { icon: <FaFileAlt size={18} />, text: 'Extract .txt' },

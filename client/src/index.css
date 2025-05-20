@@ -7,3 +7,8 @@
 body {
     font-family: Arial, sans-serif;
 }
+
+.fc-day-today {
+    background-color: rgb(103, 58, 183) !important;
+    color: white !important;
+}

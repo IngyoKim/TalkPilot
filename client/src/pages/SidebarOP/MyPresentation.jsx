@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 import Sidebar from '../../components/SideBar';
 import ProfileDropdown from '../Profile/ProfileDropdown';
 
+const mainColor = '#673AB7';
+
 export default function MyPresentation() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [projects, setProjects] = useState([]);
@@ -45,7 +47,7 @@ export default function MyPresentation() {
                 <div style={styles.header}>
                     <h2>프로젝트</h2>
                     <button onClick={() => setShowModal(true)} style={styles.addButton}>
-                        + 새 프로젝트 추가
+                        프로젝트 추가
                     </button>
                 </div>
 
@@ -137,7 +139,7 @@ const styles = {
         marginBottom: '20px',
     },
     addButton: {
-        backgroundColor: '#673AB7',
+        backgroundColor: mainColor,
         color: '#fff',
         border: 'none',
         borderRadius: '8px',

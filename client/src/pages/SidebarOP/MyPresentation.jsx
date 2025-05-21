@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
+
 import Sidebar from '../../components/SideBar';
 import ProfileDropdown from '../Profile/ProfileDropdown';
 
@@ -15,7 +18,7 @@ export default function MyPresentation() {
         setProjects(prev => [
             ...prev,
             {
-                id: projects.length + 1,
+                id: uuidv4(),
                 title,
                 description,
             },
@@ -48,10 +51,12 @@ export default function MyPresentation() {
 
                 <div style={styles.projectGrid}>
                     {projects.map(p => (
-                        <div key={p.id} style={styles.card}>
-                            <h3>{p.title}</h3>
-                            <p>{p.description}</p>
-                        </div>
+                        <Link to={`/project/${p.id}`} key={p.id} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <div style={styles.card}>
+                                <h3>{p.title}</h3>
+                                <p>{p.description}</p>
+                            </div>
+                        </Link>
                     ))}
                 </div>
             </div>

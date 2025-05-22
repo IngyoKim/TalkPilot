@@ -45,6 +45,9 @@ function SidebarItem({ icon, text }) {
         else if (text === 'My Presentation') {
             navigate('/presentation');
         }
+        else if (text === 'Extract .docx') {
+            navigate('/extdocx');
+        }
     };
     return (
         <div

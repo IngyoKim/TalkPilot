@@ -15,7 +15,7 @@ export default function ProjectDetail() {
     const [content, setContent] = useState('');
     const [presentationDate, setPresentationDate] = useState('');
 
-    const handleSave = () => {//
+    const handleSave = () => {
         console.log('저장된 프로젝트:', {
             id,
             title,

@@ -9,14 +9,45 @@ import ProfileDropdown from '../Profile/ProfileDropdown';
 export default function SchedulePage() {
     const [events] = useState([]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const calendarRef = useRef(null);
-    const selectedCellRef = useRef(null);
+    const calendarRef = useRef(null);           // FullCalendar 인스턴스 참조
+    const selectedCellRef = useRef(null);       // 마지막 클릭된 날짜 셀 참조
 
     useEffect(() => {
         setTimeout(() => {
             calendarRef.current?.getApi().updateSize();
         }, 300);
     }, [isSidebarOpen]);
+
+    // 요일별 색상 지정
+    const handleDayHeaderDidMount = (args) => {
+        const day = args.date.getDay();
+        if (day === 0) args.el.style.color = 'red';
+        else if (day === 6) args.el.style.color = 'blue';
+    };
+
+    // 날짜 셀 렌더링 및 클릭 이벤트
+    const handleDayCellDidMount = (args) => {
+        const day = args.date.getDay();
+        if (day === 0) args.el.style.color = 'red';
+        else if (day === 6) args.el.style.color = 'blue';
+
+        args.el.style.cursor = 'pointer';
+
+        args.el.onclick = () => {
+            // 이전 선택 셀 스타일 초기화
+            if (selectedCellRef.current) {
+                selectedCellRef.current.style.backgroundColor = '';
+                selectedCellRef.current.style.color = '';
+            }
+
+            // 현재 셀 선택 스타일 적용
+            args.el.style.backgroundColor = 'rgba(103,58,183, 0.3)';
+            selectedCellRef.current = args.el;
+
+            // 해당 날짜로 이동
+            calendarRef.current?.getApi().gotoDate(args.date);
+        };
+    };
 
     return (
         <div style={styles.container}>
@@ -31,6 +62,7 @@ export default function SchedulePage() {
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
                 />
+
                 <div style={styles.calendarWrapper}>
                     <h2>스케줄</h2>
                     <FullCalendar
@@ -39,34 +71,12 @@ export default function SchedulePage() {
                         initialView="dayGridMonth"
                         events={events}
                         height="auto"
-                        dayHeaderDidMount={(args) => {
-                            const day = args.date.getDay();
-                            if (day === 0) args.el.style.color = 'red';
-                            else if (day === 6) args.el.style.color = 'blue';
-                        }}
-                        dayCellDidMount={(args) => {
-                            const day = args.date.getDay();
-                            if (day === 0) args.el.style.color = 'red';
-                            else if (day === 6) args.el.style.color = 'blue';
-
-                            // 날짜 셀 클릭하면 선택 처리
-                            args.el.style.cursor = 'pointer';
-                            args.el.onclick = () => {
-                                // 이전 선택 셀 초기화
-                                if (selectedCellRef.current) {
-                                    selectedCellRef.current.style.backgroundColor = '';
-                                    selectedCellRef.current.style.color = '';
-                                }
-
-                                // 새 선택 셀 스타일 적용
-                                args.el.style.backgroundColor = 'rgba(103,58,183, 0.3)';
-
-                                // 참조 갱신
-                                selectedCellRef.current = args.el;
-
-                                // 해당 날짜로 이동 (원하는 경우)
-                                calendarRef.current?.getApi().gotoDate(args.date);
-                            };
+                        dayHeaderDidMount={handleDayHeaderDidMount}
+                        dayCellDidMount={handleDayCellDidMount}
+                        headerToolbar={{
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: ''
                         }}
                     />
                 </div>

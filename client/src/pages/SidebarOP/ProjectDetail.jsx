@@ -9,12 +9,13 @@ export default function ProjectDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    // DB연결
+    // 프로젝트 정보 상태
     const [title, setTitle] = useState('예시 프로젝트 제목');
-    const [description, setDescription] = useState('예시 설명입니다.');
+    const [description, setDescription] = useState('예시 설명');
     const [content, setContent] = useState('');
     const [presentationDate, setPresentationDate] = useState('');
 
+    // 저장 버튼 클릭 시 동작
     const handleSave = () => {
         console.log('저장된 프로젝트:', {
             id,
@@ -23,6 +24,8 @@ export default function ProjectDetail() {
             content,
             presentationDate,
         });
+
+        // 저장 완료 메시지, 추후 제거 예정
         alert('프로젝트가 저장되었습니다.');
     };
 
@@ -40,10 +43,13 @@ export default function ProjectDetail() {
                     onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
                 />
 
-                <div style={{ padding: '20px', maxWidth: '640px' }}>
+                <div style={styles.formWrapper}>
                     <h2>프로젝트 수정</h2>
-                    <p>프로젝트 ID: <strong>{id}</strong></p>
+                    <p>
+                        프로젝트 ID: <strong>{id}</strong>
+                    </p>
 
+                    {/* 제목 입력 */}
                     <div style={styles.inputGroup}>
                         <label>제목</label>
                         <input
@@ -54,6 +60,7 @@ export default function ProjectDetail() {
                         />
                     </div>
 
+                    {/* 설명 입력 */}
                     <div style={styles.inputGroup}>
                         <label>설명</label>
                         <textarea
@@ -63,6 +70,7 @@ export default function ProjectDetail() {
                         />
                     </div>
 
+                    {/* 대본 입력 */}
                     <div style={styles.inputGroup}>
                         <label>내용</label>
                         <textarea
@@ -73,6 +81,7 @@ export default function ProjectDetail() {
                         />
                     </div>
 
+                    {/* 발표일 입력 */}
                     <div style={styles.inputGroup}>
                         <label>발표일</label>
                         <input
@@ -83,6 +92,7 @@ export default function ProjectDetail() {
                         />
                     </div>
 
+                    {/* 버튼 영역 */}
                     <div style={styles.buttonGroup}>
                         <button onClick={() => navigate(-1)} style={styles.backButton}>
                             ← 뒤로가기
@@ -98,10 +108,16 @@ export default function ProjectDetail() {
 }
 
 const styles = {
-    container: { display: 'flex' },
+    container: {
+        display: 'flex',
+    },
     content: {
         flex: 1,
         transition: 'margin-left 0.3s ease',
+    },
+    formWrapper: {
+        padding: '20px',
+        maxWidth: '640px',
     },
     inputGroup: {
         marginTop: '20px',

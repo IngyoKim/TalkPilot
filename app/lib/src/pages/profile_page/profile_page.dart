@@ -1,4 +1,3 @@
-// profile_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -8,12 +7,10 @@ import 'package:talk_pilot/src/components/toast_message.dart';
 
 import 'package:talk_pilot/src/pages/profile_page/cpm_calculate_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_card.dart';
-import 'package:talk_pilot/src/pages/profile_page/widgets/stats_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_drawer.dart';
 
-import 'presentation_history_page.dart'; // 새 페이지 import
+import 'presentation_history_page.dart';
 
-// ignore_for_file: use_build_context_synchronously
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -47,7 +44,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: Colors.deepPurple,
         title: const Text('프로필', style: TextStyle(color: Colors.white)),
@@ -100,8 +96,8 @@ class _ProfilePageState extends State<ProfilePage> {
               },
             ),
             const SizedBox(height: 20),
-            StatsCard(
-              presentationCount:
+            StatsSummaryCard(
+              completedCount:
                   userModel?.projectIds?.values
                       .where((v) => v == 'Completed')
                       .length ??
@@ -163,6 +159,151 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class StatsSummaryCard extends StatelessWidget {
+  final int completedCount;
+  final double averageScore;
+  final int averageCPM;
+  final double targetScore;
+
+  const StatsSummaryCard({
+    super.key,
+    required this.completedCount,
+    required this.averageScore,
+    required this.averageCPM,
+    required this.targetScore,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.white,
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 104,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _StatItem(
+                      icon: Icons.check_circle,
+                      value: '$completedCount',
+                      label: '완료한 발표',
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    height: double.infinity,
+                    color: Colors.grey.shade300,
+                  ),
+                  Expanded(
+                    child: _StatItem(
+                      icon: Icons.star,
+                      value: averageScore.toStringAsFixed(1),
+                      label: '평균 점수',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    height: 1,
+                    color: Colors.grey.shade300,
+                    margin: const EdgeInsets.only(right: 4),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Container(
+                    height: 1,
+                    color: Colors.grey.shade300,
+                    margin: const EdgeInsets.only(left: 4),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 104,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _StatItem(
+                      icon: Icons.speed,
+                      value: '$averageCPM',
+                      label: '평균 CPM',
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    height: double.infinity,
+                    color: Colors.grey.shade300,
+                  ),
+                  Expanded(
+                    child: _StatItem(
+                      icon: Icons.flag,
+                      value: targetScore.toStringAsFixed(1),
+                      label: '목표 점수',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class _StatItem extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+
+  const _StatItem({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 26, color: Colors.deepPurple), // 아이콘 키움
+        const SizedBox(height: 6),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Colors.grey,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }

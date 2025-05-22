@@ -9,13 +9,13 @@ export default function ProjectDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    // DB연결결
+    // DB연결
     const [title, setTitle] = useState('예시 프로젝트 제목');
     const [description, setDescription] = useState('예시 설명입니다.');
     const [content, setContent] = useState('');
     const [presentationDate, setPresentationDate] = useState('');
 
-    const handleSave = () => {
+    const handleSave = () => {//
         console.log('저장된 프로젝트:', {
             id,
             title,

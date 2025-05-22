@@ -14,15 +14,38 @@ export default function MyPresentation() {
     const [mode, setMode] = useState('생성');
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [selectedProjectId, setSelectedProjectId] = useState(null);
+    const [menuOpenId, setMenuOpenId] = useState(null);
+
+    const formatRelativeTime = (date) => {
+        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+        if (seconds < 60) return `${seconds}초 전`;
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}분 전`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}시간 전`;
+        const days = Math.floor(hours / 24);
+        return `${days}일 전`;
+    };
+
+    const statusColors = {
+        '진행중': '#4CAF50',
+        '보류': '#FFC107',
+        '완료': '#F44336',
+    };
 
     const handleCreate = () => {
         if (title.trim() === '') return;
+        const now = new Date();
         setProjects(prev => [
             ...prev,
             {
                 id: uuidv4(),
                 title,
                 description,
+                createdAt: now,
+                updatedAt: now,
+                status: '진행중',
             },
         ]);
         setTitle('');
@@ -30,15 +53,24 @@ export default function MyPresentation() {
         setShowModal(false);
     };
 
+    const handleStatusChange = (id, newStatus) => {
+        setProjects(prev =>
+            prev.map(p =>
+                p.id === id ? { ...p, status: newStatus, updatedAt: new Date() } : p
+            )
+        );
+        setSelectedProjectId(null);
+    };
+
+    const handleDelete = (id) => {
+        setProjects(prev => prev.filter(p => p.id !== id));
+        if (menuOpenId === id) setMenuOpenId(null);
+    };
+
     return (
         <div style={styles.container}>
             <Sidebar isOpen={isSidebarOpen} />
-            <div
-                style={{
-                    ...styles.content,
-                    marginLeft: isSidebarOpen ? 240 : 0,
-                }}
-            >
+            <div style={{ ...styles.content, marginLeft: isSidebarOpen ? 240 : 0 }}>
                 <ProfileDropdown
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
@@ -53,12 +85,49 @@ export default function MyPresentation() {
 
                 <div style={styles.projectGrid}>
                     {projects.map(p => (
-                        <Link to={`/project/${p.id}`} key={p.id} style={{ textDecoration: 'none', color: 'inherit' }}>
-                            <div style={styles.card}>
-                                <h3>{p.title}</h3>
-                                <p>{p.description}</p>
-                            </div>
-                        </Link>
+                        <div key={p.id} style={{ position: 'relative' }}>
+                            <Link to={`/project/${p.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                <div style={styles.card}>
+                                    <h3>{p.title}</h3>
+                                    <p>{p.description}</p>
+                                    <small>생성일: {new Date(p.createdAt).toLocaleDateString()}</small><br />
+                                    <small>수정일: {formatRelativeTime(p.updatedAt)}</small>
+                                </div>
+                            </Link>
+
+                            <div style={styles.menuButton} onClick={() => setMenuOpenId(menuOpenId === p.id ? null : p.id)}>⋮</div>
+                            <div
+                                style={{ ...styles.statusDot, backgroundColor: statusColors[p.status] }}
+                                onClick={() => setSelectedProjectId(p.id)}
+                            />
+
+                            {selectedProjectId === p.id && (
+                                <div style={styles.statusDropdown}>
+                                    {Object.keys(statusColors).map(status => (
+                                        <div
+                                            key={status}
+                                            onClick={() => handleStatusChange(p.id, status)}
+                                            style={{
+                                                padding: '6px 12px',
+                                                cursor: 'pointer',
+                                                backgroundColor: statusColors[status],
+                                                color: '#fff',
+                                                fontSize: '13px',
+                                            }}
+                                        >
+                                            {status}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {menuOpenId === p.id && (
+                                <div style={styles.menuDropdown}>
+                                    <div style={styles.menuItem} onClick={() => alert('수정 기능은 추후 구현')}>수정</div>
+                                    <div style={styles.menuItem} onClick={() => handleDelete(p.id)}>삭제</div>
+                                </div>
+                            )}
+                        </div>
                     ))}
                 </div>
             </div>
@@ -111,12 +180,8 @@ export default function MyPresentation() {
                         </div>
 
                         <div style={styles.modalActions}>
-                            <button onClick={() => setShowModal(false)} style={styles.cancelBtn}>
-                                취소
-                            </button>
-                            <button onClick={handleCreate} style={styles.confirmBtn}>
-                                생성
-                            </button>
+                            <button onClick={() => setShowModal(false)} style={styles.cancelBtn}>취소</button>
+                            <button onClick={handleCreate} style={styles.confirmBtn}>생성</button>
                         </div>
                     </div>
                 </div>
@@ -127,100 +192,70 @@ export default function MyPresentation() {
 
 const styles = {
     container: { display: 'flex' },
-    content: {
-        flex: 1,
-        transition: 'margin-left 0.3s ease',
-        padding: '20px',
-    },
+    content: { flex: 1, transition: 'margin-left 0.3s ease', padding: '20px' },
     header: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '20px',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'
     },
     addButton: {
-        backgroundColor: mainColor,
-        color: '#fff',
-        border: 'none',
-        borderRadius: '8px',
-        padding: '10px 16px',
-        cursor: 'pointer',
-        fontSize: '14px',
+        backgroundColor: mainColor, color: '#fff', border: 'none', borderRadius: '8px',
+        padding: '10px 16px', cursor: 'pointer', fontSize: '14px'
     },
     projectGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-        gap: '20px',
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+        gap: '20px'
     },
     card: {
-        backgroundColor: '#f4f4f4',
-        padding: '16px',
-        borderRadius: '10px',
-        boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+        backgroundColor: '#ffffff', padding: '16px', borderRadius: '10px',
+        boxShadow: '0 6px 16px rgba(0, 0, 0, 0.3)', position: 'relative'
+    },
+    statusDot: {
+        position: 'absolute', top: 8, right: 8, width: 14, height: 14, borderRadius: '50%',
+        border: '1px solid #ccc', cursor: 'pointer'
+    },
+    menuButton: {
+        position: 'absolute', top: 8, right: 32, width: 16, height: 16, cursor: 'pointer',
+        fontSize: '16px', textAlign: 'center', lineHeight: '16px'
+    },
+    statusDropdown: {
+        position: 'absolute', top: 30, right: 8, backgroundColor: '#fff', border: '1px solid #ccc',
+        borderRadius: '6px', boxShadow: '0 2px 6px rgba(0,0,0,0.2)', zIndex: 10
+    },
+    menuDropdown: {
+        position: 'absolute', top: 30, right: 32, backgroundColor: '#fff', border: '1px solid #ccc',
+        borderRadius: '6px', boxShadow: '0 2px 6px rgba(0,0,0,0.2)', zIndex: 10
+    },
+    menuItem: {
+        padding: '6px 12px', fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap',
+        borderBottom: '1px solid #eee'
     },
     modalOverlay: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 999,
+        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 999
     },
     modal: {
-        backgroundColor: '#f2e8ff',
-        padding: '24px',
-        borderRadius: '20px',
-        width: '90%',
-        maxWidth: '360px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+        backgroundColor: '#f2e8ff', padding: '24px', borderRadius: '20px', width: '90%', maxWidth: '360px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
     },
     tabWrapper: {
-        display: 'flex',
-        borderRadius: '10px',
-        overflow: 'hidden',
-        marginBottom: '16px',
+        display: 'flex', borderRadius: '10px', overflow: 'hidden', marginBottom: '16px'
     },
     tabButton: {
-        flex: 1,
-        padding: '8px',
-        border: 'none',
-        cursor: 'pointer',
+        flex: 1, padding: '8px', border: 'none', cursor: 'pointer'
     },
     inputGroup: {
-        marginBottom: '12px',
-        display: 'flex',
-        flexDirection: 'column',
-        fontSize: '14px',
+        marginBottom: '12px', display: 'flex', flexDirection: 'column', fontSize: '14px'
     },
     input: {
-        padding: '8px',
-        border: '1px solid #ccc',
-        borderRadius: '6px',
-        fontSize: '14px',
+        padding: '8px', border: '1px solid #ccc', borderRadius: '6px', fontSize: '14px'
     },
     modalActions: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginTop: '20px',
+        display: 'flex', justifyContent: 'space-between', marginTop: '20px'
     },
     cancelBtn: {
-        backgroundColor: 'transparent',
-        color: '#673AB7',
-        border: 'none',
-        fontWeight: 'bold',
-        cursor: 'pointer',
+        backgroundColor: 'transparent', color: '#673AB7', border: 'none', fontWeight: 'bold', cursor: 'pointer'
     },
     confirmBtn: {
-        backgroundColor: '#673AB7',
-        color: '#fff',
-        border: 'none',
-        padding: '8px 16px',
-        borderRadius: '8px',
-        fontWeight: 'bold',
-        cursor: 'pointer',
-    },
+        backgroundColor: '#673AB7', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px',
+        fontWeight: 'bold', cursor: 'pointer'
+    }
 };

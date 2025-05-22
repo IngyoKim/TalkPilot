@@ -16,8 +16,9 @@ export default function MyPresentation() {
     const [description, setDescription] = useState('');
     const [selectedProjectId, setSelectedProjectId] = useState(null);
     const [menuOpenId, setMenuOpenId] = useState(null);
+    const [editProjectId, setEditProjectId] = useState(null);
 
-    const formatRelativeTime = (date) => {
+    const formatRelativeTime = (date) => {//수정일
         const seconds = Math.floor((new Date() - new Date(date)) / 1000);
         if (seconds < 60) return `${seconds}초 전`;
         const minutes = Math.floor(seconds / 60);
@@ -28,32 +29,46 @@ export default function MyPresentation() {
         return `${days}일 전`;
     };
 
-    const statusColors = {
+    const statusColors = {//상태창 색
         '진행중': '#4CAF50',
         '보류': '#FFC107',
         '완료': '#F44336',
     };
 
-    const handleCreate = () => {
+    const handleCreate = () => {//프로젝트 카드
         if (title.trim() === '') return;
         const now = new Date();
-        setProjects(prev => [
-            ...prev,
-            {
-                id: uuidv4(),
-                title,
-                description,
-                createdAt: now,
-                updatedAt: now,
-                status: '진행중',
-            },
-        ]);
+
+        if (editProjectId) {
+            setProjects(prev => prev.map(p =>
+                p.id === editProjectId ? {
+                    ...p,
+                    title,
+                    description,
+                    updatedAt: now
+                } : p
+            ));
+        } else {
+            setProjects(prev => [
+                ...prev,
+                {
+                    id: uuidv4(),
+                    title,
+                    description,
+                    createdAt: now,
+                    updatedAt: now,
+                    status: '진행중',
+                },
+            ]);
+        }
+
         setTitle('');
         setDescription('');
+        setEditProjectId(null);
         setShowModal(false);
     };
 
-    const handleStatusChange = (id, newStatus) => {
+    const handleStatusChange = (id, newStatus) => {//상태창 변경
         setProjects(prev =>
             prev.map(p =>
                 p.id === id ? { ...p, status: newStatus, updatedAt: new Date() } : p
@@ -62,9 +77,16 @@ export default function MyPresentation() {
         setSelectedProjectId(null);
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = (id) => {//삭제
         setProjects(prev => prev.filter(p => p.id !== id));
         if (menuOpenId === id) setMenuOpenId(null);
+    };
+
+    const handleEdit = (project) => {//수정
+        setTitle(project.title);
+        setDescription(project.description);
+        setEditProjectId(project.id);
+        setShowModal(true);
     };
 
     return (
@@ -108,14 +130,21 @@ export default function MyPresentation() {
                                             key={status}
                                             onClick={() => handleStatusChange(p.id, status)}
                                             style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px',
                                                 padding: '6px 12px',
                                                 cursor: 'pointer',
-                                                backgroundColor: statusColors[status],
-                                                color: '#fff',
                                                 fontSize: '13px',
                                             }}
                                         >
-                                            {status}
+                                            <div style={{
+                                                width: '10px',
+                                                height: '10px',
+                                                borderRadius: '50%',
+                                                backgroundColor: statusColors[status],
+                                            }} />
+                                            <span>{status}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -123,7 +152,7 @@ export default function MyPresentation() {
 
                             {menuOpenId === p.id && (
                                 <div style={styles.menuDropdown}>
-                                    <div style={styles.menuItem} onClick={() => alert('수정 기능은 추후 구현')}>수정</div>
+                                    <div style={styles.menuItem} onClick={() => handleEdit(p)}>수정</div>
                                     <div style={styles.menuItem} onClick={() => handleDelete(p.id)}>삭제</div>
                                 </div>
                             )}
@@ -181,7 +210,7 @@ export default function MyPresentation() {
 
                         <div style={styles.modalActions}>
                             <button onClick={() => setShowModal(false)} style={styles.cancelBtn}>취소</button>
-                            <button onClick={handleCreate} style={styles.confirmBtn}>생성</button>
+                            <button onClick={handleCreate} style={styles.confirmBtn}>{editProjectId ? '수정' : '생성'}</button>
                         </div>
                     </div>
                 </div>
@@ -201,8 +230,7 @@ const styles = {
         padding: '10px 16px', cursor: 'pointer', fontSize: '14px'
     },
     projectGrid: {
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-        gap: '20px'
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px'
     },
     card: {
         backgroundColor: '#ffffff', padding: '16px', borderRadius: '10px',
@@ -229,12 +257,13 @@ const styles = {
         borderBottom: '1px solid #eee'
     },
     modalOverlay: {
-        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 999
+        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center',
+        alignItems: 'center', zIndex: 999
     },
     modal: {
-        backgroundColor: '#f2e8ff', padding: '24px', borderRadius: '20px', width: '90%', maxWidth: '360px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+        backgroundColor: '#f2e8ff', padding: '24px', borderRadius: '20px', width: '90%',
+        maxWidth: '360px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
     },
     tabWrapper: {
         display: 'flex', borderRadius: '10px', overflow: 'hidden', marginBottom: '16px'
@@ -252,10 +281,11 @@ const styles = {
         display: 'flex', justifyContent: 'space-between', marginTop: '20px'
     },
     cancelBtn: {
-        backgroundColor: 'transparent', color: '#673AB7', border: 'none', fontWeight: 'bold', cursor: 'pointer'
+        backgroundColor: 'transparent', color: '#673AB7', border: 'none', fontWeight: 'bold',
+        cursor: 'pointer'
     },
     confirmBtn: {
-        backgroundColor: '#673AB7', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px',
-        fontWeight: 'bold', cursor: 'pointer'
+        backgroundColor: '#673AB7', color: '#fff', border: 'none', padding: '8px 16px',
+        borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer'
     }
 };

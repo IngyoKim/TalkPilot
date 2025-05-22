@@ -64,7 +64,7 @@ class _EditableTextEditorState extends State<EditableTextEditor> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 filled: true,
-                fillColor: Colors.grey[100],
+                fillColor: Colors.white,
               ),
               onChanged: (text) {
                 ProjectService().updateProject(widget.projectId, {

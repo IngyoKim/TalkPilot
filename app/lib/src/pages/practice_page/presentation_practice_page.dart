@@ -87,6 +87,7 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
+                    color: Colors.white,
                     border: Border.all(color: Colors.deepPurple),
                     borderRadius: BorderRadius.circular(8),
                   ),

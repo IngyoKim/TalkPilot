@@ -76,11 +76,6 @@ class _ProjectDetailPageState extends State<ProjectDetailPage> {
             padding: const EdgeInsets.all(16),
             children: [
               if (isLoading) const LinearProgressIndicator(),
-              const Text(
-                '프로젝트 정보',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
               ProjectInfoCard(project: project, editable: isEditable),
               const SizedBox(height: 32),
               ...[

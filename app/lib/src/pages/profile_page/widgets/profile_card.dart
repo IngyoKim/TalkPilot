@@ -76,7 +76,7 @@ class ProfileCard extends StatelessWidget {
                       ),
                   const SizedBox(height: 6),
                   Text(
-                    'Email: $realName',
+                    realName,
                     style: const TextStyle(fontSize: 15, color: Colors.grey),
                   ),
                 ],

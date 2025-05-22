@@ -19,7 +19,24 @@ class EstimatedTimeService {
       final script = project.script?.trim();
       final List<ScriptPartModel>? parts = project.scriptParts;
 
-      if (script == null || script.isEmpty || parts == null || parts.isEmpty) return;
+      if (script == null || script.isEmpty) return;
+
+      if (parts == null || parts.isEmpty) {
+        final user = await _userService.readUser(project.ownerUid);
+        final cpm = user?.cpm ?? 0;
+        if (cpm <= 0) return;
+
+        final time = (script.length / cpm) * 60;
+        final estimatedTime = double.parse(time.toStringAsFixed(2));
+
+        if (project.estimatedTime != estimatedTime) {
+          await _projectService.updateProject(project.id, {
+            'estimatedTime': estimatedTime,
+          });
+        }
+
+        return;
+      }
 
       final currentState = '$script::${parts.map((e) => e.toString()).join()}';
       final prevState = _prevScriptMap[project.id];

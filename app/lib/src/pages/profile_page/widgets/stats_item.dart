@@ -5,7 +5,7 @@ class StatItem extends StatelessWidget {
   final String value;
   final String label;
 
-  const StatItem({
+  const StatItem({super.key, 
     required this.icon,
     required this.value,
     required this.label,

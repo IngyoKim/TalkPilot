@@ -48,6 +48,9 @@ function SidebarItem({ icon, text }) {
         else if (text === 'Extract .docx') {
             navigate('/extdocx');
         }
+        else if (text === 'Extract .txt') {
+            navigate('/exttxt');
+        }
     };
     return (
         <div

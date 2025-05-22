@@ -38,7 +38,7 @@ function SidebarItem({ icon, text }) {
 
     const handleClick = () => {
         if (text === 'Home') {
-            navigate('/'); // 🔥 MainPage 경로로 이동
+            navigate('/');
         }
     };
     return (
@@ -49,7 +49,7 @@ function SidebarItem({ icon, text }) {
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            onClick={handleClick} // 🔥 클릭 이벤트 등록
+            onClick={handleClick}
         >
             {icon}
             <span style={{ marginLeft: 12 }}>{text}</span>

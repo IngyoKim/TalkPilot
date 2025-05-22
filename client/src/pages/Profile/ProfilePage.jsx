@@ -1,44 +1,58 @@
+// pages/ProfilePage.jsx
 import { useState } from 'react';
-import Sidebar from '../Navigations/SideBar';
-import NavbarControls from '../Navigations/NavbarControl';
-import {
-    FaEdit,
-    FaCheckCircle,
-    FaChartLine,
-    FaBullseye,
-    FaPoll,
-    FaAngellist,
-    FaTachometerAlt,
-} from 'react-icons/fa';
+import { FaUserCircle, FaEdit, FaCheckCircle, FaChartLine, FaBullseye, FaPoll, FaAngellist, FaTachometerAlt } from 'react-icons/fa';
+import Sidebar from '../../components/SideBar';
+import ProfileDropdown from './ProfileDropdown';
+import { useUser } from '../../contexts/UserContext';
+import { updateUser } from '../../utils/api/user';
 
 const mainColor = '#673AB7';
 
-export default function AccountDetailPage() {
+export default function ProfilePage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [profileImage] = useState(null);
+    const { user, setUser } = useUser();
 
-    const user = { //DB연결하면 삭제예정
-        name: '홍길동',
-        email: 'hong@example.com',
-        friendCode: '123213213121',
-        joinedAt: '2024-01-15',
-        completedPresentation: 12,
-        averageScore: 87,
-        targetScore: 90,
-        averageCPM: 152,
-    };
-
-    const handleEdit = () => alert('구현할까 고민중.');
+    const [isEditingNickname, setIsEditingNickname] = useState(false);
+    const [nickname, setNickname] = useState(user?.name ?? '');
 
     const handleToggleSidebar = () => setIsSidebarOpen(prev => !prev);
+
+    // 닉네임 수정 시작
+    const startEditNickname = () => {
+        setNickname(user?.nickname ?? '');
+        setIsEditingNickname(true);
+    };
+
+    // 닉네임 저장
+    const saveNickname = async () => {
+        try {
+            await updateUser({ nickname: nickname });
+            setUser(prev => ({ ...prev, nickname: nickname }));
+            setIsEditingNickname(false);
+            alert('닉네임이 수정되었습니다.');
+        } catch (err) {
+            alert('닉네임 수정에 실패했습니다.');
+            console.error(err);
+        }
+    };
+
+    // 닉네임 편집 취소
+    const cancelEdit = () => {
+        setIsEditingNickname(false);
+        setNickname(user?.nickname ?? '');
+    };
+
+    if (!user) {
+        return <div style={{ padding: 40 }}>사용자 정보를 불러오는 중입니다...</div>;
+    }
 
     return (
         <div style={styles.container}>
             <div style={{ ...styles.navbar, marginLeft: isSidebarOpen ? 240 : 0, transition: 'all 0.3s ease' }}>
-                <NavbarControls
+                <ProfileDropdown
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={handleToggleSidebar}
-                    user={user}
                 />
             </div>
 
@@ -46,7 +60,7 @@ export default function AccountDetailPage() {
 
             <div style={{ ...styles.mainContent, marginLeft: isSidebarOpen ? 240 : 0 }}>
                 <div style={styles.topSection}>
-                    <div style={styles.profileCard}> {/*상세 계정 정보*/}
+                    <div style={styles.profileCard}>
                         <div style={styles.header}>
                             <span role="img" aria-label="user" style={styles.avatar}>👤</span>
                             <h2 style={styles.title}>Account Detail</h2>
@@ -54,19 +68,39 @@ export default function AccountDetailPage() {
                         <div style={styles.infoSection}>
                             <div style={styles.photoBox}>
                                 {profileImage ? (
-                                    <img src={profileImage} alt="프로필" style={styles.image} />
+                                    <img
+                                        src={profileImage}
+                                        alt="프로필"
+                                        style={styles.image}
+                                    />
                                 ) : (
-                                    <div style={styles.imagePlaceholder}>이미지 없음</div>
+                                    <FaUserCircle size={100} color="#bbb" />
                                 )}
                             </div>
                             <div style={styles.infoText}>
                                 <div style={styles.infoRow}>
-                                    <strong>이름:</strong> {user.name}
-                                    <FaEdit style={styles.editIcon} onClick={handleEdit} />
+                                    <strong>닉네임:</strong>{' '}
+                                    {isEditingNickname ? (
+                                        <>
+                                            <input
+                                                type="text"
+                                                value={nickname}
+                                                onChange={e => setNickname(e.target.value)}
+                                                style={{ fontSize: 16, padding: 4, width: 180 }}
+                                            />
+                                            <button onClick={saveNickname} style={{ marginLeft: 8 }}>저장</button>
+                                            <button onClick={cancelEdit} style={{ marginLeft: 4 }}>취소</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            {user.nickname}
+                                            <FaEdit style={styles.editIcon} onClick={startEditNickname} />
+                                        </>
+                                    )}
                                 </div>
+                                <div style={styles.infoRow}><strong>이름:</strong> {user.name ?? ''}</div>
                                 <div style={styles.infoRow}><strong>이메일:</strong> {user.email}</div>
-                                <div style={styles.infoRow}><strong>친구 코드:</strong> {user.friendCode}</div>
-                                <div style={styles.infoRow}><strong>가입일:</strong> {user.joinedAt}</div>
+                                <div style={styles.infoRow}><strong>가입일:</strong> {user.createdAt?.slice(0, 10)}</div>
                             </div>
                         </div>
                     </div>
@@ -74,34 +108,33 @@ export default function AccountDetailPage() {
                     <div style={styles.profileSideBox}>
                         <div style={styles.header}>
                             <FaAngellist style={styles.avatar} />
-                            <span style={styles.accountTitle}>Statistics</span> {/*발표 관련 통계*/}
+                            <span style={styles.accountTitle}>Statistics</span>
                         </div>
-
                         <div style={styles.metricsItem}>
                             <FaCheckCircle style={styles.icon} />
-                            <span><strong>완료한 발표:</strong> {user.completedPresentation}회</span>
+                            <span><strong>완료한 발표:</strong> {user.completedPresentation ?? 0}회</span>
                         </div>
                         <div style={styles.metricsItem}>
                             <FaChartLine style={styles.icon} />
-                            <span><strong>평균 발표 점수:</strong> {user.averageScore}점</span>
+                            <span><strong>평균 발표 점수:</strong> {user.averageScore ?? 0}점</span>
                         </div>
                         <div style={styles.metricsItem}>
                             <FaBullseye style={styles.icon} />
                             <span>
-                                <strong>목표 점수:</strong> {user.targetScore}점
-                                <FaEdit style={styles.editIcon} onClick={handleEdit} />
+                                <strong>목표 점수:</strong> {user.targetScore ?? 0}점
+                                <FaEdit style={styles.editIcon} onClick={() => alert('목표 점수 수정 구현 예정')} />
                             </span>
                         </div>
                         <div style={styles.metricsItem}>
                             <FaPoll style={styles.icon} />
-                            <span><strong>평균 CPM:</strong> {user.averageCPM}</span>
+                            <span><strong>평균 CPM:</strong> {user.averageCPM ?? 0}</span>
                         </div>
                     </div>
                 </div>
 
                 <div style={styles.bottomSection}>
                     <div style={styles.gridBox}>
-                        <div style={styles.boxTitle}>{/*발표 기록*/}
+                        <div style={styles.boxTitle}>
                             <FaCheckCircle style={styles.icon} />
                             발표 기록 보기
                         </div>
@@ -110,7 +143,7 @@ export default function AccountDetailPage() {
                     </div>
 
                     <div style={styles.gridBox}>
-                        <div style={styles.boxTitle}>{/*STT*/}
+                        <div style={styles.boxTitle}>
                             <FaPoll style={styles.icon} />
                             임시 STT 테스트
                         </div>
@@ -119,14 +152,13 @@ export default function AccountDetailPage() {
                     </div>
 
                     <div style={styles.gridBox}>
-                        <div style={styles.boxTitle}>{/*CPM 측정*/}
+                        <div style={styles.boxTitle}>
                             <FaTachometerAlt style={styles.icon} />
                             CPM 계산 페이지
                         </div>
                         <div style={styles.placeholder}>당신의 CPM이 몇인지 측정하세요.</div>
                         <button style={styles.actionButton}>테스트</button>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -204,7 +236,7 @@ const styles = {
     },
     avatar: {
         fontSize: '26px',
-        color: '#673AB7',
+        color: mainColor,
     },
     title: {
         fontSize: '22px',
@@ -239,14 +271,6 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         color: '#999',
-    },
-    uploadLabel: {
-        backgroundColor: '#673AB7',
-        color: '#fff',
-        padding: '6px 12px',
-        borderRadius: '6px',
-        cursor: 'pointer',
-        fontSize: '12px',
     },
     infoText: {
         display: 'flex',

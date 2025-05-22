@@ -5,7 +5,7 @@ import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/provider/project_provider.dart';
 
-import 'package:talk_pilot/src/pages/project_page/project_detail_page.dart';
+import 'package:talk_pilot/src/pages/project_page/project_page.dart';
 import 'package:talk_pilot/src/pages/work_page/widgets/project_card.dart';
 import 'package:talk_pilot/src/pages/work_page/widgets/project_action_dialog.dart';
 
@@ -30,9 +30,7 @@ class _WorkPageState extends State<WorkPage> {
     context.read<ProjectProvider>().selectedProject = project;
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => ProjectDetailPage(projectId: project.id),
-      ),
+      MaterialPageRoute(builder: (_) => ProjectPage(projectId: project.id)),
     );
   }
 

@@ -1,3 +1,5 @@
+import 'package:talk_pilot/src/models/script_part_model.dart';
+
 /// 변경 가능한 필드들만 정의
 enum ProjectField {
   title,
@@ -10,6 +12,7 @@ enum ProjectField {
   script,
   scheduledDate,
   memo,
+  scriptParts,
 }
 
 extension ProjectFieldExt on ProjectField {
@@ -37,6 +40,7 @@ class ProjectModel {
   final String? script; // 대본
   final DateTime? scheduledDate; // 발표 일자
   final String? memo; // 메모
+  final List<ScriptPartModel>? scriptParts;
 
   ProjectModel({
     required this.id,
@@ -52,6 +56,7 @@ class ProjectModel {
     this.script,
     this.scheduledDate,
     this.memo,
+    this.scriptParts,
   });
 
   factory ProjectModel.fromMap(String id, Map<String, dynamic> map) {
@@ -66,7 +71,11 @@ class ProjectModel {
       ownerUid: map['ownerUid'] ?? '',
       participants:
           map['participants'] != null
-              ? Map<String, String>.from(map['participants'])
+              ? Map<String, String>.from(
+                (map['participants'] as Map).map(
+                  (k, v) => MapEntry(k.toString(), v.toString()),
+                ),
+              )
               : {},
       status: map['status'] ?? 'preparing',
       estimatedTime:
@@ -80,6 +89,16 @@ class ProjectModel {
               ? DateTime.tryParse(map['scheduledDate'])
               : null,
       memo: map['memo'] ?? '',
+      scriptParts:
+          map['scriptParts'] != null
+              ? (map['scriptParts'] as List)
+                  .map(
+                    (error) => ScriptPartModel.fromMap(
+                      Map<String, dynamic>.from(error),
+                    ),
+                  )
+                  .toList()
+              : null,
     );
   }
 
@@ -98,6 +117,8 @@ class ProjectModel {
       if (scheduledDate != null)
         "scheduledDate": scheduledDate!.toIso8601String(),
       if (memo != null) "memo": memo,
+      if (scriptParts != null)
+        "scriptParts": scriptParts!.map((e) => e.toMap()).toList(),
     };
   }
 
@@ -114,6 +135,7 @@ class ProjectModel {
     String? script,
     DateTime? scheduledDate,
     String? memo,
+    List<ScriptPartModel>? scriptParts,
   }) {
     return ProjectModel(
       id: id,
@@ -129,6 +151,7 @@ class ProjectModel {
       script: script ?? this.script,
       scheduledDate: scheduledDate ?? this.scheduledDate,
       memo: memo ?? this.memo,
+      scriptParts: scriptParts ?? this.scriptParts,
     );
   }
 }

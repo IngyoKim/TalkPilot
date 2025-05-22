@@ -6,6 +6,22 @@ import Sidebar from '../../components/SideBar';
 import ProfileDropdown from '../Profile/ProfileDropdown';
 
 const mainColor = '#673AB7';
+const STATUS_COLORS = {
+    진행중: '#4CAF50',
+    보류: '#FFC107',
+    완료: '#F44336',
+};
+
+const formatRelativeTime = (date) => {//수정 일
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    if (seconds < 60) return `${seconds}초 전`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}분 전`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}시간 전`;
+    const days = Math.floor(hours / 24);
+    return `${days}일 전`;
+};
 
 export default function MyPresentation() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -14,101 +30,83 @@ export default function MyPresentation() {
     const [mode, setMode] = useState('생성');
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [selectedProjectId, setSelectedProjectId] = useState(null);
+    const [selectedId, setSelectedId] = useState(null);
     const [menuOpenId, setMenuOpenId] = useState(null);
-    const [editProjectId, setEditProjectId] = useState(null);
+    const [editId, setEditId] = useState(null);
 
-    const formatRelativeTime = (date) => {//수정일
-        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-        if (seconds < 60) return `${seconds}초 전`;
-        const minutes = Math.floor(seconds / 60);
-        if (minutes < 60) return `${minutes}분 전`;
-        const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `${hours}시간 전`;
-        const days = Math.floor(hours / 24);
-        return `${days}일 전`;
-    };
-
-    const statusColors = {//상태창 색
-        '진행중': '#4CAF50',
-        '보류': '#FFC107',
-        '완료': '#F44336',
-    };
-
-    const handleCreate = () => {//프로젝트 카드
-        if (title.trim() === '') return;
+    const handleCreateOrUpdate = () => {
+        if (!title.trim()) return;
         const now = new Date();
-
-        if (editProjectId) {
-            setProjects(prev => prev.map(p =>
-                p.id === editProjectId ? {
-                    ...p,
-                    title,
-                    description,
-                    updatedAt: now
-                } : p
-            ));
+        if (editId) {//프로젝트 수정
+            setProjects(ps =>
+                ps.map(p =>
+                    p.id === editId
+                        ? { ...p, title, description, updatedAt: now }
+                        : p
+                )
+            );
         } else {
-            setProjects(prev => [
-                ...prev,
+            setProjects(ps => [//프로젝트 생성
+                ...ps,
                 {
-                    id: uuidv4(),
-                    title,
-                    description,
-                    createdAt: now,
-                    updatedAt: now,
-                    status: '진행중',
+                    id: uuidv4(), title, description, status: '진행중',
+                    createdAt: now, updatedAt: now
                 },
             ]);
         }
-
+        // 초기화
         setTitle('');
         setDescription('');
-        setEditProjectId(null);
+        setEditId(null);
         setShowModal(false);
     };
 
-    const handleStatusChange = (id, newStatus) => {//상태창 변경
-        setProjects(prev =>
-            prev.map(p =>
-                p.id === id ? { ...p, status: newStatus, updatedAt: new Date() } : p
-            )
+    const handleStatusChange = (id, newStatus) => { //상태창 변경
+        setProjects(ps =>
+            ps.map(p => (p.id === id ? {
+                ...p, status: newStatus,
+                updatedAt: new Date()
+            } : p))
         );
-        setSelectedProjectId(null);
+        setSelectedId(null);
     };
 
-    const handleDelete = (id) => {//삭제
-        setProjects(prev => prev.filter(p => p.id !== id));
-        if (menuOpenId === id) setMenuOpenId(null);
+    const handleDelete = (id) => {//프로젝트 삭제
+        setProjects(ps => ps.filter(p => p.id !== id));
+        setMenuOpenId(prev => (prev === id ? null : prev));
     };
 
-    const handleEdit = (project) => {//수정
-        setTitle(project.title);
-        setDescription(project.description);
-        setEditProjectId(project.id);
+    const handleEdit = (p) => {//프로젝트 수정모드 진입
+        setTitle(p.title);
+        setDescription(p.description);
+        setEditId(p.id);
+        setMode('생성');
         setShowModal(true);
     };
 
+    // 렌더링
     return (
         <div style={styles.container}>
             <Sidebar isOpen={isSidebarOpen} />
             <div style={{ ...styles.content, marginLeft: isSidebarOpen ? 240 : 0 }}>
                 <ProfileDropdown
                     isSidebarOpen={isSidebarOpen}
-                    onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+                    onToggleSidebar={() => setIsSidebarOpen(o => !o)}
                 />
 
+                {/* 헤더 */}
                 <div style={styles.header}>
                     <h2>프로젝트</h2>
-                    <button onClick={() => setShowModal(true)} style={styles.addButton}>
+                    <button style={styles.addButton} onClick={() => setShowModal(true)}>
                         프로젝트 추가
                     </button>
                 </div>
 
+                {/* 프로젝트 그리드 */}
                 <div style={styles.projectGrid}>
                     {projects.map(p => (
-                        <div key={p.id} style={{ position: 'relative' }}>
-                            <Link to={`/project/${p.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <div key={p.id} style={styles.cardWrapper}>
+                            <Link to={`/project/${p.id}`} style={styles.link}>
                                 <div style={styles.card}>
                                     <h3>{p.title}</h3>
                                     <p>{p.description}</p>
@@ -117,43 +115,45 @@ export default function MyPresentation() {
                                 </div>
                             </Link>
 
-                            <div style={styles.menuButton} onClick={() => setMenuOpenId(menuOpenId === p.id ? null : p.id)}>⋮</div>
+                            {/* 메뉴 버튼 */}
                             <div
-                                style={{ ...styles.statusDot, backgroundColor: statusColors[p.status] }}
-                                onClick={() => setSelectedProjectId(p.id)}
+                                style={styles.menuButton}
+                                onClick={() => setMenuOpenId(m => (m === p.id ? null : p.id))}
+                            >
+                                ⋮
+                            </div>
+
+                            {/* 상태 도트 */}
+                            <div
+                                style={{ ...styles.statusDot, backgroundColor: STATUS_COLORS[p.status] }}
+                                onClick={() => setSelectedId(id => (id === p.id ? null : p.id))}
                             />
 
-                            {selectedProjectId === p.id && (
-                                <div style={styles.statusDropdown}>
-                                    {Object.keys(statusColors).map(status => (
+                            {/* 상태 드롭다운 */}
+                            {selectedId === p.id && (
+                                <div style={styles.dropdown}>
+                                    {Object.entries(STATUS_COLORS).map(([status, color]) => (
                                         <div
                                             key={status}
+                                            style={styles.dropdownItem}
                                             onClick={() => handleStatusChange(p.id, status)}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '8px',
-                                                padding: '6px 12px',
-                                                cursor: 'pointer',
-                                                fontSize: '13px',
-                                            }}
                                         >
-                                            <div style={{
-                                                width: '10px',
-                                                height: '10px',
-                                                borderRadius: '50%',
-                                                backgroundColor: statusColors[status],
-                                            }} />
+                                            <div style={{ ...styles.dropdownDot, backgroundColor: color }} />
                                             <span>{status}</span>
                                         </div>
                                     ))}
                                 </div>
                             )}
 
+                            {/* 메뉴 드롭다운 */}
                             {menuOpenId === p.id && (
-                                <div style={styles.menuDropdown}>
-                                    <div style={styles.menuItem} onClick={() => handleEdit(p)}>수정</div>
-                                    <div style={styles.menuItem} onClick={() => handleDelete(p.id)}>삭제</div>
+                                <div style={styles.dropdown}>
+                                    <div style={styles.dropdownItem} onClick={() => handleEdit(p)}>
+                                        수정
+                                    </div>
+                                    <div style={styles.dropdownItem} onClick={() => handleDelete(p.id)}>
+                                        삭제
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -161,30 +161,24 @@ export default function MyPresentation() {
                 </div>
             </div>
 
+            {/* 모달 */}
             {showModal && (
                 <div style={styles.modalOverlay}>
                     <div style={styles.modal}>
                         <div style={styles.tabWrapper}>
-                            <button
-                                onClick={() => setMode('생성')}
-                                style={{
-                                    ...styles.tabButton,
-                                    backgroundColor: mode === '생성' ? '#fff' : '#eee',
-                                    fontWeight: mode === '생성' ? 'bold' : 'normal',
-                                }}
-                            >
-                                생성
-                            </button>
-                            <button
-                                onClick={() => setMode('참여')}
-                                style={{
-                                    ...styles.tabButton,
-                                    backgroundColor: mode === '참여' ? '#fff' : '#eee',
-                                    fontWeight: mode === '참여' ? 'bold' : 'normal',
-                                }}
-                            >
-                                참여
-                            </button>
+                            {['생성', '참여'].map(tab => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setMode(tab)}
+                                    style={{
+                                        ...styles.tabButton,
+                                        backgroundColor: mode === tab ? '#fff' : '#eee',
+                                        fontWeight: mode === tab ? 'bold' : 'normal',
+                                    }}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
                         </div>
 
                         <div style={styles.inputGroup}>
@@ -209,8 +203,12 @@ export default function MyPresentation() {
                         </div>
 
                         <div style={styles.modalActions}>
-                            <button onClick={() => setShowModal(false)} style={styles.cancelBtn}>취소</button>
-                            <button onClick={handleCreate} style={styles.confirmBtn}>{editProjectId ? '수정' : '생성'}</button>
+                            <button style={styles.cancelBtn} onClick={() => setShowModal(false)}>
+                                취소
+                            </button>
+                            <button style={styles.confirmBtn} onClick={handleCreateOrUpdate}>
+                                {editId ? '수정' : '생성'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -219,73 +217,75 @@ export default function MyPresentation() {
     );
 }
 
+// 스타일
 const styles = {
     container: { display: 'flex' },
+
     content: { flex: 1, transition: 'margin-left 0.3s ease', padding: '20px' },
+
     header: {
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        marginBottom: '20px'
     },
     addButton: {
         backgroundColor: mainColor, color: '#fff', border: 'none', borderRadius: '8px',
         padding: '10px 16px', cursor: 'pointer', fontSize: '14px'
     },
     projectGrid: {
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px'
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+        gap: '20px'
     },
+    cardWrapper: { position: 'relative' },
+
+    link: { textDecoration: 'none', color: 'inherit' },
+
     card: {
-        backgroundColor: '#ffffff', padding: '16px', borderRadius: '10px',
-        boxShadow: '0 6px 16px rgba(0, 0, 0, 0.3)', position: 'relative'
-    },
-    statusDot: {
-        position: 'absolute', top: 8, right: 8, width: 14, height: 14, borderRadius: '50%',
-        border: '1px solid #ccc', cursor: 'pointer'
+        backgroundColor: '#fff', padding: '16px', borderRadius: '10px',
+        boxShadow: '0 6px 16px rgba(0,0,0,0.3)'
     },
     menuButton: {
         position: 'absolute', top: 8, right: 32, width: 16, height: 16, cursor: 'pointer',
         fontSize: '16px', textAlign: 'center', lineHeight: '16px'
     },
-    statusDropdown: {
+    statusDot: {
+        position: 'absolute', top: 8, right: 8, width: 14, height: 14, borderRadius: '50%',
+        border: '1px solid #ccc', cursor: 'pointer'
+    },
+    dropdown: {
         position: 'absolute', top: 30, right: 8, backgroundColor: '#fff', border: '1px solid #ccc',
         borderRadius: '6px', boxShadow: '0 2px 6px rgba(0,0,0,0.2)', zIndex: 10
     },
-    menuDropdown: {
-        position: 'absolute', top: 30, right: 32, backgroundColor: '#fff', border: '1px solid #ccc',
-        borderRadius: '6px', boxShadow: '0 2px 6px rgba(0,0,0,0.2)', zIndex: 10
+    dropdownItem: {
+        display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px',
+        cursor: 'pointer', fontSize: '13px'
     },
-    menuItem: {
-        padding: '6px 12px', fontSize: '13px', cursor: 'pointer', whiteSpace: 'nowrap',
-        borderBottom: '1px solid #eee'
-    },
+    dropdownDot: { width: '10px', height: '10px', borderRadius: '50%' },
+
     modalOverlay: {
         position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', justifyContent: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center',
         alignItems: 'center', zIndex: 999
     },
     modal: {
         backgroundColor: '#f2e8ff', padding: '24px', borderRadius: '20px', width: '90%',
         maxWidth: '360px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
     },
-    tabWrapper: {
-        display: 'flex', borderRadius: '10px', overflow: 'hidden', marginBottom: '16px'
-    },
-    tabButton: {
-        flex: 1, padding: '8px', border: 'none', cursor: 'pointer'
-    },
-    inputGroup: {
-        marginBottom: '12px', display: 'flex', flexDirection: 'column', fontSize: '14px'
-    },
-    input: {
-        padding: '8px', border: '1px solid #ccc', borderRadius: '6px', fontSize: '14px'
-    },
-    modalActions: {
-        display: 'flex', justifyContent: 'space-between', marginTop: '20px'
-    },
+    tabWrapper: { display: 'flex', borderRadius: '10px', overflow: 'hidden', marginBottom: '16px' },
+
+    tabButton: { flex: 1, padding: '8px', border: 'none', cursor: 'pointer' },
+
+    inputGroup: { marginBottom: '12px', display: 'flex', flexDirection: 'column', fontSize: '14px' },
+
+    input: { padding: '8px', border: '1px solid #ccc', borderRadius: '6px', fontSize: '14px' },
+
+    modalActions: { display: 'flex', justifyContent: 'space-between', marginTop: '20px' },
+
     cancelBtn: {
-        backgroundColor: 'transparent', color: '#673AB7', border: 'none', fontWeight: 'bold',
+        backgroundColor: 'transparent', color: mainColor, border: 'none', fontWeight: 'bold',
         cursor: 'pointer'
     },
     confirmBtn: {
-        backgroundColor: '#673AB7', color: '#fff', border: 'none', padding: '8px 16px',
+        backgroundColor: mainColor, color: '#fff', border: 'none', padding: '8px 16px',
         borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer'
-    }
+    },
 };

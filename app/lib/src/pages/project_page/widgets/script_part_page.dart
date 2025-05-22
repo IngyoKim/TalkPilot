@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/models/script_part_model.dart';
 import 'package:talk_pilot/src/provider/project_provider.dart';
+import 'package:talk_pilot/src/components/toast_message.dart';
+import 'package:talk_pilot/src/services/database/user_service.dart';
 
-// ignore_for_file: deprecated_member_use
 class ScriptPartPage extends StatefulWidget {
   final String projectId;
   const ScriptPartPage({super.key, required this.projectId});
@@ -16,45 +17,50 @@ class ScriptPartPage extends StatefulWidget {
 }
 
 class _ScriptPartPageState extends State<ScriptPartPage> {
+  int? dragEndIndex;
   String? selectedUid;
   int? dragStartIndex;
-  int? dragEndIndex;
 
+  List<ScriptPartModel>? localScriptParts;
+  Map<String, String> participantNicknames = {};
+
+  late ProjectProvider provider;
   final GlobalKey _richTextKey = GlobalKey();
   final TextStyle _textStyle = const TextStyle(fontSize: 16);
-
-  late List<ScriptPartModel> scriptParts;
-  String _text = '';
 
   @override
   void initState() {
     super.initState();
-    _initScriptParts();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final provider = context.read<ProjectProvider>();
+
+      await provider.refreshProject();
+
+      final participants = provider.selectedProject?.participants ?? {};
+
+      final nicknameResults = await Future.wait(
+        participants.keys.map((uid) async {
+          final user = await UserService().readUser(uid);
+          return MapEntry(uid, user?.nickname ?? '로딩 중...');
+        }),
+      );
+
+      setState(() {
+        localScriptParts = List.from(
+          provider.selectedProject?.scriptParts ?? [],
+        );
+        participantNicknames = Map.fromEntries(nicknameResults);
+      });
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initScriptParts();
+    provider = context.read<ProjectProvider>();
   }
 
-  void _initScriptParts() {
-    final project = context.read<ProjectProvider>().projects.firstWhere(
-      (p) => p.id == widget.projectId,
-      orElse:
-          () => ProjectModel(
-            id: '',
-            title: '',
-            description: '',
-            ownerUid: '',
-            participants: {},
-            status: '',
-          ),
-    );
-    scriptParts = List<ScriptPartModel>.from(project.scriptParts ?? []);
-    _text = project.script ?? '';
-  }
-
+  /// 색상 매칭
   Color getColorForUid(String uid, ProjectModel project) {
     final colors = [
       Colors.blue,
@@ -69,182 +75,23 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
     return colors[index % colors.length];
   }
 
-  List<String?> _mapTextIndicesToUid(
-    ProjectModel project,
-    List<ScriptPartModel> scriptParts,
-  ) {
-    List<String?> map = List<String?>.filled(_text.length, null);
-
-    for (final part in scriptParts) {
-      final start = part.startIndex.clamp(0, _text.length);
-      final end = part.endIndex.clamp(0, _text.length);
-      for (int i = start; i < end; i++) {
-        map[i] = part.uid;
-      }
+  /// 파트 저장
+  void _overwriteParts(ProjectModel project, int start, int end) {
+    if (selectedUid == null || localScriptParts == null) {
+      ToastMessage.show("참여자를 먼저 선택하세요.");
+      return;
     }
 
-    return map;
-  }
-
-  /// 텍스트 배경색
-  List<InlineSpan> buildTextSpans(
-    ProjectModel project,
-    List<ScriptPartModel> scriptParts,
-    int? dragStart,
-    int? dragEnd,
-  ) {
-    if (_text.isEmpty) return [const TextSpan(text: '대본이 없습니다.')];
-
-    final uidMap = _mapTextIndicesToUid(project, scriptParts);
-
-    if (dragStart != null && dragEnd != null && dragStart > dragEnd) {
-      final tmp = dragStart;
-      dragStart = dragEnd;
-      dragEnd = tmp;
-    }
-
-    List<InlineSpan> spans = [];
-    String? currentUid = uidMap[0];
-    int segmentStart = 0;
-
-    for (int i = 1; i <= _text.length; i++) {
-      final uid = (i < _text.length) ? uidMap[i] : null;
-
-      final isInDragRange =
-          dragStart != null && dragEnd != null && i > dragStart && i <= dragEnd;
-
-      if (isInDragRange) {
-        if (segmentStart < dragStart) {
-          final segmentText = _text.substring(segmentStart, dragStart);
-          final bgColor =
-              currentUid != null
-                  ? getColorForUid(currentUid, project).withOpacity(0.3)
-                  : Colors.transparent;
-
-          spans.add(
-            TextSpan(
-              text: segmentText,
-              style: TextStyle(
-                backgroundColor: bgColor,
-                fontWeight:
-                    currentUid != null ? FontWeight.bold : FontWeight.normal,
-                color: Colors.black,
-              ),
-            ),
-          );
-        }
-
-        final dragText = _text.substring(dragStart, dragEnd);
-        spans.add(
-          TextSpan(
-            text: dragText,
-            style: const TextStyle(
-              backgroundColor: Colors.yellowAccent,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-        );
-
-        segmentStart = dragEnd;
-        currentUid = null;
-        i = dragEnd;
-        dragStart = null;
-        dragEnd = null;
-        continue;
-      }
-
-      if (uid != currentUid || i == _text.length) {
-        final segmentText = _text.substring(segmentStart, i);
-        final bgColor =
-            currentUid != null
-                ? getColorForUid(currentUid, project).withOpacity(0.3)
-                : Colors.transparent;
-
-        spans.add(
-          TextSpan(
-            text: segmentText,
-            style: TextStyle(
-              backgroundColor: bgColor,
-              fontWeight:
-                  currentUid != null ? FontWeight.bold : FontWeight.normal,
-              color: Colors.black,
-            ),
-          ),
-        );
-
-        currentUid = uid;
-        segmentStart = i;
-      }
-    }
-
-    return spans;
-  }
-
-  int _getTextLocalOffset(Offset localOffset) {
-    final renderObject = _richTextKey.currentContext?.findRenderObject();
-    if (renderObject == null || renderObject is! RenderParagraph) {
-      return 0;
-    }
-    final renderParagraph = renderObject;
-
-    final textStyle = _textStyle;
-    final textPainter = TextPainter(
-      text: TextSpan(text: _text, style: textStyle),
-      maxLines: null,
-      textDirection: TextDirection.ltr,
-    );
-    textPainter.layout(maxWidth: renderParagraph.size.width);
-
-    double avgCharWidth = textPainter.size.width / _text.length;
-    final candidates = [
-      localOffset,
-      Offset(localOffset.dx - avgCharWidth, localOffset.dy),
-      Offset(localOffset.dx - avgCharWidth * 2, localOffset.dy),
-    ];
-
-    int bestOffset = 0;
-    double bestDistance = double.infinity;
-
-    for (final offset in candidates) {
-      final pos = renderParagraph.getPositionForOffset(offset).offset;
-      final caretOffset = renderParagraph.getOffsetForCaret(
-        TextPosition(offset: pos),
-        Rect.zero,
-      );
-
-      final dist = (caretOffset - offset).distance;
-
-      if (dist < bestDistance) {
-        bestDistance = dist;
-        bestOffset = pos;
-      }
-    }
-
-    return bestOffset.clamp(0, _text.length);
-  }
-
-  int _getTextGlobalOffset(Offset globalPosition) {
-    final box = _richTextKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null) return 0;
-
-    final localOffset = box.globalToLocal(globalPosition);
-    return _getTextLocalOffset(localOffset);
-  }
-
-  /// 파트 덮어쓰기
-  void _overwriteParts(int start, int end) {
     final s = start < end ? start : end;
     final e = start > end ? start : end;
+    final parts = List<ScriptPartModel>.from(localScriptParts!);
 
-    /// 겹치는 기존 파트를 겹치지 않는 영역만 남기도록 수정
-    final List<ScriptPartModel> newParts = [];
-    for (final part in scriptParts) {
+    /// 파트 중복되는 부분을 덮어씌움(기존 파트는 잘림)
+    final newParts = <ScriptPartModel>[];
+    for (final part in parts) {
       if (e <= part.startIndex || s >= part.endIndex) {
-        /// 겹치지 않는 부분은 그대로 유지
         newParts.add(part);
       } else {
-        /// 겹치는 부분은 기존 파트를 잘라서 겹치지 않는 부분만 남김
         if (part.startIndex < s) {
           newParts.add(
             ScriptPartModel(
@@ -266,31 +113,140 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
       }
     }
 
-    /// 새 파트 추가
+    /// 새로운 파트 추가
     newParts.add(
       ScriptPartModel(uid: selectedUid!, startIndex: s, endIndex: e),
     );
 
-    scriptParts = newParts;
+    /// [startIndex]로 정렬(색상을 맞춤춤)
+    newParts.sort((a, b) => a.startIndex.compareTo(b.startIndex));
+
+    setState(() {
+      localScriptParts = newParts;
+    });
+  }
+
+  /// 드래그 구역 표시
+  List<InlineSpan> buildTextSpans(
+    ProjectModel project,
+    List<ScriptPartModel> scriptParts,
+    int? dragStart,
+    int? dragEnd,
+    String script,
+  ) {
+    final uidMap = List<String?>.filled(script.length, null);
+
+    for (final part in scriptParts) {
+      for (
+        int i = part.startIndex;
+        i < part.endIndex && i < script.length;
+        i++
+      ) {
+        uidMap[i] = part.uid;
+      }
+    }
+
+    if (dragStart != null && dragEnd != null && dragStart > dragEnd) {
+      final tmp = dragStart;
+      dragStart = dragEnd;
+      dragEnd = tmp;
+    }
+
+    List<InlineSpan> spans = [];
+    String? currentUid = uidMap[0];
+    int segmentStart = 0;
+
+    for (int i = 1; i <= script.length; i++) {
+      final uid = (i < script.length) ? uidMap[i] : null;
+      final isInDragRange =
+          dragStart != null && dragEnd != null && i > dragStart && i <= dragEnd;
+
+      if (isInDragRange) {
+        if (segmentStart < dragStart) {
+          spans.add(
+            _buildSpan(
+              script.substring(segmentStart, dragStart),
+              currentUid,
+              project,
+            ),
+          );
+        }
+
+        spans.add(
+          TextSpan(
+            text: script.substring(dragStart, dragEnd),
+            style: const TextStyle(
+              backgroundColor: Colors.yellowAccent,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        );
+
+        segmentStart = dragEnd;
+        currentUid = null;
+        i = dragEnd;
+        dragStart = null;
+        dragEnd = null;
+        continue;
+      }
+
+      if (uid != currentUid || i == script.length) {
+        spans.add(
+          _buildSpan(script.substring(segmentStart, i), currentUid, project),
+        );
+        currentUid = uid;
+        segmentStart = i;
+      }
+    }
+
+    return spans;
+  }
+
+  /// 선택중인 파트 표시
+  TextSpan _buildSpan(String text, String? uid, ProjectModel project) {
+    return TextSpan(
+      text: text,
+      style: TextStyle(
+        backgroundColor:
+            uid != null
+                // ignore: deprecated_member_use
+                ? getColorForUid(uid, project).withOpacity(0.3)
+                : Colors.transparent,
+        fontWeight: uid != null ? FontWeight.bold : FontWeight.normal,
+        color: Colors.black,
+      ),
+    );
+  }
+
+  /// 드래그 중인 위치 파악 및 텍스트 인덱스 계산
+  int _getTextOffset(Offset globalPosition) {
+    final box = _richTextKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null) return 0;
+
+    final localOffset = box.globalToLocal(globalPosition);
+    final renderObject = _richTextKey.currentContext?.findRenderObject();
+    if (renderObject == null || renderObject is! RenderParagraph) return 0;
+
+    final paragraph = renderObject;
+    final position = paragraph.getPositionForOffset(localOffset).offset;
+
+    return position.clamp(
+      0,
+      context.read<ProjectProvider>().selectedProject?.script?.length ?? 0,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ProjectProvider>();
-    final project = provider.projects.firstWhere(
-      (p) => p.id == widget.projectId,
-      orElse:
-          () => ProjectModel(
-            id: '',
-            title: '',
-            description: '',
-            ownerUid: '',
-            participants: {},
-            status: '',
-          ),
-    );
+    final project = provider.selectedProject;
 
-    final participants = project.participants;
+    if (project == null || project.id.isEmpty || localScriptParts == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final script = project.script ?? '';
 
     return Scaffold(
       appBar: AppBar(
@@ -299,11 +255,11 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: () async {
-              final provider = context.read<ProjectProvider>();
               await provider.updateProject({
                 ProjectField.scriptParts:
-                    scriptParts.map((e) => e.toMap()).toList(),
+                    localScriptParts!.map((e) => e.toMap()).toList(),
               });
+              ToastMessage.show("저장되었습니다");
               // ignore: use_build_context_synchronously
               Navigator.pop(context);
             },
@@ -311,136 +267,110 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
           ),
         ],
       ),
-      body:
-          project.id.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: DropdownButton<String>(
-                            value: selectedUid,
-                            hint: const Text('참여자 선택'),
-                            isExpanded: true,
-                            items:
-                                participants.entries
-                                    .map(
-                                      (e) => DropdownMenuItem(
-                                        value: e.key,
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: 14,
-                                              height: 14,
-                                              margin: const EdgeInsets.only(
-                                                right: 8,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: getColorForUid(
-                                                  e.key,
-                                                  project,
-                                                ),
-                                                shape: BoxShape.circle,
-                                              ),
-                                            ),
-                                            Flexible(
-                                              child: Text(
-                                                '${e.value} (${e.key})',
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                            onChanged: (v) => setState(() => selectedUid = v),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        if (selectedUid != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: getColorForUid(selectedUid!, project),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              selectedUid!,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          return GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            onPanStart: (details) {
-                              final startPos = _getTextGlobalOffset(
-                                details.globalPosition,
-                              );
-                              setState(() {
-                                dragStartIndex = startPos;
-                                dragEndIndex = startPos;
-                              });
-                            },
-                            onPanUpdate: (details) {
-                              if (dragStartIndex == null) return;
-                              final pos = _getTextGlobalOffset(
-                                details.globalPosition,
-                              );
-                              setState(() {
-                                dragEndIndex = pos;
-                              });
-                            },
-                            onPanEnd: (details) {
-                              if (dragStartIndex != null &&
-                                  dragEndIndex != null) {
-                                setState(() {
-                                  _overwriteParts(
-                                    dragStartIndex!,
-                                    dragEndIndex!,
-                                  );
-                                  dragStartIndex = null;
-                                  dragEndIndex = null;
-                                });
-                              }
-                            },
-                            child: SingleChildScrollView(
-                              padding: const EdgeInsets.all(8),
-                              child: RichText(
-                                key: _richTextKey,
-                                text: TextSpan(
-                                  style: _textStyle,
-                                  children: buildTextSpans(
-                                    project,
-                                    scriptParts,
-                                    dragStartIndex,
-                                    dragEndIndex,
+      body: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButton<String>(
+                    value: selectedUid,
+                    hint: const Text('참여자 선택'),
+                    isExpanded: true,
+                    items:
+                        project.participants.keys.map((uid) {
+                          final nickname =
+                              participantNicknames[uid] ?? '알 수 없음';
+                          final role = project.participants[uid] ?? 'member';
+                          return DropdownMenuItem(
+                            value: uid,
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 14,
+                                  height: 14,
+                                  margin: const EdgeInsets.only(right: 8),
+                                  decoration: BoxDecoration(
+                                    color: getColorForUid(uid, project),
+                                    shape: BoxShape.circle,
                                   ),
                                 ),
-                              ),
+                                Flexible(child: Text('$nickname ($role)')),
+                              ],
                             ),
                           );
-                        },
+                        }).toList(),
+                    onChanged: (v) => setState(() => selectedUid = v),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                if (selectedUid != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: getColorForUid(selectedUid!, project),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      participantNicknames[selectedUid] ?? '알 수 없음',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onPanStart: (details) {
+                  setState(() {
+                    dragStartIndex = _getTextOffset(details.globalPosition);
+                    dragEndIndex = dragStartIndex;
+                  });
+                },
+                onPanUpdate: (details) {
+                  if (dragStartIndex == null) return;
+                  setState(() {
+                    dragEndIndex = _getTextOffset(details.globalPosition);
+                  });
+                },
+                onPanEnd: (_) {
+                  if (dragStartIndex != null && dragEndIndex != null) {
+                    _overwriteParts(project, dragStartIndex!, dragEndIndex!);
+                    setState(() {
+                      dragStartIndex = null;
+                      dragEndIndex = null;
+                    });
+                  }
+                },
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(8),
+                  child: RichText(
+                    key: _richTextKey,
+                    text: TextSpan(
+                      style: _textStyle,
+                      children: buildTextSpans(
+                        project,
+                        localScriptParts!,
+                        dragStartIndex,
+                        dragEndIndex,
+                        script,
+                      ),
+                    ),
+                  ),
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

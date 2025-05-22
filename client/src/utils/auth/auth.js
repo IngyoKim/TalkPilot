@@ -1,4 +1,4 @@
-import { signOut } from "firebase/auth";
+import { signOut, getAuth } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -15,11 +15,6 @@ export const serverLogin = async (idToken) => {
 
     const userData = await res.json();
     console.log("[Nest] 사용자 정보 수신 완료:");
-    console.table({
-        UID: userData.uid,
-        이름: userData.name,
-        프로필: userData.picture,
-    });
     return userData;
 };
 
@@ -31,4 +26,18 @@ export const logout = async () => {
     } catch (error) {
         console.error("로그아웃 실패", error);
     }
+};
+
+/// Firebase에서 uid를 가져옴
+export const getCurrentUid = () => {
+    const user = getAuth().currentUser;
+    if (!user) throw new Error("로그인된 사용자가 없습니다.");
+    return user.uid;
+};
+
+/// Firebase에서 Id token을 가져옴
+export const getIdToken = async () => {
+    const user = getAuth().currentUser;
+    if (!user) throw new Error('로그인된 사용자가 없습니다.');
+    return await user.getIdToken();
 };

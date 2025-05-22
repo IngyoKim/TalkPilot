@@ -28,9 +28,12 @@ class ProjectService {
       ownerUid: ownerUid,
       participants: participants,
       status: 'preparing',
+      estimatedTime: 0,
+      score: 0,
       scheduledDate: null,
       script: '',
       memo: '',
+      scriptParts: [],
     );
 
     await _db.writeDB('$basePath/$id', project.toMap());
@@ -95,6 +98,7 @@ class ProjectService {
     setIfMissing('script', project.script);
     setIfMissing('presentationDate', project.scheduledDate?.toIso8601String());
     setIfMissing('memo', project.memo);
+    setIfMissing('scriptParts', project.scriptParts);
 
     if (updateMap.isNotEmpty) {
       await updateProject(project.id, updateMap);

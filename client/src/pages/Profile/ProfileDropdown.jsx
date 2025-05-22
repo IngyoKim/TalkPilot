@@ -3,7 +3,6 @@ import {
     FaChevronLeft,
     FaChevronRight,
     FaUser,
-    FaCog,
     FaQuestionCircle,
     FaEnvelope,
     FaSignOutAlt,
@@ -11,11 +10,13 @@ import {
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../utils/auth/auth';
+import { useUser } from '../../contexts/UserContext';
 
 const mainColor = '#673AB7';
 
-export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user }) {
+export default function ProfileDropdown({ isSidebarOpen, onToggleSidebar }) {
     const navigate = useNavigate();
+    const { user } = useUser();
     const [isHovered, setIsHovered] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
@@ -31,7 +32,6 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user })
         }
     };
 
-    // 바깥 클릭 시 드롭다운 닫기
     useEffect(() => {
         function onClickOutside(e) {
             if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -44,27 +44,38 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user })
 
     const ArrowIcon = () => {
         if (isSidebarOpen) {
-            return isHovered
-                ? <FaChevronRight size={20} />
-                : <FaChevronLeft size={20} />;
+            return isHovered ? <FaChevronRight size={20} /> : <FaChevronLeft size={20} />;
         } else {
-            return isHovered
-                ? <FaChevronLeft size={20} />
-                : <FaChevronRight size={20} />;
+            return isHovered ? <FaChevronLeft size={20} /> : <FaChevronRight size={20} />;
         }
     };
 
     const menuItems = [
-        { icon: <FaUserEdit />, label: 'Account Detail', onClick: () => navigate('../AccountDetail'), },
-        { icon: <FaCog />, label: 'Setting', onClick: () => console.log('설정') },
-        { icon: <FaQuestionCircle />, label: 'Help Center', onClick: () => console.log('도움말') },
-        { icon: <FaEnvelope />, label: 'Contact us', onClick: () => console.log('문의하기') },
-        { icon: <FaSignOutAlt />, label: 'Log Out', onClick: handleLogout, isDanger: true },
+        {
+            icon: <FaUserEdit />,
+            label: 'Account Detail',
+            onClick: () => navigate('../profile'),
+        },
+        {
+            icon: <FaQuestionCircle />,
+            label: 'Help',
+            onClick: () => navigate('../help'),
+        },
+        {
+            icon: <FaEnvelope />,
+            label: 'Contact us',
+            onClick: () => navigate('../contact'),
+        },
+        {
+            icon: <FaSignOutAlt />,
+            label: 'Log Out',
+            onClick: handleLogout,
+            isDanger: true,
+        },
     ];
 
     return (
         <div style={styles.container}>
-            {/* 고정된 화살표 */}
             <div
                 style={{
                     ...styles.arrowToggle,
@@ -77,7 +88,6 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user })
                 <ArrowIcon />
             </div>
 
-            {/* 프로필 + 드롭다운 */}
             <div style={styles.profileContainer} ref={menuRef}>
                 <div style={styles.profileIcon} onClick={() => setMenuOpen(o => !o)}>
                     <FaUser size={20} color={mainColor} />
@@ -85,14 +95,11 @@ export default function NavbarControls({ isSidebarOpen, onToggleSidebar, user })
 
                 {menuOpen && (
                     <div style={styles.dropdown}>
-                        {/* 사용자 정보 */}
                         <div style={styles.userInfo}>
                             <span style={styles.userName}>{user?.name || 'Guest'}</span>
                             <span style={styles.userEmail}>{user?.email || 'guest@example.com'}</span>
                         </div>
                         <div style={styles.divider} />
-
-                        {/* 메뉴 항목 */}
                         {menuItems.map((item, i) => (
                             <div
                                 key={i}
@@ -183,19 +190,19 @@ const styles = {
         padding: '12px 16px',
         backgroundColor: '#f5f5f5',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
     },
     userName: {
         fontWeight: 'bold',
-        marginBottom: '4px'
+        marginBottom: '4px',
     },
     userEmail: {
         fontSize: '12px',
-        color: '#555'
+        color: '#555',
     },
     divider: {
         height: '1px',
         backgroundColor: '#eee',
-        margin: '4px 0'
-    }
+        margin: '4px 0',
+    },
 };

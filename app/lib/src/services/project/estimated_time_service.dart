@@ -1,3 +1,4 @@
+import 'package:talk_pilot/src/models/script_part_model.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/database/project_stream_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
@@ -16,31 +17,49 @@ class EstimatedTimeService {
 
     _projectService.streamProject(projectId).listen((project) async {
       final script = project.script?.trim();
-      if (script == null || script.isEmpty) return;
+      final List<ScriptPartModel>? parts = project.scriptParts;
 
-      final prevScript = _prevScriptMap[project.id];
+      if (script == null || script.isEmpty || parts == null || parts.isEmpty) return;
+
+      final currentState = '$script::${parts.map((e) => e.toString()).join()}';
+      final prevState = _prevScriptMap[project.id];
 
       if (!_initializedProjects.contains(project.id)) {
-        _prevScriptMap[project.id] = script;
+        _prevScriptMap[project.id] = currentState;
         _initializedProjects.add(project.id);
         return;
       }
 
-      if (script == prevScript) return;
+      if (currentState == prevState) return;
+      _prevScriptMap[project.id] = currentState;
 
-      _prevScriptMap[project.id] = script;
+      double totalTime = 0;
 
-      final user = await _userService.readUser(project.ownerUid);
-      final cpm = user?.cpm ?? 0.0;
-      if (cpm <= 0) return;
+      for (final part in parts) {
+        final int start = part.startIndex;
+        final int end = part.endIndex;
+        final String uid = part.uid;
 
-      final estimatedTime = double.parse(
-        ((script.length / cpm) * 60).toStringAsFixed(2),
-      );
+        if (start < 0 || end > script.length || start >= end) continue;
 
-      await _projectService.updateProject(project.id, {
-        'estimatedTime': estimatedTime,
-      });
+        final text = script.substring(start, end).trim();
+        if (text.isEmpty) continue;
+
+        final user = await _userService.readUser(uid);
+        final cpm = user?.cpm ?? 0;
+        if (cpm <= 0) continue;
+
+        final time = (text.length / cpm) * 60;
+        totalTime += time;
+      }
+
+      final newEstimatedTime = double.parse(totalTime.toStringAsFixed(2));
+
+      if (project.estimatedTime != newEstimatedTime) {
+        await _projectService.updateProject(project.id, {
+          'estimatedTime': newEstimatedTime,
+        });
+      }
     });
   }
 }

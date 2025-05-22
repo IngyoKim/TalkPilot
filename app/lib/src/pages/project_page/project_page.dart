@@ -12,7 +12,6 @@ import 'package:talk_pilot/src/pages/project_page/widgets/script_part_page.dart'
 import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/script_upload_button.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/editable/editable_text_editor.dart';
-import 'package:talk_pilot/src/pages/project_page/widgets/practice_button.dart';
 import 'package:talk_pilot/src/services/project/estimated_time_service.dart';
 
 class ProjectPage extends StatefulWidget {

@@ -33,11 +33,19 @@ export default function MyPresentation() {
     const [selectedId, setSelectedId] = useState(null);
     const [menuOpenId, setMenuOpenId] = useState(null);
     const [editId, setEditId] = useState(null);
+    const [joinProjectId, setJoinProjectId] = useState('');
 
     const handleCreateOrUpdate = () => {
+        if (mode === '참여') {
+            if (!joinProjectId.trim()) return;
+            console.log('입력된 ID:', joinProjectId); // 여기에 ID 확인 로직 등 연결 가능
+            setJoinProjectId('');
+            setShowModal(false);
+            return;
+        }
         if (!title.trim()) return;
         const now = new Date();
-        if (editId) {//프로젝트 수정
+        if (editId) {// 프로젝트 수정
             setProjects(ps =>
                 ps.map(p =>
                     p.id === editId
@@ -46,7 +54,7 @@ export default function MyPresentation() {
                 )
             );
         } else {
-            setProjects(ps => [//프로젝트 생성
+            setProjects(ps => [// 프로젝트 생성
                 ...ps,
                 {
                     id: uuidv4(), title, description, status: '진행중',
@@ -61,7 +69,7 @@ export default function MyPresentation() {
         setShowModal(false);
     };
 
-    const handleStatusChange = (id, newStatus) => { //상태창 변경
+    const handleStatusChange = (id, newStatus) => { // 상태창 변경
         setProjects(ps =>
             ps.map(p => (p.id === id ? {
                 ...p, status: newStatus,
@@ -71,12 +79,12 @@ export default function MyPresentation() {
         setSelectedId(null);
     };
 
-    const handleDelete = (id) => {//프로젝트 삭제
+    const handleDelete = (id) => {// 프로젝트 삭제
         setProjects(ps => ps.filter(p => p.id !== id));
         setMenuOpenId(prev => (prev === id ? null : prev));
     };
 
-    const handleEdit = (p) => {//프로젝트 수정모드 진입
+    const handleEdit = (p) => {// 프로젝트 수정모드 진입
         setTitle(p.title);
         setDescription(p.description);
         setEditId(p.id);
@@ -96,7 +104,7 @@ export default function MyPresentation() {
 
                 {/* 헤더 */}
                 <div style={styles.header}>
-                    <h2>프로젝트</h2>
+
                     <button style={styles.addButton} onClick={() => setShowModal(true)}>
                         프로젝트 추가
                     </button>
@@ -180,27 +188,41 @@ export default function MyPresentation() {
                                 </button>
                             ))}
                         </div>
+                        {mode === '생성' ? (
+                            <>
+                                <div style={styles.inputGroup}>
+                                    <label>제목 입력</label>
+                                    <input
+                                        type="text"
+                                        maxLength={100}
+                                        value={title}
+                                        onChange={e => setTitle(e.target.value)}
+                                        style={styles.input}
+                                    />
+                                </div>
 
-                        <div style={styles.inputGroup}>
-                            <label>제목 입력</label>
-                            <input
-                                type="text"
-                                maxLength={100}
-                                value={title}
-                                onChange={e => setTitle(e.target.value)}
-                                style={styles.input}
-                            />
-                        </div>
+                                <div style={styles.inputGroup}>
+                                    <label>설명 입력 (최대 100자)</label>
+                                    <textarea
+                                        maxLength={100}
+                                        value={description}
+                                        onChange={e => setDescription(e.target.value)}
+                                        style={{ ...styles.input, height: '60px' }}
+                                    />
+                                </div>
+                            </>
+                        ) : (
+                            <div style={styles.inputGroup}>
+                                <label>프로젝트 ID 입력</label>
+                                <input
+                                    type="text"
+                                    value={joinProjectId}
+                                    onChange={e => setJoinProjectId(e.target.value)}
+                                    style={styles.input}
+                                />
+                            </div>
+                        )}
 
-                        <div style={styles.inputGroup}>
-                            <label>설명 입력 (최대 100자)</label>
-                            <textarea
-                                maxLength={100}
-                                value={description}
-                                onChange={e => setDescription(e.target.value)}
-                                style={{ ...styles.input, height: '60px' }}
-                            />
-                        </div>
 
                         <div style={styles.modalActions}>
                             <button style={styles.cancelBtn} onClick={() => setShowModal(false)}>
@@ -217,7 +239,6 @@ export default function MyPresentation() {
     );
 }
 
-// 스타일
 const styles = {
     container: { display: 'flex' },
 
@@ -229,7 +250,7 @@ const styles = {
     },
     addButton: {
         backgroundColor: mainColor, color: '#fff', border: 'none', borderRadius: '8px',
-        padding: '10px 16px', cursor: 'pointer', fontSize: '14px'
+        padding: '10px 16px', cursor: 'pointer', fontSize: '14px', marginLeft: '16px'
     },
     projectGrid: {
         display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',

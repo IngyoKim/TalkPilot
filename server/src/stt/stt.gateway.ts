@@ -28,26 +28,20 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
     async handleConnection(socket: Socket) {
         const token = socket.handshake.auth?.token;
         if (!token?.startsWith('Bearer ')) {
-            console.warn(`인증 실패(토큰 없음): ${socket.id}`);
             socket.disconnect();
             return;
         }
 
         const idToken = token.split('Bearer ')[1];
-
         try {
             const decoded = await admin.auth().verifyIdToken(idToken);
             socket.data.user = decoded;
-            console.log(`소켓 연결된 사용자: ${decoded.uid}`);
-            console.log(`소켓 연결됨: ${socket.id}`);
-        } catch (err) {
-            console.warn(`토큰 인증 실패: ${err.message}`);
+        } catch {
             socket.disconnect();
         }
     }
 
     handleDisconnect(socket: Socket) {
-        console.log(`소켓 연결 해제됨: ${socket.id}`);
         this.closeStream(socket.id);
     }
 
@@ -59,9 +53,7 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('audio-chunk')
     handleAudioChunk(socket: Socket, chunk: Buffer) {
         const stream = this.recognizeStreams.get(socket.id);
-        if (stream) {
-            stream.write(chunk);
-        }
+        if (stream) stream.write(chunk);
     }
 
     @SubscribeMessage('end-audio')
@@ -82,20 +74,19 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 interimResults: true,
             })
             .on('data', (data) => {
-                const transcript = data.results?.[0]?.alternatives?.[0]?.transcript;
+                const result = data.results?.[0];
+                const transcript = result?.alternatives?.[0]?.transcript;
                 if (transcript) {
-                    socket.emit('stt-result', transcript);
+                    socket.emit('stt-result', transcript.trim());
                 }
             })
-            .on('error', (err) => {
-                console.error(`STT 스트림 오류: ${err.message}`);
-                this.startNewStream(socket); // 자동 재시작
+            .on('error', () => {
+                this.startNewStream(socket);
             });
 
         this.recognizeStreams.set(socket.id, stream);
 
         const timer = setTimeout(() => {
-            console.log(`5분 자동 재연결: ${socket.id}`);
             this.startNewStream(socket);
         }, 290_000);
         this.streamTimers.set(socket.id, timer);

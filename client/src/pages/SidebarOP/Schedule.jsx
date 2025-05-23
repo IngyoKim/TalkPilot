@@ -64,7 +64,6 @@ export default function SchedulePage() {
                 />
 
                 <div style={styles.calendarWrapper}>
-                    <h2>스케줄</h2>
                     <FullCalendar
                         ref={calendarRef}
                         plugins={[dayGridPlugin, interactionPlugin]}
@@ -74,9 +73,9 @@ export default function SchedulePage() {
                         dayHeaderDidMount={handleDayHeaderDidMount}
                         dayCellDidMount={handleDayCellDidMount}
                         headerToolbar={{
-                            left: 'prev,next today',
+                            left: '',
                             center: 'title',
-                            right: ''
+                            right: 'prev,next today'
                         }}
                     />
                 </div>

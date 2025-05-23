@@ -1,7 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+
 import Sidebar from '../components/SideBar';
 import ProfileDropdown from './Profile/ProfileDropdown';
+import MyPresentation from './SidebarOP/MyPresentation';
+
 
 const mainColor = '#673AB7';
 
@@ -11,6 +15,7 @@ export default function MainPage() {
         console.log('프로필 클릭!');
     };
     const handleToggleSidebar = () => setIsSidebarOpen(prev => !prev);
+    const navigate = useNavigate();
 
     return (
         <div style={styles.container}>
@@ -38,8 +43,9 @@ export default function MainPage() {
             >
                 <div style={styles.headerSection}>
                     <h2 style={styles.welcomeText}>Welcome to TalkPilot!</h2>
-                    <button style={styles.startButton}>Start a New Presentation</button>
-                    <p style={styles.emptyMessage}>현재 생성된 프로젝트가 없습니다.</p>
+                    <button style={styles.startButton} onClick={() => navigate('/presentation')}>
+                        Start a Presentation
+                    </button>
                 </div>
             </motion.div>
 
@@ -103,11 +109,6 @@ const styles = {
         borderRadius: '8px',
         cursor: 'pointer',
         fontSize: '16px',
-    },
-    emptyMessage: {
-        marginTop: '12px',
-        fontSize: '14px',
-        color: '#888888',
     },
     footer: {
         textAlign: 'center',

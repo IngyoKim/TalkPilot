@@ -141,6 +141,7 @@ const styles = {
         alignItems: 'center',
         width: '100%',
         height: '64px',
+        overflow: 'visible',
     },
     arrowToggle: {
         position: 'fixed',
@@ -160,6 +161,7 @@ const styles = {
     profileContainer: {
         position: 'fixed',
         marginRight: '32px',
+        zIndex: 1002,
     },
     profileIcon: {
         width: '40px',
@@ -181,7 +183,7 @@ const styles = {
         border: `1px solid ${mainColor}`,
         borderRadius: '8px',
         boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-        zIndex: 1002,
+        zIndex: 9999,
         overflow: 'hidden',
     },
     menuItem: {

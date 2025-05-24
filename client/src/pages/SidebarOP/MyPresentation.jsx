@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 import Sidebar from '../../components/SideBar';
+import ToastMessage from '../../components/ToastMessage';
 import ProfileDropdown from '../Profile/ProfileDropdown';
 
 const mainColor = '#673AB7';
@@ -34,6 +35,7 @@ export default function MyPresentation() {
     const [menuOpenId, setMenuOpenId] = useState(null);
     const [editId, setEditId] = useState(null);
     const [joinProjectId, setJoinProjectId] = useState('');
+    const [toastMessage, setToastMessage] = useState('');// 토스트 메시지
 
     const handleCreateOrUpdate = () => {
         if (mode === '참여') {
@@ -53,7 +55,9 @@ export default function MyPresentation() {
                         : p
                 )
             );
-        } else {
+            setToastMessage('프로젝트가 수정되었습니다.');
+        }
+        else {
             setProjects(ps => [// 프로젝트 생성
                 ...ps,
                 {
@@ -61,7 +65,9 @@ export default function MyPresentation() {
                     createdAt: now, updatedAt: now
                 },
             ]);
+            setToastMessage('프로젝트가 생성되었습니다.');
         }
+
         // 초기화
         setTitle('');
         setDescription('');
@@ -77,10 +83,12 @@ export default function MyPresentation() {
             } : p))
         );
         setSelectedId(null);
+        setToastMessage(`상태가 "${newStatus}"(으)로 변경되었습니다.`);
     };
 
     const handleDelete = (id) => {// 프로젝트 삭제
         setProjects(ps => ps.filter(p => p.id !== id));
+        setToastMessage('프로젝트가 삭제되었습니다.');
         setMenuOpenId(prev => (prev === id ? null : prev));
     };
 
@@ -234,6 +242,12 @@ export default function MyPresentation() {
                         </div>
                     </div>
                 </div>
+            )}
+            {toastMessage && (
+                <ToastMessage
+                    message={toastMessage}
+                    onClose={() => setToastMessage('')}
+                />
             )}
         </div>
     );

@@ -76,7 +76,14 @@ function OfficeCard({ city, address, phone, hours }) {
                     {hours}
                 </p>
             )}
-            <button style={styles.viewMapBtn}>위치 확인</button>
+            <button style={styles.viewMapBtn} onClick={() =>
+                window.open(
+                    'https://www.google.co.kr/maps/dir//%EC%B6%A9%EC%B2%AD%EB%B6%81%EB%8F%84+%EC%B2%AD%EC%A3%BC%EC%8B%9C+%EC%84%9C%EC%9B%90%EA%B5%AC+%EC%B6%A9%EB%8C%80%EB%A1%9C+1+%EC%B6%A9%EB%B6%81%EB%8C%80%ED%95%99%EA%B5%90+%EA%B3%B5%EA%B3%BC%EB%8C%80%ED%95%991%ED%98%B8%EA%B4%80/data=!4m8!4m7!1m0!1m5!1m1!1s0x3565298c2b8fa25f:0xaed1ccc87a1c3f0f!2m2!1d127.4582894!2d36.6266955?hl=ko&entry=ttu',
+                    '_blank'
+                )
+            }
+            >위치 확인
+            </button>
         </div>
     );
 }

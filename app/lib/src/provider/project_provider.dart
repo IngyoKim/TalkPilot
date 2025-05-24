@@ -41,7 +41,7 @@ class ProjectProvider with ChangeNotifier {
   }
 
   /// 프로젝트 생성
-  Future<void> createProject({
+  Future<ProjectModel> createProject({
     required String title,
     required String description,
     required UserModel currentUser,
@@ -68,6 +68,7 @@ class ProjectProvider with ChangeNotifier {
     _projects.insert(0, newProject);
     _selectedProject = newProject;
     notifyListeners();
+    return newProject;
   }
 
   /// 프로젝트 새로고침

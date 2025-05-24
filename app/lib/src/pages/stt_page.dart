@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-import 'package:talk_pilot/src/services/stt/native_audio_stream.dart';
+import 'package:talk_pilot/src/provider/user_provider.dart';
+import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/services/stt/stt_socket_service.dart';
+import 'package:talk_pilot/src/services/stt/native_audio_stream.dart';
 
 class SttPage extends StatefulWidget {
   const SttPage({super.key});
@@ -21,11 +23,13 @@ class _SttPageState extends State<SttPage> {
   StreamSubscription<Uint8List>? _subscription;
 
   bool _isRecording = false;
+  DateTime? _startTime;
 
   Future<void> _start(SttSocketService stt) async {
     final granted = await Permission.microphone.request();
     if (granted != PermissionStatus.granted) {
-      throw Exception('🎙 마이크 권한 필요');
+      ToastMessage.show('🎙 마이크 권한이 필요합니다.');
+      return;
     }
 
     await nativeAudio.start();
@@ -34,6 +38,8 @@ class _SttPageState extends State<SttPage> {
       stt.sendAudioChunk(data);
     });
 
+    _startTime = DateTime.now();
+
     setState(() => _isRecording = true);
   }
 
@@ -41,6 +47,23 @@ class _SttPageState extends State<SttPage> {
     await nativeAudio.stop();
     await _subscription?.cancel();
     stt.endAudio();
+
+    final text = stt.transcript.trim();
+    if (text.isNotEmpty && _startTime != null) {
+      final seconds = DateTime.now().difference(_startTime!).inSeconds;
+      if (seconds > 0) {
+        final charCount = text.replaceAll(' ', '').length;
+        final cpm = (charCount / seconds) * 60;
+
+        final userProvider = context.read<UserProvider>();
+        await userProvider.addCpm(cpm);
+
+        if (mounted) {
+          ToastMessage.show('CPM 저장됨: ${cpm.toStringAsFixed(1)}');
+        }
+      }
+    }
+
     setState(() => _isRecording = false);
   }
 

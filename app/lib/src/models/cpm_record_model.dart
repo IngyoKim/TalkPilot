@@ -13,4 +13,6 @@ class CpmRecordModel {
     'cpm': cpm,
     'timestamp': timestamp.toIso8601String(),
   };
+
+  Map<String, dynamic> toJson() => toMap();
 }

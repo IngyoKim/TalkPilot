@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
-import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
-import 'package:talk_pilot/src/services/stt/stt_socket_service.dart';
+import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/services/stt/native_audio_stream.dart';
+import 'package:talk_pilot/src/services/stt/stt_socket_service.dart';
+import 'package:talk_pilot/src/utils/cpm_calculator.dart';
 
 class SttPage extends StatefulWidget {
   const SttPage({super.key});
@@ -19,11 +19,11 @@ class SttPage extends StatefulWidget {
 
 class _SttPageState extends State<SttPage> {
   final nativeAudio = NativeAudioStream();
+  final CpmCalculator _cpmCalculator = CpmCalculator();
   Stream<Uint8List>? _audioStream;
   StreamSubscription<Uint8List>? _subscription;
 
   bool _isRecording = false;
-  DateTime? _startTime;
 
   Future<void> _start(SttSocketService stt) async {
     final granted = await Permission.microphone.request();
@@ -38,7 +38,11 @@ class _SttPageState extends State<SttPage> {
       stt.sendAudioChunk(data);
     });
 
-    _startTime = DateTime.now();
+    _cpmCalculator.reset();
+
+    stt.onTranscriptUpdated = () {
+      _cpmCalculator.updateOnTranscriptChange();
+    };
 
     setState(() => _isRecording = true);
   }
@@ -49,18 +53,13 @@ class _SttPageState extends State<SttPage> {
     stt.endAudio();
 
     final text = stt.transcript.trim();
-    if (text.isNotEmpty && _startTime != null) {
-      final seconds = DateTime.now().difference(_startTime!).inSeconds;
-      if (seconds > 0) {
-        final charCount = text.replaceAll(' ', '').length;
-        final cpm = (charCount / seconds) * 60;
+    final cpm = _cpmCalculator.calculateCpm(text);
 
-        final userProvider = context.read<UserProvider>();
-        await userProvider.addCpm(cpm);
-
-        if (mounted) {
-          ToastMessage.show('CPM 저장됨: ${cpm.toStringAsFixed(1)}');
-        }
+    if (text.isNotEmpty && cpm > 0) {
+      final userProvider = context.read<UserProvider>();
+      await userProvider.addCpm(cpm);
+      if (mounted) {
+        ToastMessage.show('CPM 저장됨: ${cpm.toStringAsFixed(1)}');
       }
     }
 

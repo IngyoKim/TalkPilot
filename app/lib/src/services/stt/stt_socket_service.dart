@@ -12,6 +12,13 @@ class SttSocketService with ChangeNotifier {
   bool _connected = false;
   bool get isConnected => _connected;
 
+  Duration _speakingDuration = Duration.zero;
+  DateTime? _speechStartTime;
+
+  Duration get speakingDuration => _speakingDuration;
+
+  VoidCallback? onTranscriptUpdated;
+
   String _transcript = '';
   String get transcript => _transcript;
 
@@ -55,17 +62,33 @@ class SttSocketService with ChangeNotifier {
 
     socket.on('stt-result', (data) {
       debugPrint('STT 결과 수신: $data');
-      _transcript += '$data\n';
+      final text = data['text'] as String;
+      final isFinal = data['isFinal'] as bool;
+
+      if (text.trim().isNotEmpty) {
+        _transcript += '$text\n';
+        onTranscriptUpdated?.call();
+      }
+
+      final now = DateTime.now();
+
+      _speechStartTime ??= now;
+
+      if (isFinal) {
+        _speakingDuration += now.difference(_speechStartTime!);
+        _speechStartTime = null;
+      }
+
       _safeNotify();
     });
 
-    socket.onConnectError((err) {
-      debugPrint('WebSocket 연결 실패: $err');
+    socket.onConnectError((e) {
+      debugPrint('WebSocket 연결 실패: $e');
       ToastMessage.show('서버와 연결할 수 없습니다.');
     });
 
-    socket.onError((err) {
-      debugPrint('WebSocket 에러: $err');
+    socket.onError((e) {
+      debugPrint('WebSocket 에러: $e');
       ToastMessage.show('WebSocket 에러가 발생했습니다.');
     });
 
@@ -97,6 +120,8 @@ class SttSocketService with ChangeNotifier {
 
   void clearTranscript() {
     _transcript = '';
+    _speakingDuration = Duration.zero;
+    _speechStartTime = null;
     _safeNotify();
   }
 

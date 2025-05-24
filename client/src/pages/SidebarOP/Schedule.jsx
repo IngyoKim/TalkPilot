@@ -41,7 +41,7 @@ export default function SchedulePage() {
             }
 
             // 현재 셀 선택 스타일 적용
-            args.el.style.backgroundColor = 'rgba(103,58,183, 0.3)';
+            args.el.style.backgroundColor = '#D1C4E9';
             selectedCellRef.current = args.el;
 
             // 해당 날짜로 이동

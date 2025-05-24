@@ -23,6 +23,6 @@ extension CpmHistoryService on UserService {
 
     final avg =
         history.map((e) => e.cpm).reduce((a, b) => a + b) / history.length;
-    await updateUser(uid, {'averageCpm': avg});
+    await updateUser(uid, {'cpm': avg});
   }
 }

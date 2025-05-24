@@ -13,7 +13,9 @@ class SttSocketService with ChangeNotifier {
   bool get isConnected => _connected;
 
   Duration _speakingDuration = Duration.zero;
-  DateTime? _speechStartTime;
+
+  DateTime? _sessionStartTime;
+  DateTime? _lastTranscriptTime;
 
   Duration get speakingDuration => _speakingDuration;
 
@@ -60,25 +62,20 @@ class SttSocketService with ChangeNotifier {
       socket.emit('start-audio');
     });
 
+    /// STT 결과 수신
     socket.on('stt-result', (data) {
       debugPrint('STT 결과 수신: $data');
-      final text = data['text'] as String;
-      final isFinal = data['isFinal'] as bool;
+      final transcript = data['transcript'] as String? ?? '';
+      final timestamp = data['timestamp'] as int?;
+      if (timestamp != null) {
+        final currentTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
 
-      if (text.trim().isNotEmpty) {
-        _transcript += '$text\n';
-        onTranscriptUpdated?.call();
+        _sessionStartTime ??= currentTime;
+        _lastTranscriptTime = currentTime;
       }
 
-      final now = DateTime.now();
-
-      _speechStartTime ??= now;
-
-      if (isFinal) {
-        _speakingDuration += now.difference(_speechStartTime!);
-        _speechStartTime = null;
-      }
-
+      _transcript += '$transcript\n';
+      onTranscriptUpdated?.call();
       _safeNotify();
     });
 
@@ -115,13 +112,30 @@ class SttSocketService with ChangeNotifier {
   }
 
   void endAudio() {
+    final endTime = DateTime.now();
     socket.emit('end-audio');
+
+    if (_sessionStartTime != null && _lastTranscriptTime != null) {
+      final totalDuration = endTime.difference(_sessionStartTime!);
+      final silentGap = endTime.difference(_lastTranscriptTime!);
+
+      /// 침묵은 말 중단으로 간주하고 초기화
+      /// 계산만 중단, stt는 계속 작동함
+      /// 아래 if문에서 시간 조절 잘 해야하니 알아서 하시길..
+      /// 참고로 시간은 ms 단위임
+      final effectiveDuration =
+          silentGap.inMilliseconds > 3000
+              ? totalDuration - silentGap
+              : totalDuration;
+
+      _speakingDuration = effectiveDuration;
+      _safeNotify();
+    }
   }
 
   void clearTranscript() {
     _transcript = '';
     _speakingDuration = Duration.zero;
-    _speechStartTime = null;
     _safeNotify();
   }
 

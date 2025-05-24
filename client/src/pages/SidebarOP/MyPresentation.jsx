@@ -35,7 +35,7 @@ export default function MyPresentation() {
     const [menuOpenId, setMenuOpenId] = useState(null);
     const [editId, setEditId] = useState(null);
     const [joinProjectId, setJoinProjectId] = useState('');
-    const [toastMessage, setToastMessage] = useState('');// 토스트 메시지
+    const [messages, setMessages] = useState([]);// 토스트 메시지
 
     const handleCreateOrUpdate = () => {
         if (mode === '참여') {
@@ -55,7 +55,15 @@ export default function MyPresentation() {
                         : p
                 )
             );
-            setToastMessage('프로젝트가 수정되었습니다.');
+            setMessages(prev => [
+                ...prev,
+                {
+                    id: uuidv4(),
+                    text: '프로젝트가 수정되었습니다.',
+                    duration: 3000,
+                    type: 'yellow',
+                },
+            ]);
         }
         else {
             setProjects(ps => [// 프로젝트 생성
@@ -65,7 +73,15 @@ export default function MyPresentation() {
                     createdAt: now, updatedAt: now
                 },
             ]);
-            setToastMessage('프로젝트가 생성되었습니다.');
+            setMessages(prev => [
+                ...prev,
+                {
+                    id: uuidv4(),
+                    text: '프로젝트가 생성되었습니다.',
+                    duration: 3000,
+                    type: 'green',
+                },
+            ]);
         }
 
         // 초기화
@@ -75,21 +91,46 @@ export default function MyPresentation() {
         setShowModal(false);
     };
 
-    const handleStatusChange = (id, newStatus) => { // 상태창 변경
+    const handleStatusChange = (id, newStatus) => {// 상태창 변경
         setProjects(ps =>
-            ps.map(p => (p.id === id ? {
-                ...p, status: newStatus,
-                updatedAt: new Date()
-            } : p))
+            ps.map(p =>
+                p.id === id
+                    ? { ...p, status: newStatus, updatedAt: new Date() }
+                    : p
+            )
         );
         setSelectedId(null);
-        setToastMessage(`상태가 "${newStatus}"(으)로 변경되었습니다.`);
+
+        const typeMap = {
+            진행중: 'green',
+            보류: 'yellow',
+            완료: 'red',
+        };
+
+        setMessages(prev => [
+            ...prev,
+            {
+                id: uuidv4(),
+                text: `상태가 '${newStatus}'로 변경되었습니다.`,
+                duration: 3000,
+                type: typeMap[newStatus] || 'info', // fallback to 'info'
+            },
+        ]);
     };
+
 
     const handleDelete = (id) => {// 프로젝트 삭제
         setProjects(ps => ps.filter(p => p.id !== id));
-        setToastMessage('프로젝트가 삭제되었습니다.');
         setMenuOpenId(prev => (prev === id ? null : prev));
+        setMessages(prev => [
+            ...prev,
+            {
+                id: uuidv4(),
+                text: '프로젝트가 삭제되었습니다.',
+                duration: 3000,
+                type: 'red',
+            },
+        ]);
     };
 
     const handleEdit = (p) => {// 프로젝트 수정모드 진입
@@ -243,12 +284,7 @@ export default function MyPresentation() {
                     </div>
                 </div>
             )}
-            {toastMessage && (
-                <ToastMessage
-                    message={toastMessage}
-                    onClose={() => setToastMessage('')}
-                />
-            )}
+            <ToastMessage messages={messages} setMessages={setMessages} />
         </div>
     );
 }

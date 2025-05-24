@@ -12,6 +12,15 @@ class SttSocketService with ChangeNotifier {
   bool _connected = false;
   bool get isConnected => _connected;
 
+  Duration _speakingDuration = Duration.zero;
+
+  DateTime? _sessionStartTime;
+  DateTime? _lastTranscriptTime;
+
+  Duration get speakingDuration => _speakingDuration;
+
+  VoidCallback? onTranscriptUpdated;
+
   String _transcript = '';
   String get transcript => _transcript;
 
@@ -53,19 +62,30 @@ class SttSocketService with ChangeNotifier {
       socket.emit('start-audio');
     });
 
+    /// STT 결과 수신
     socket.on('stt-result', (data) {
       debugPrint('STT 결과 수신: $data');
-      _transcript += '$data\n';
+      final transcript = data['transcript'] as String? ?? '';
+      final timestamp = data['timestamp'] as int?;
+      if (timestamp != null) {
+        final currentTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+
+        _sessionStartTime ??= currentTime;
+        _lastTranscriptTime = currentTime;
+      }
+
+      _transcript += '$transcript\n';
+      onTranscriptUpdated?.call();
       _safeNotify();
     });
 
-    socket.onConnectError((err) {
-      debugPrint('WebSocket 연결 실패: $err');
+    socket.onConnectError((e) {
+      debugPrint('WebSocket 연결 실패: $e');
       ToastMessage.show('서버와 연결할 수 없습니다.');
     });
 
-    socket.onError((err) {
-      debugPrint('WebSocket 에러: $err');
+    socket.onError((e) {
+      debugPrint('WebSocket 에러: $e');
       ToastMessage.show('WebSocket 에러가 발생했습니다.');
     });
 
@@ -92,11 +112,30 @@ class SttSocketService with ChangeNotifier {
   }
 
   void endAudio() {
+    final endTime = DateTime.now();
     socket.emit('end-audio');
+
+    if (_sessionStartTime != null && _lastTranscriptTime != null) {
+      final totalDuration = endTime.difference(_sessionStartTime!);
+      final silentGap = endTime.difference(_lastTranscriptTime!);
+
+      /// 침묵은 말 중단으로 간주하고 초기화
+      /// 계산만 중단, stt는 계속 작동함
+      /// 아래 if문에서 시간 조절 잘 해야하니 알아서 하시길..
+      /// 참고로 시간은 ms 단위임
+      final effectiveDuration =
+          silentGap.inMilliseconds > 3000
+              ? totalDuration - silentGap
+              : totalDuration;
+
+      _speakingDuration = effectiveDuration;
+      _safeNotify();
+    }
   }
 
   void clearTranscript() {
     _transcript = '';
+    _speakingDuration = Duration.zero;
     _safeNotify();
   }
 

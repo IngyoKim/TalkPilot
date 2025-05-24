@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:talk_pilot/src/models/cpm_record_model.dart';
 
 import 'package:talk_pilot/src/models/user_model.dart';
+import 'package:talk_pilot/src/services/database/cpm_history_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
 
 class UserProvider with ChangeNotifier {
@@ -43,5 +45,23 @@ class UserProvider with ChangeNotifier {
   void clearUser() {
     _currentUser = null;
     notifyListeners();
+  }
+
+  /// 아래 두개의 메서드는 cpm 계산과 관련된 메서드
+  /// [cpm] 기록 추가 + 평균 갱신 + 유저 새로고침
+  Future<void> addCpm(double cpm) async {
+    if (_currentUser == null) return;
+
+    final record = CpmRecordModel(cpm: cpm, timestamp: DateTime.now());
+
+    await _userService.addCpmRecord(_currentUser!.uid, record);
+    await _userService.updateAverageCpm(_currentUser!.uid);
+    await refreshUser(); // 평균 갱신된 값으로 유저 리로드
+  }
+
+  /// [cpm] 기록 전체 불러오기
+  Future<List<CpmRecordModel>> fetchCpmHistory() async {
+    if (_currentUser == null) return [];
+    return await _userService.getCpmHistory(_currentUser!.uid);
   }
 }

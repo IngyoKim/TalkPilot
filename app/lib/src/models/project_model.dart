@@ -13,6 +13,7 @@ enum ProjectField {
   scheduledDate,
   memo,
   scriptParts,
+  keywords,
 }
 
 extension ProjectFieldExt on ProjectField {
@@ -41,6 +42,7 @@ class ProjectModel {
   final DateTime? scheduledDate; // 발표 일자
   final String? memo; // 메모
   final List<ScriptPartModel>? scriptParts;
+  final List<String>? keywords;
 
   ProjectModel({
     required this.id,
@@ -57,6 +59,7 @@ class ProjectModel {
     this.scheduledDate,
     this.memo,
     this.scriptParts,
+    this.keywords,
   });
 
   factory ProjectModel.fromMap(String id, Map<String, dynamic> map) {
@@ -99,6 +102,8 @@ class ProjectModel {
                   )
                   .toList()
               : null,
+      keywords:
+          map['keywords'] != null ? List<String>.from(map['keywords']) : null,
     );
   }
 
@@ -119,6 +124,7 @@ class ProjectModel {
       if (memo != null) "memo": memo,
       if (scriptParts != null)
         "scriptParts": scriptParts!.map((e) => e.toMap()).toList(),
+      if (keywords != null) "keywords": keywords,
     };
   }
 
@@ -136,6 +142,7 @@ class ProjectModel {
     DateTime? scheduledDate,
     String? memo,
     List<ScriptPartModel>? scriptParts,
+    List<String>? keywords,
   }) {
     return ProjectModel(
       id: id,
@@ -152,6 +159,7 @@ class ProjectModel {
       scheduledDate: scheduledDate ?? this.scheduledDate,
       memo: memo ?? this.memo,
       scriptParts: scriptParts ?? this.scriptParts,
+      keywords: keywords ?? this.keywords,
     );
   }
 }

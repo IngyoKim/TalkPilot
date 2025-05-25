@@ -4,11 +4,13 @@ class ScriptProgressService {
   final ProjectService _projectService = ProjectService();
 
   List<String> _scriptChunks = [];
+  final Set<int> _matchedScriptIndexes = {};
 
   Future<void> loadScript(String projectId) async {
     final project = await _projectService.readProject(projectId);
     final script = project?.script ?? '';
     _scriptChunks = _splitText(script);
+    _matchedScriptIndexes.clear();
   }
 
   double calculateProgressByLastMatch(String recognizedText) {
@@ -16,12 +18,11 @@ class ScriptProgressService {
     if (_scriptChunks.isEmpty || recognizedWords.isEmpty) return 0.0;
 
     final usedRecognizedIndexes = <int>{};
-    final usedScriptIndexes = <int>{};
     int lastMatchedScriptIndex = -1;
     int lastMatchedRecognizedIndex = -1;
 
     for (int i = 0; i < _scriptChunks.length; i++) {
-      if (usedScriptIndexes.contains(i)) continue;
+      if (_matchedScriptIndexes.contains(i)) continue;
 
       final start = (lastMatchedRecognizedIndex + 1 - 5).clamp(0, recognizedWords.length);
       final end = (lastMatchedRecognizedIndex + 1 + 5).clamp(0, recognizedWords.length);
@@ -30,7 +31,7 @@ class ScriptProgressService {
         if (usedRecognizedIndexes.contains(j)) continue;
 
         if (isSimilar(_scriptChunks[i], recognizedWords[j])) {
-          usedScriptIndexes.add(i);
+          _matchedScriptIndexes.add(i);
           usedRecognizedIndexes.add(j);
           lastMatchedRecognizedIndex = j;
           lastMatchedScriptIndex = i;
@@ -49,11 +50,10 @@ class ScriptProgressService {
 
     final matchedFlags = List<bool>.filled(_scriptChunks.length, false);
     final usedRecognizedIndexes = <int>{};
-    final usedScriptIndexes = <int>{};
     int lastMatchedRecognizedIndex = -1;
 
     for (int i = 0; i < _scriptChunks.length; i++) {
-      if (usedScriptIndexes.contains(i)) continue;
+      if (_matchedScriptIndexes.contains(i)) continue;
 
       final start = (lastMatchedRecognizedIndex + 1 - 5).clamp(0, recognizedWords.length);
       final end = (lastMatchedRecognizedIndex + 1 + 5).clamp(0, recognizedWords.length);
@@ -62,9 +62,9 @@ class ScriptProgressService {
         if (usedRecognizedIndexes.contains(j)) continue;
 
         if (isSimilar(_scriptChunks[i], recognizedWords[j])) {
+          _matchedScriptIndexes.add(i);
           matchedFlags[i] = true;
           usedRecognizedIndexes.add(j);
-          usedScriptIndexes.add(i);
           lastMatchedRecognizedIndex = j;
           break;
         }
@@ -96,7 +96,11 @@ class ScriptProgressService {
   }
 
   bool isSimilar(String a, String b) {
-    return _similarity(a, b) >= 0.7;
+    final normA = a.replaceAll(' ', '');
+    final normB = b.replaceAll(' ', '');
+    if ((normA.length - normB.length).abs() > 2) return false;
+    final sim = _similarity(normA, normB);
+    return sim >= 0.7;
   }
 
   double _similarity(String a, String b) {
@@ -124,13 +128,11 @@ class ScriptProgressService {
         } else if (s1[i - 1] == s2[j - 1]) {
           dp[i][j] = dp[i - 1][j - 1];
         } else {
-          dp[i][j] =
-              1 +
-              [
-                dp[i - 1][j],
-                dp[i][j - 1],
-                dp[i - 1][j - 1],
-              ].reduce((a, b) => a < b ? a : b);
+          dp[i][j] = 1 + [
+            dp[i - 1][j],
+            dp[i][j - 1],
+            dp[i - 1][j - 1],
+          ].reduce((a, b) => a < b ? a : b);
         }
       }
     }

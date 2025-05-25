@@ -54,14 +54,20 @@ class SttSocketService with ChangeNotifier {
     });
 
     socket.on('stt-result', (data) {
-      final full = data.toString().trim();
-      final words = full.split(' ');
+      final transcript =
+          data is Map && data.containsKey('transcript')
+              ? data['transcript']?.toString().trim()
+              : null;
+
+      if (transcript == null || transcript.isEmpty) return;
+
+      final words = transcript.split(' ');
 
       for (final word in words) {
         if (!_sentWords.contains(word)) {
           _sentWords.add(word);
           _transcript += '$word ';
-          _onTranscript?.call(_transcript.trim());
+          _onTranscript?.call(transcript);
           _safeNotify();
         }
       }

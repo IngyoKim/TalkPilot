@@ -91,11 +91,40 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: SingleChildScrollView(
-                    child: ScriptComparisonView(
-                      scriptChunks: _controller.scriptChunks,
-                      recognizedText: _controller.recognizedText,
-                      isSimilar: _controller.isSimilar,
-                      splitText: _controller.splitText,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ScriptComparisonView(
+                          scriptChunks: _controller.scriptChunks,
+                          recognizedText: _controller.recognizedText,
+                          isSimilar: _controller.isSimilar,
+                          splitText: _controller.splitText,
+                        ),
+                        const SizedBox(height: 24),
+                        const Text(
+                          '인식된 텍스트',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Text(
+                            _controller.recognizedText.isEmpty
+                                ? '아직 인식된 텍스트가 없습니다.'
+                                : _controller.recognizedText,
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

@@ -73,7 +73,8 @@ export class ProjectController {
         return { success: true };
     }
 
-    async deleteProject(id: string): Promise<void> {
+    @Delete(':id')
+    async delete(@Param('id') id: string): Promise<void> {
         const project = await this.getById(id);
         if (!project) return;
 
@@ -86,6 +87,6 @@ export class ProjectController {
             }
         }
 
-        await this.projectService.deleteProject(`projects/${id}`);
+        await this.projectService.deleteProject(id);
     }
 }

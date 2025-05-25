@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:talk_pilot/src/models/user_model.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
@@ -41,16 +42,24 @@ class _ProjectActionDialogState extends State<_ProjectActionDialog> {
   Future<void> _handleCreate() async {
     final title = titleController.text.trim();
     final desc = descriptionController.text.trim();
-    final user = context.read<UserProvider>().currentUser;
+    final userProvider = context.read<UserProvider>();
     final projectProvider = context.read<ProjectProvider>();
+    final user = userProvider.currentUser;
 
     if (user == null || title.isEmpty) return;
 
-    await projectProvider.createProject(
+    final newProject = await projectProvider.createProject(
       title: title,
       description: desc,
       currentUser: user,
     );
+
+    final mergedProjectIds = {
+      ...?user.projectIds,
+      newProject.id: newProject.status,
+    };
+
+    await userProvider.updateUser({UserField.projectIds: mergedProjectIds});
 
     ToastMessage.show(
       '프로젝트가 생성되었습니다.',

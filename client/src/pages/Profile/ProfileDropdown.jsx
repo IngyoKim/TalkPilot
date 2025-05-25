@@ -54,17 +54,26 @@ export default function ProfileDropdown({ isSidebarOpen, onToggleSidebar }) {
         {
             icon: <FaUserEdit />,
             label: 'Account Detail',
-            onClick: () => navigate('../profile'),
+            onClick: () => {
+                console.log('Navigating to /profile');
+                navigate('/profile');
+            },
         },
         {
             icon: <FaQuestionCircle />,
             label: 'Help',
-            onClick: () => navigate('../help'),
+            onClick: () => {
+                console.log('Navigating to /help');
+                navigate('/help');
+            },
         },
         {
             icon: <FaEnvelope />,
             label: 'Contact us',
-            onClick: () => navigate('../contact'),
+            onClick: () => {
+                console.log('Navigating to /contact');
+                navigate('/contact');
+            },
         },
         {
             icon: <FaSignOutAlt />,
@@ -73,6 +82,7 @@ export default function ProfileDropdown({ isSidebarOpen, onToggleSidebar }) {
             isDanger: true,
         },
     ];
+
 
     return (
         <div style={styles.container}>
@@ -131,6 +141,7 @@ const styles = {
         alignItems: 'center',
         width: '100%',
         height: '64px',
+        overflow: 'visible',
     },
     arrowToggle: {
         position: 'fixed',
@@ -148,8 +159,9 @@ const styles = {
         zIndex: 1001,
     },
     profileContainer: {
-        position: 'relative',
+        position: 'fixed',
         marginRight: '32px',
+        zIndex: 1002,
     },
     profileIcon: {
         width: '40px',
@@ -171,7 +183,7 @@ const styles = {
         border: `1px solid ${mainColor}`,
         borderRadius: '8px',
         boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-        zIndex: 1002,
+        zIndex: 9999,
         overflow: 'hidden',
     },
     menuItem: {

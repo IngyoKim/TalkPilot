@@ -40,8 +40,8 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
             socket.data.user = decoded;
             console.log(`소켓 연결된 사용자: ${decoded.uid}`);
             console.log(`소켓 연결됨: ${socket.id}`);
-        } catch (err) {
-            console.warn(`토큰 인증 실패: ${err.message}`);
+        } catch (e) {
+            console.warn(`토큰 인증 실패: ${e.message}`);
             socket.disconnect();
         }
     }
@@ -84,11 +84,15 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
             .on('data', (data) => {
                 const transcript = data.results?.[0]?.alternatives?.[0]?.transcript;
                 if (transcript) {
-                    socket.emit('stt-result', transcript);
+                    const now = Date.now(); // 서버 기준 현재 시간(ms 단위)
+                    socket.emit('stt-result', {
+                        transcript,
+                        timestamp: now,
+                    });
                 }
             })
-            .on('error', (err) => {
-                console.error(`STT 스트림 오류: ${err.message}`);
+            .on('error', (e) => {
+                console.error(`STT 스트림 오류: ${e.message}`);
                 this.startNewStream(socket); // 자동 재시작
             });
 

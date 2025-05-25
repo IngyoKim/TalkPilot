@@ -9,7 +9,8 @@ class PresentationPracticePage extends StatefulWidget {
   const PresentationPracticePage({super.key, required this.projectId});
 
   @override
-  State<PresentationPracticePage> createState() => _PresentationPracticePageState();
+  State<PresentationPracticePage> createState() =>
+      _PresentationPracticePageState();
 }
 
 class _PresentationPracticePageState extends State<PresentationPracticePage> {
@@ -35,6 +36,7 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: deprecated_member_use
     return WillPopScope(
       onWillPop: () async {
         await _controller.dispose(); // 소켓 및 마이크 안전 종료
@@ -59,17 +61,18 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _controller.isListening
-                        ? Colors.grey
-                        : Colors.deepPurple,
+                    backgroundColor:
+                        _controller.isListening
+                            ? Colors.grey
+                            : Colors.deepPurple,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  onPressed: _controller.isListening
-                      ? _controller.stopListening
-                      : _controller.startListening,
-                  child: Text(
-                    _controller.isListening ? '발표 중지' : '발표 시작'),
+                  onPressed:
+                      _controller.isListening
+                          ? _controller.stopListening
+                          : _controller.startListening,
+                  child: Text(_controller.isListening ? '발표 중지' : '발표 시작'),
                 ),
                 const SizedBox(height: 16),
                 Row(

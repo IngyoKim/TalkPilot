@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+// ignore: library_prefixes
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -54,9 +55,10 @@ class SttSocketService with ChangeNotifier {
     });
 
     socket.on('stt-result', (data) {
-      final transcript = data is Map && data.containsKey('transcript')
-          ? data['transcript']?.toString().trim()
-          : null;
+      final transcript =
+          data is Map && data.containsKey('transcript')
+              ? data['transcript']?.toString().trim()
+              : null;
 
       if (transcript == null || transcript.isEmpty) return;
 

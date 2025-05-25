@@ -29,15 +29,18 @@ export class UserService {
         await this.db.delete(`users/${uid}`);
     }
 
-    async initUser(decodedUser: {
-        uid: string;
-        email?: string;
-        name?: string;
-        picture?: string;
-        firebase?: {
-            sign_in_provider?: string;
-        };
-    }, loginMethod?: string): Promise<void> {
+    async initUser(
+        decodedUser: {
+            uid: string;
+            email?: string;
+            name?: string;
+            picture?: string;
+            firebase?: {
+                sign_in_provider?: string;
+            };
+        },
+        loginMethod?: string,
+    ): Promise<void> {
         const existing = await this.readUser(decodedUser.uid);
         const now = new Date().toISOString();
 

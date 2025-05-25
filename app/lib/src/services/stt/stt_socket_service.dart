@@ -49,15 +49,14 @@ class SttSocketService with ChangeNotifier {
 
     socket.onConnect((_) {
       _connected = true;
-      _safeNotify();
       socket.emit('start-audio');
+      _safeNotify();
     });
 
     socket.on('stt-result', (data) {
-      final transcript =
-          data is Map && data.containsKey('transcript')
-              ? data['transcript']?.toString().trim()
-              : null;
+      final transcript = data is Map && data.containsKey('transcript')
+          ? data['transcript']?.toString().trim()
+          : null;
 
       if (transcript == null || transcript.isEmpty) return;
 
@@ -119,7 +118,9 @@ class SttSocketService with ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
-    socket.dispose();
+    if (socket.connected) {
+      socket.disconnect();
+    }
     super.dispose();
   }
 

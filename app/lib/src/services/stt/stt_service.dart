@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:typed_data';
-
 import 'package:permission_handler/permission_handler.dart';
 import 'native_audio_stream.dart';
 import 'stt_socket_service.dart';
@@ -43,12 +42,11 @@ class SttService {
     await _nativeAudio.stop();
     await _subscription?.cancel();
     _sttSocket.endAudio();
-
     _isListening = false;
   }
 
-  void dispose() {
-    _subscription?.cancel();
+  Future<void> dispose() async {
+    await stopListening();
     _sttSocket.dispose();
   }
 }

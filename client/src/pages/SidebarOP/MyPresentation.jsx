@@ -13,7 +13,7 @@ const STATUS_COLORS = {
     완료: '#F44336',
 };
 
-const formatRelativeTime = (date) => {//수정 일
+const formatRelativeTime = (date) => {// 수정 일
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
     if (seconds < 60) return `${seconds}초 전`;
     const minutes = Math.floor(seconds / 60);

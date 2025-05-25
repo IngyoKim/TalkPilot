@@ -1,10 +1,11 @@
-// pages/ProfilePage.jsx
 import { useState } from 'react';
 import { FaUserCircle, FaEdit, FaCheckCircle, FaChartLine, FaBullseye, FaPoll, FaAngellist, FaTachometerAlt } from 'react-icons/fa';
-import Sidebar from '../../components/SideBar';
-import ProfileDropdown from './ProfileDropdown';
 import { useUser } from '../../contexts/UserContext';
 import { updateUser } from '../../utils/api/user';
+
+import Sidebar from '../../components/SideBar';
+import ProfileDropdown from './ProfileDropdown';
+import ToastMessage from '../../components/ToastMessage';
 
 const mainColor = '#673AB7';
 
@@ -18,6 +19,8 @@ export default function ProfilePage() {
 
     const handleToggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
+    const [messages, setMessages] = useState([]);
+
     // 닉네임 수정 시작
     const startEditNickname = () => {
         setNickname(user?.nickname ?? '');
@@ -30,9 +33,23 @@ export default function ProfilePage() {
             await updateUser({ nickname: nickname });
             setUser(prev => ({ ...prev, nickname: nickname }));
             setIsEditingNickname(false);
-            alert('닉네임이 수정되었습니다.');
+            setMessages(prev => [
+                ...prev,
+                {
+                    text: '닉네임이 변경되었습니다.',
+                    duration: 3000,
+                    type: 'green',
+                },
+            ]);
         } catch (err) {
-            alert('닉네임 수정에 실패했습니다.');
+            setMessages(prev => [
+                ...prev,
+                {
+                    text: '닉네임 변경에 실패했습니다.',
+                    duration: 3000,
+                    type: 'red',
+                },
+            ]);
             console.error(err);
         }
     };
@@ -161,6 +178,7 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </div>
+            <ToastMessage messages={messages} setMessages={setMessages} />
         </div>
     );
 }

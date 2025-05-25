@@ -1,26 +1,55 @@
 import {
     Controller, Get, Post, Patch, Delete,
-    Param, Query, Body, NotFoundException
+    Param, Query, Body, NotFoundException,
+    Req
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { ProjectModel } from '../models/project.model';
 import { v4 as uuidv4 } from 'uuid';
+import { UserService } from '../user/user.service';
 
 @Controller('project')
 export class ProjectController {
-    constructor(private readonly projectService: ProjectService) { }
+    constructor(private readonly projectService: ProjectService,
+        private readonly userService: UserService,
+    ) { }
 
     @Post()
-    async create(@Body() data: Omit<ProjectModel, 'id' | 'createdAt' | 'updatedAt'>) {
+    async create(
+        @Body() data: Pick<ProjectModel, 'title' | 'description'>,
+        @Req() req: Request,
+    ) {
+        const uid = (req as any).user?.uid;
         const now = new Date().toISOString();
+        const projectId = uuidv4();
+
         const project: ProjectModel = {
             ...data,
-            id: uuidv4(),
+            id: projectId,
             createdAt: now,
             updatedAt: now,
+            ownerUid: uid,
+            participants: { [uid]: 'owner' },
+            status: 'preparing',
+            estimatedTime: 0,
+            score: 0,
+            script: '',
+            scheduledDate: '',
+            memo: '',
+            scriptParts: [],
+            keywords: [],
         };
+
         await this.projectService.createProject(project);
-        return { success: true, id: project.id };
+
+        await this.userService.updateUser(uid, {
+            projectIds: {
+                ...(await this.userService.readUser(uid)).projectIds ?? {},
+                [projectId]: project.status,
+            },
+        });
+
+        return { success: true, id: projectId };
     }
 
     @Get(':id')
@@ -44,9 +73,19 @@ export class ProjectController {
         return { success: true };
     }
 
-    @Delete(':id')
-    async delete(@Param('id') id: string) {
-        await this.projectService.deleteProject(id);
-        return { success: true };
+    async deleteProject(id: string): Promise<void> {
+        const project = await this.getById(id);
+        if (!project) return;
+
+        const participants = Object.keys(project.participants || {});
+        for (const uid of participants) {
+            const user = await this.userService.readUser(uid);
+            if (user?.projectIds?.[id]) {
+                const { [id]: _, ...rest } = user.projectIds;
+                await this.userService.updateUser(uid, { projectIds: rest });
+            }
+        }
+
+        await this.projectService.deleteProject(`projects/${id}`);
     }
 }

@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://talkpilot.onrender.com', // NestJS 서버 주소
+        target: 'http://localhost:3000', // NestJS 서버 주소
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api/, ''),
       },

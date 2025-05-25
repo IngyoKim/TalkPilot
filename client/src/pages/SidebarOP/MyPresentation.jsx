@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 
 import Sidebar from '../../components/SideBar';
 import ProfileDropdown from '../Profile/ProfileDropdown';
+
+import { useUser } from '../../contexts/UserContext';
+import * as projectAPI from '../../utils/api/project';
 
 const mainColor = '#673AB7';
 const STATUS_COLORS = {
@@ -12,7 +14,7 @@ const STATUS_COLORS = {
     완료: '#F44336',
 };
 
-const formatRelativeTime = (date) => {//수정 일
+const formatRelativeTime = (date) => {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
     if (seconds < 60) return `${seconds}초 전`;
     const minutes = Math.floor(seconds / 60);
@@ -24,8 +26,9 @@ const formatRelativeTime = (date) => {//수정 일
 };
 
 export default function MyPresentation() {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const { user } = useUser();
     const [projects, setProjects] = useState([]);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [mode, setMode] = useState('생성');
     const [title, setTitle] = useState('');
@@ -35,56 +38,136 @@ export default function MyPresentation() {
     const [editId, setEditId] = useState(null);
     const [joinProjectId, setJoinProjectId] = useState('');
 
-    const handleCreateOrUpdate = () => {
+    useEffect(() => {
+        if (!user || !user.projectIds) return;
+
+        const loadProjects = async () => {
+            try {
+                const entries = Object.entries(user.projectIds);
+                const fetchedProjects = await Promise.all(
+                    entries.map(async ([id, status]) => {
+                        const project = await projectAPI.fetchProjectById(id);
+                        if (!project) return null;
+                        return { ...project, status };
+                    })
+                );
+                setProjects(fetchedProjects.filter(Boolean));
+            } catch (error) {
+                console.error('[MyPresentation] 프로젝트 불러오기 실패:', error);
+            }
+        };
+
+        loadProjects();
+    }, [user]);
+
+    const handleCreateOrUpdate = async () => {
         if (mode === '참여') {
             if (!joinProjectId.trim()) return;
-            console.log('입력된 ID:', joinProjectId); // 여기에 ID 확인 로직 등 연결 가능
+
+            try {
+                const project = await projectAPI.fetchProjectById(joinProjectId);
+                if (!project) {
+                    alert('해당 프로젝트가 존재하지 않습니다.');
+                    return;
+                }
+
+                /// 이미 참여 중인지 확인
+                if (project.participants[user.uid]) {
+                    alert('이미 참여 중인 프로젝트입니다.');
+                    return;
+                }
+
+                /// participants 업데이트
+                await projectAPI.updateProject(joinProjectId, {
+                    participants: {
+                        ...project.participants,
+                        [user.uid]: 'member',
+                    },
+                });
+
+                /// 유저 정보 업데이트
+                await projectAPI.updateUser({
+                    projectIds: {
+                        ...(user.projectIds || {}),
+                        [joinProjectId]: project.status,
+                    },
+                });
+
+                /// 프로젝트 리스트 반영
+                setProjects(ps => [
+                    {
+                        ...project,
+                        participants: {
+                            ...project.participants,
+                            [user.uid]: 'member',
+                        },
+                        status: project.status,
+                    },
+                    ...ps,
+                ]);
+            } catch (e) {
+                console.error('참여 실패:', e);
+                alert('프로젝트 참여 중 오류가 발생했습니다.');
+            }
+
             setJoinProjectId('');
             setShowModal(false);
             return;
         }
+
         if (!title.trim()) return;
-        const now = new Date();
-        if (editId) {// 프로젝트 수정
+
+        if (editId) {
+            await projectAPI.updateProject(editId, {
+                title,
+                description,
+                updatedAt: new Date().toISOString(),
+            });
             setProjects(ps =>
                 ps.map(p =>
-                    p.id === editId
-                        ? { ...p, title, description, updatedAt: now }
-                        : p
+                    p.id === editId ? { ...p, title, description, updatedAt: new Date().toISOString() } : p
                 )
             );
         } else {
-            setProjects(ps => [// 프로젝트 생성
-                ...ps,
-                {
-                    id: uuidv4(), title, description, status: '진행중',
-                    createdAt: now, updatedAt: now
-                },
-            ]);
+            const res = await projectAPI.createProject({ title, description });
+
+            const newProject = {
+                id: res.id,
+                title,
+                description,
+                status: '진행중',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            };
+            setProjects(ps => [newProject, ...ps]);
         }
-        // 초기화
+
         setTitle('');
         setDescription('');
         setEditId(null);
         setShowModal(false);
     };
 
-    const handleStatusChange = (id, newStatus) => { // 상태창 변경
+    const handleStatusChange = async (id, newStatus) => {
+        await projectAPI.updateProject(id, {
+            status: newStatus,
+            updatedAt: new Date().toISOString(),
+        });
         setProjects(ps =>
-            ps.map(p => (p.id === id ? {
-                ...p, status: newStatus,
-                updatedAt: new Date()
-            } : p))
+            ps.map(p =>
+                p.id === id ? { ...p, status: newStatus, updatedAt: new Date().toISOString() } : p
+            )
         );
         setSelectedId(null);
     };
 
-    const handleDelete = (id) => {// 프로젝트 삭제
+    const handleDelete = async (id) => {
+        await projectAPI.deleteProject(id);
         setProjects(ps => ps.filter(p => p.id !== id));
-        setMenuOpenId(prev => (prev === id ? null : prev));
+        setMenuOpenId(null);
     };
 
-    const handleEdit = (p) => {// 프로젝트 수정모드 진입
+    const handleEdit = (p) => {
         setTitle(p.title);
         setDescription(p.description);
         setEditId(p.id);
@@ -92,7 +175,6 @@ export default function MyPresentation() {
         setShowModal(true);
     };
 
-    // 렌더링
     return (
         <div style={styles.container}>
             <Sidebar isOpen={isSidebarOpen} />
@@ -102,15 +184,12 @@ export default function MyPresentation() {
                     onToggleSidebar={() => setIsSidebarOpen(o => !o)}
                 />
 
-                {/* 헤더 */}
                 <div style={styles.header}>
-
                     <button style={styles.addButton} onClick={() => setShowModal(true)}>
                         프로젝트 추가
                     </button>
                 </div>
 
-                {/* 프로젝트 그리드 */}
                 <div style={styles.projectGrid}>
                     {projects.map(p => (
                         <div key={p.id} style={styles.cardWrapper}>
@@ -123,7 +202,6 @@ export default function MyPresentation() {
                                 </div>
                             </Link>
 
-                            {/* 메뉴 버튼 */}
                             <div
                                 style={styles.menuButton}
                                 onClick={() => setMenuOpenId(m => (m === p.id ? null : p.id))}
@@ -131,13 +209,11 @@ export default function MyPresentation() {
                                 ⋮
                             </div>
 
-                            {/* 상태 도트 */}
                             <div
                                 style={{ ...styles.statusDot, backgroundColor: STATUS_COLORS[p.status] }}
                                 onClick={() => setSelectedId(id => (id === p.id ? null : p.id))}
                             />
 
-                            {/* 상태 드롭다운 */}
                             {selectedId === p.id && (
                                 <div style={styles.dropdown}>
                                     {Object.entries(STATUS_COLORS).map(([status, color]) => (
@@ -153,15 +229,10 @@ export default function MyPresentation() {
                                 </div>
                             )}
 
-                            {/* 메뉴 드롭다운 */}
                             {menuOpenId === p.id && (
                                 <div style={styles.dropdown}>
-                                    <div style={styles.dropdownItem} onClick={() => handleEdit(p)}>
-                                        수정
-                                    </div>
-                                    <div style={styles.dropdownItem} onClick={() => handleDelete(p.id)}>
-                                        삭제
-                                    </div>
+                                    <div style={styles.dropdownItem} onClick={() => handleEdit(p)}>수정</div>
+                                    <div style={styles.dropdownItem} onClick={() => handleDelete(p.id)}>삭제</div>
                                 </div>
                             )}
                         </div>
@@ -169,7 +240,6 @@ export default function MyPresentation() {
                 </div>
             </div>
 
-            {/* 모달 */}
             {showModal && (
                 <div style={styles.modalOverlay}>
                     <div style={styles.modal}>
@@ -200,7 +270,6 @@ export default function MyPresentation() {
                                         style={styles.input}
                                     />
                                 </div>
-
                                 <div style={styles.inputGroup}>
                                     <label>설명 입력 (최대 100자)</label>
                                     <textarea
@@ -222,12 +291,8 @@ export default function MyPresentation() {
                                 />
                             </div>
                         )}
-
-
                         <div style={styles.modalActions}>
-                            <button style={styles.cancelBtn} onClick={() => setShowModal(false)}>
-                                취소
-                            </button>
+                            <button style={styles.cancelBtn} onClick={() => setShowModal(false)}>취소</button>
                             <button style={styles.confirmBtn} onClick={handleCreateOrUpdate}>
                                 {editId ? '수정' : '생성'}
                             </button>
@@ -241,9 +306,7 @@ export default function MyPresentation() {
 
 const styles = {
     container: { display: 'flex' },
-
     content: { flex: 1, transition: 'margin-left 0.3s ease', padding: '20px' },
-
     header: {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         marginBottom: '20px'
@@ -257,9 +320,7 @@ const styles = {
         gap: '20px'
     },
     cardWrapper: { position: 'relative' },
-
     link: { textDecoration: 'none', color: 'inherit' },
-
     card: {
         backgroundColor: '#fff', padding: '16px', borderRadius: '10px',
         boxShadow: '0 6px 16px rgba(0,0,0,0.3)'
@@ -281,7 +342,6 @@ const styles = {
         cursor: 'pointer', fontSize: '13px'
     },
     dropdownDot: { width: '10px', height: '10px', borderRadius: '50%' },
-
     modalOverlay: {
         position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
         backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center',
@@ -292,15 +352,10 @@ const styles = {
         maxWidth: '360px', boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
     },
     tabWrapper: { display: 'flex', borderRadius: '10px', overflow: 'hidden', marginBottom: '16px' },
-
     tabButton: { flex: 1, padding: '8px', border: 'none', cursor: 'pointer' },
-
     inputGroup: { marginBottom: '12px', display: 'flex', flexDirection: 'column', fontSize: '14px' },
-
     input: { padding: '8px', border: '1px solid #ccc', borderRadius: '6px', fontSize: '14px' },
-
     modalActions: { display: 'flex', justifyContent: 'space-between', marginTop: '20px' },
-
     cancelBtn: {
         backgroundColor: 'transparent', color: mainColor, border: 'none', fontWeight: 'bold',
         cursor: 'pointer'

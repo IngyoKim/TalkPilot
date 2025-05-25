@@ -29,7 +29,7 @@ export async function getProjects(uid) {
 }
 
 /// 선택된 프로젝트의 정보를 업데이트함(projectId를 받아서)
-export async function updateProject(projectIdprojectId, updates) {
+export async function updateProject(projectId, updates) {
     const token = await getIdToken();
     const res = await fetch(`${API_URL}/${projectId}`, {
         method: 'PATCH',
@@ -57,7 +57,7 @@ export async function deleteProject(projectId) {
 /// [projectId]로 단일 프로젝트를 조회
 export async function fetchProjectById(projectId) {
     const token = await getIdToken();
-    const res = await fetch(`/api/project/${projectId}`, {
+    const res = await fetch(`${API_URL}/${projectId}`, {
         headers: { Authorization: `Bearer ${token}` },
     });
 

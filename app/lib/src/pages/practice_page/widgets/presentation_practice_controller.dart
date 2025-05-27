@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/services/stt/stt_service.dart';
@@ -38,7 +37,7 @@ class PresentationPracticeController {
   });
 
   Future<void> initialize() async {
-    _sttService.init();
+    await _sttService.init();
     await _loadUserCpm();
     await _loadScript();
   }
@@ -60,7 +59,7 @@ class PresentationPracticeController {
     onUpdate();
   }
 
-  void startListening() {
+  Future<void> startListening() async {
     _stopwatch.reset();
     _stopwatch.start();
 
@@ -73,13 +72,16 @@ class PresentationPracticeController {
       },
     );
 
-    _sttService.startListening((text) {
+    await _sttService.startListening((text) {
       recognizedText = text;
       isListening = true;
       scriptProgress = _progressService.calculateProgressByLastMatch(text);
       _cpmService.updateRecognizedText(text);
       onUpdate();
     });
+
+    isListening = true;
+    onUpdate();
   }
 
   Future<void> stopListening() async {
@@ -90,8 +92,8 @@ class PresentationPracticeController {
     onUpdate();
   }
 
-  void dispose() {
-    _sttService.stopListening();
+  Future<void> dispose() async {
+    await _sttService.dispose();
     _cpmService.stop();
   }
 

@@ -1,30 +1,52 @@
-import 'package:flutter/material.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'dart:async';
+import 'dart:typed_data';
+import 'package:permission_handler/permission_handler.dart';
+import 'native_audio_stream.dart';
+import 'stt_socket_service.dart';
 
 class SttService {
-  final stt.SpeechToText _speech = stt.SpeechToText();
-  bool _isAvailable = false;
+  final NativeAudioStream _nativeAudio = NativeAudioStream();
+  final SttSocketService _sttSocket = SttSocketService();
 
-  bool get isListening => _speech.isListening;
+  Stream<Uint8List>? _audioStream;
+  StreamSubscription<Uint8List>? _subscription;
+  bool _isListening = false;
+
+  bool get isListening => _isListening;
+  String get transcript => _sttSocket.transcript;
 
   Future<void> init() async {
-    _isAvailable = await _speech.initialize(
-      onStatus: (status) => debugPrint('STT status: $status'),
-      onError: (error) => debugPrint('STT error: $error'),
-    );
+    await _sttSocket.connect();
   }
 
-  void startListening(Function(String) onResult) {
-  if (_isAvailable && !_speech.isListening) {
-    _speech.listen(
-      onResult: (result) {
-        onResult(result.recognizedWords);
-      },
-    );
+  Future<void> startListening(Function(String) onResult) async {
+    final granted = await Permission.microphone.request();
+    if (granted != PermissionStatus.granted) {
+      throw Exception('🎙 마이크 권한이 필요합니다');
+    }
+
+    await _nativeAudio.start();
+    _sttSocket.clearTranscript();
+    _sttSocket.setOnTranscript(onResult);
+    _sttSocket.startAudio();
+
+    _audioStream = _nativeAudio.audioStream;
+    _subscription = _audioStream?.listen((data) {
+      _sttSocket.sendAudioChunk(data);
+    });
+
+    _isListening = true;
   }
-}
 
   Future<void> stopListening() async {
-    await _speech.stop();
+    await _nativeAudio.stop();
+    await _subscription?.cancel();
+    _sttSocket.endAudio();
+    _isListening = false;
+  }
+
+  Future<void> dispose() async {
+    await stopListening();
+    _sttSocket.dispose();
   }
 }

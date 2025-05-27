@@ -28,13 +28,11 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
     async handleConnection(socket: Socket) {
         const token = socket.handshake.auth?.token;
         if (!token?.startsWith('Bearer ')) {
-            console.warn(`인증 실패(토큰 없음): ${socket.id}`);
             socket.disconnect();
             return;
         }
 
         const idToken = token.split('Bearer ')[1];
-
         try {
             const decoded = await admin.auth().verifyIdToken(idToken);
             socket.data.user = decoded;
@@ -47,7 +45,6 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     handleDisconnect(socket: Socket) {
-        console.log(`소켓 연결 해제됨: ${socket.id}`);
         this.closeStream(socket.id);
     }
 
@@ -59,9 +56,7 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('audio-chunk')
     handleAudioChunk(socket: Socket, chunk: Buffer) {
         const stream = this.recognizeStreams.get(socket.id);
-        if (stream) {
-            stream.write(chunk);
-        }
+        if (stream) stream.write(chunk);
     }
 
     @SubscribeMessage('end-audio')
@@ -82,7 +77,8 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 interimResults: true,
             })
             .on('data', (data) => {
-                const transcript = data.results?.[0]?.alternatives?.[0]?.transcript;
+                const result = data.results?.[0];
+                const transcript = result?.alternatives?.[0]?.transcript;
                 if (transcript) {
                     const now = Date.now(); // 서버 기준 현재 시간(ms 단위)
                     socket.emit('stt-result', {
@@ -99,7 +95,6 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.recognizeStreams.set(socket.id, stream);
 
         const timer = setTimeout(() => {
-            console.log(`5분 자동 재연결: ${socket.id}`);
             this.startNewStream(socket);
         }, 290_000);
         this.streamTimers.set(socket.id, timer);

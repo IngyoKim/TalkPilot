@@ -34,6 +34,13 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
 
   @override
   Widget build(BuildContext context) {
+    final progressPercent = (_controller.scriptProgress * 100).toStringAsFixed(
+      1,
+    );
+    final current =
+        (_controller.scriptChunks.length * _controller.scriptProgress).round();
+    final total = _controller.scriptChunks.length;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('발표 연습'),
@@ -53,34 +60,62 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
             children: [
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _controller.isListening
-                      ? Colors.grey
-                      : Colors.deepPurple,
+                  backgroundColor:
+                      _controller.isListening ? Colors.grey : Colors.deepPurple,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onPressed: _controller.isListening
-                    ? _controller.stopListening
-                    : _controller.startListening,
-                child: Text(
-                    _controller.isListening ? '발표 중지' : '발표 시작'),
+                onPressed:
+                    _controller.isListening
+                        ? _controller.stopListening
+                        : _controller.startListening,
+                child: Text(_controller.isListening ? '발표 중지' : '발표 시작'),
               ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   InfoCard(title: '현재 속도', value: _controller.cpmStatus),
-                  InfoCard(
-                    title: '진행도',
-                    value:
-                        '${(_controller.scriptProgress * 100).toStringAsFixed(1)}%',
-                  ),
+                  InfoCard(title: '진행도', value: '$progressPercent%'),
                   InfoCard(
                     title: '정확도',
                     value:
                         '${(_controller.scriptAccuracy * 100).toStringAsFixed(1)}%',
                   ),
                 ],
+              ),
+              const SizedBox(height: 8),
+              Container(
+                height: 80,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.deepPurple),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(40),
+                      child: LinearProgressIndicator(
+                        value: _controller.scriptProgress,
+                        backgroundColor: Colors.grey[300],
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.deepPurple,
+                        ),
+                        minHeight: 20,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '$current / $total • $progressPercent%',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 24),
               Expanded(

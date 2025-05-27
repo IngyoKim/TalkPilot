@@ -113,7 +113,7 @@ export default function MyPresentation() {
                 id: uuidv4(),
                 text: `상태가 '${newStatus}'로 변경되었습니다.`,
                 duration: 3000,
-                type: typeMap[newStatus] || 'info', // fallback to 'info'
+                type: typeMap[newStatus] || 'info',
             },
         ]);
     };

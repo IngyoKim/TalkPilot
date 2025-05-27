@@ -10,15 +10,31 @@ export class ProjectService {
         await this.db.write(`projects/${project.id}`, project);
     }
 
+    private applyDefaults(project: ProjectModel): ProjectModel {
+        return {
+            ...project,
+            scheduledDate: project.scheduledDate ?? '',
+            script: project.script ?? '',
+            memo: project.memo ?? '',
+            estimatedTime: project.estimatedTime ?? 0,
+            score: project.score ?? 0,
+            status: project.status ?? 'preparing',
+            scriptParts: project.scriptParts ?? [],
+            keywords: project.keywords ?? [],
+        };
+    }
+
     async getProjectById(id: string): Promise<ProjectModel | null> {
-        return await this.db.read(`projects/${id}`);
+        const project = await this.db.read(`projects/${id}`);
+        return project ? this.applyDefaults(project) : null;
     }
 
     async getAllProjects(): Promise<ProjectModel[]> {
-        return await this.db.fetch(`projects`, (item, key) => ({
+        const projects = await this.db.fetch(`projects`, (item, key) => ({
             ...item,
             id: key,
         }));
+        return projects.map(p => this.applyDefaults(p));
     }
 
     async updateProject(id: string, updates: Partial<ProjectModel>): Promise<void> {

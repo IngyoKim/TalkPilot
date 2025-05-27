@@ -20,13 +20,14 @@ export async function createProject(data) {
 // 참여 중인 프로젝트 목록을 가져옴
 export async function getProjects(uid) {
     const token = await getIdToken();
-    const res = await fetch(`${API_URL}?uid=${uid}`, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
+    const res = await fetch(`/api/project?uid=${uid}`, {
+        headers: { Authorization: `Bearer ${token}` },
     });
-    return res.json();
+
+    const json = await res.json();
+    return json.map((p) => createProjectModel(p.id, p));
 }
+
 
 /// 선택된 프로젝트의 정보를 업데이트함(projectId를 받아서)
 export async function updateProject(projectId, updates) {

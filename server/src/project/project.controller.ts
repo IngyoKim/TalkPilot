@@ -10,7 +10,8 @@ import { UserService } from '../user/user.service';
 
 @Controller('project')
 export class ProjectController {
-    constructor(private readonly projectService: ProjectService,
+    constructor(
+        private readonly projectService: ProjectService,
         private readonly userService: UserService,
     ) { }
 
@@ -49,7 +50,7 @@ export class ProjectController {
             },
         });
 
-        return { success: true, id: projectId };
+        return project;
     }
 
     @Get(':id')

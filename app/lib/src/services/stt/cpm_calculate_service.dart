@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:talk_pilot/src/models/cpm_record_model.dart';
+import 'package:talk_pilot/src/services/database/cpm_history_service.dart';
 import 'package:talk_pilot/src/services/database/database_service.dart';
+import 'package:talk_pilot/src/services/database/user_service.dart';
 
 enum CpmStage { ready, timing, finished }
 
@@ -61,19 +64,32 @@ class CpmCalculateService extends ChangeNotifier {
         break;
 
       case CpmStage.finished:
-        if (isLast) {
+        final user = _auth.currentUser;
+
+        if (isLast && user != null) {
           final avg = averageCpm;
-          final user = _auth.currentUser;
-          if (user != null && avg != null) {
+
+          if (avg != null) {
+            // 1. 평균 CPM 업데이트
             await _db.updateDB("users/${user.uid}", {
               'cpm': avg,
               'updatedAt': DateTime.now().toIso8601String(),
             });
+
+            // 2. CPM 기록 추가
+            final historyService = UserService();
+            await historyService.addCpmRecord(
+              user.uid,
+              CpmRecordModel(cpm: avg, timestamp: DateTime.now()),
+            );
+
+            // 3. 평균 재계산하여 업데이트 (history 기준)
+            await historyService.updateAverageCpm(user.uid);
           }
 
           /// ProfilePage로 이동
           if (context.mounted) {
-            Navigator.pop(context, averageCpm);
+            Navigator.pop(context, avg);
           }
         } else {
           _currentIndex++;

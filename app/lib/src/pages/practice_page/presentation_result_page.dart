@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:talk_pilot/src/models/cpm_record_model.dart';
 import 'package:talk_pilot/src/pages/practice_page/widgets/result_summary.dart';
 import 'package:talk_pilot/src/pages/work_page/work_page.dart';
+import 'package:talk_pilot/src/provider/user_provider.dart';
+import 'package:talk_pilot/src/services/database/cpm_history_service.dart';
+import 'package:talk_pilot/src/services/database/user_service.dart';
 
-class PresentationResultPage extends StatelessWidget {
+class PresentationResultPage extends StatefulWidget {
   final double scriptAccuracy;
   final double actualCpm;
   final double userCpm;
@@ -19,6 +24,32 @@ class PresentationResultPage extends StatelessWidget {
     required this.actualDuration,
     required this.expectedDuration,
   });
+
+  @override
+  State<PresentationResultPage> createState() => _PresentationResultPageState();
+}
+
+class _PresentationResultPageState extends State<PresentationResultPage> {
+  @override
+  void initState() {
+    super.initState();
+    _saveCpmRecord();
+  }
+
+  Future<void> _saveCpmRecord() async {
+    final userProvider = context.read<UserProvider>();
+    final user = userProvider.currentUser;
+    if (user == null) return;
+
+    final record = CpmRecordModel(
+      cpm: widget.actualCpm,
+      timestamp: DateTime.now(),
+    );
+
+    final userService = UserService();
+    await userService.addCpmRecord(user.uid, record);
+    await userService.updateAverageCpm(user.uid);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,12 +71,12 @@ class PresentationResultPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ResultSummary(
-                scriptAccuracy: scriptAccuracy,
-                actualCpm: actualCpm,
-                userCpm: userCpm,
-                cpmStatus: cpmStatus,
-                actualDuration: actualDuration,
-                expectedDuration: expectedDuration,
+                scriptAccuracy: widget.scriptAccuracy,
+                actualCpm: widget.actualCpm,
+                userCpm: widget.userCpm,
+                cpmStatus: widget.cpmStatus,
+                actualDuration: widget.actualDuration,
+                expectedDuration: widget.expectedDuration,
               ),
               const SizedBox(height: 24),
               ElevatedButton(

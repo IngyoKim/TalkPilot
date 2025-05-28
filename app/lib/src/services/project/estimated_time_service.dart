@@ -21,24 +21,7 @@ class EstimatedTimeService {
 
       if (script == null || script.isEmpty) return;
 
-      if (parts == null || parts.isEmpty) {
-        final user = await _userService.readUser(project.ownerUid);
-        final cpm = user?.cpm ?? 0;
-        if (cpm <= 0) return;
-
-        final time = (script.length / cpm) * 60;
-        final estimatedTime = double.parse(time.toStringAsFixed(2));
-
-        if (project.estimatedTime != estimatedTime) {
-          await _projectService.updateProject(project.id, {
-            'estimatedTime': estimatedTime,
-          });
-        }
-
-        return;
-      }
-
-      final currentState = '$script::${parts.map((e) => e.toString()).join()}';
+      final currentState = '$script::${parts?.map((e) => '${e.uid}:${e.startIndex}-${e.endIndex}').join(',') ?? ''}';
       final prevState = _prevScriptMap[project.id];
 
       if (!_initializedProjects.contains(project.id)) {
@@ -52,22 +35,31 @@ class EstimatedTimeService {
 
       double totalTime = 0;
 
-      for (final part in parts) {
-        final int start = part.startIndex;
-        final int end = part.endIndex;
-        final String uid = part.uid;
+      if (parts != null && parts.isNotEmpty) {
+        for (final part in parts) {
+          final int start = part.startIndex;
+          final int end = part.endIndex;
+          final String uid = part.uid;
+          final bool isWholeScript = start == 0 && end == script.length;
 
-        if (start < 0 || end > script.length || start >= end) continue;
+          if ((start < 0 || end > script.length || start >= end) && !isWholeScript) continue;
 
-        final text = script.substring(start, end).trim();
-        if (text.isEmpty) continue;
+          final text = script.substring(start, end).trim();
+          if (text.isEmpty) continue;
 
-        final user = await _userService.readUser(uid);
+          final user = await _userService.readUser(uid);
+          final cpm = user?.cpm ?? 0;
+          if (cpm <= 0) continue;
+
+          final timeInSeconds = (text.length / cpm) * 60;
+          totalTime += timeInSeconds;
+        }
+      } else {
+        final user = await _userService.readUser(project.ownerUid);
         final cpm = user?.cpm ?? 0;
-        if (cpm <= 0) continue;
+        if (cpm <= 0) return;
 
-        final time = (text.length / cpm) * 60;
-        totalTime += time;
+        totalTime = (script.length / cpm) * 60;
       }
 
       final newEstimatedTime = double.parse(totalTime.toStringAsFixed(2));

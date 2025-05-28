@@ -21,21 +21,22 @@ class EstimatedTimeService {
 
       if (script == null || script.isEmpty) return;
 
-      final normalizedKeywords =
-          keywords.map((e) => e.trim().toLowerCase()).where((e) => e.isNotEmpty).toList()
-            ..sort();
+      final normalizedKeywords = keywords
+          .map((e) => e.trim().toLowerCase())
+          .where((e) => e.isNotEmpty)
+          .toList()
+        ..sort();
 
-      final normalizedParts =
-          parts.map((e) => '${e.uid}:${e.startIndex}-${e.endIndex}').toList()
-            ..sort();
+      final normalizedParts = parts
+          .map((e) => '${e.uid}:${e.startIndex}-${e.endIndex}')
+          .toList()
+        ..sort();
 
-      final currentState =
-          '$script::${normalizedParts.join(',')}::${normalizedKeywords.join(',')}';
+      final currentState = '$script::${normalizedParts.join(',')}::${normalizedKeywords.join(',')}';
       final prevState = _prevStateMap[project.id];
       final prevKeywords = _prevKeywordMap[project.id] ?? [];
 
-      final keywordChanged =
-          normalizedKeywords.join(',') != prevKeywords.join(',');
+      final keywordChanged = normalizedKeywords.join(',') != prevKeywords.join(',');
 
       if (!keywordChanged && prevState == currentState) return;
 

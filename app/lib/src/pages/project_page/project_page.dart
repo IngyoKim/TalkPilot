@@ -26,9 +26,12 @@ class _ProjectPageState extends State<ProjectPage> {
   final _projectService = ProjectService();
   final _estimatedTimeService = EstimatedTimeService();
   bool isLoading = false;
-  bool _estimatedTimeSubscribed = false;
+  bool isScriptEditable = false;
 
-  bool isScriptEditable = false; // 추가
+  @override
+  void initState() {
+    super.initState();
+  }
 
   ProjectRole getUserRole(ProjectModel project, String? uid) {
     final role = project.participants[uid] ?? 'member';
@@ -58,11 +61,6 @@ class _ProjectPageState extends State<ProjectPage> {
         final project = snapshot.data!;
         final isEditable =
             getUserRole(project, currentUid) != ProjectRole.member;
-
-        if (!_estimatedTimeSubscribed) {
-          _estimatedTimeSubscribed = true;
-          _estimatedTimeService.streamEstimatedTime(project.id);
-        }
 
         return Scaffold(
           appBar: AppBar(
@@ -95,35 +93,70 @@ class _ProjectPageState extends State<ProjectPage> {
               const SizedBox(height: 12),
               ProjectInfoCard(project: project, editable: isEditable),
               const SizedBox(height: 32),
-              ...[
-                EditableTextEditor(
-                  projectId: project.id,
-                  field: ProjectField.title,
-                  label: '제목',
-                  value: project.title,
-                  maxLength: 100,
-                  editable: isEditable,
+              EditableTextEditor(
+                projectId: project.id,
+                field: ProjectField.title,
+                label: '제목',
+                value: project.title,
+                maxLength: 100,
+                editable: isEditable,
+              ),
+              EditableTextEditor(
+                projectId: project.id,
+                field: ProjectField.description,
+                label: '설명',
+                value: project.description,
+                maxLength: 300,
+                editable: isEditable,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '키워드 (쉼표로 구분)',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                initialValue: (project.keywords ?? []).join(', '),
+                maxLength: 300,
+                enabled: isEditable,
+                style: const TextStyle(fontSize: 14),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: const OutlineInputBorder(),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 12,
+                  ),
                 ),
-                EditableTextEditor(
-                  projectId: project.id,
-                  field: ProjectField.description,
-                  label: '설명',
-                  value: project.description,
-                  maxLength: 300,
-                  editable: isEditable,
-                ),
-                EditableTextEditor(
-                  projectId: project.id,
-                  field: ProjectField.memo,
-                  label: '메모',
-                  value: project.memo ?? '',
-                  maxLength: 1000,
-                  editable: isEditable,
-                ),
-              ].expand((widget) => [widget, const SizedBox(height: 16)]),
-              const SizedBox(height: 24),
+                onFieldSubmitted: (text) async {
+                  final keywords =
+                      text
+                          .split(',')
+                          .map((s) => s.trim())
+                          .where((s) => s.isNotEmpty)
+                          .toList();
 
-              // 대본 편집 모드 토글 버튼
+                  await _projectService.updateProject(project.id, {
+                    'keywords': keywords,
+                  });
+
+                  _estimatedTimeService.streamEstimatedTime(
+                    project.id,
+                    force: true,
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              EditableTextEditor(
+                projectId: project.id,
+                field: ProjectField.memo,
+                label: '메모',
+                value: project.memo ?? '',
+                maxLength: 1000,
+                editable: isEditable,
+              ),
+              const SizedBox(height: 24),
               Row(
                 children: [
                   const SizedBox(width: 12),
@@ -131,7 +164,7 @@ class _ProjectPageState extends State<ProjectPage> {
                     '대본',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
-                  Expanded(flex: 1, child: Container()),
+                  Expanded(child: Container()),
                   if (isEditable)
                     ElevatedButton(
                       onPressed: () {
@@ -145,7 +178,6 @@ class _ProjectPageState extends State<ProjectPage> {
                 ],
               ),
               const SizedBox(height: 8),
-
               EditableTextEditor(
                 projectId: project.id,
                 field: ProjectField.script,
@@ -155,9 +187,7 @@ class _ProjectPageState extends State<ProjectPage> {
                 editable: isEditable && isScriptEditable,
                 scriptParts: project.scriptParts ?? [],
               ),
-
               const SizedBox(height: 24),
-
               if (isEditable)
                 ElevatedButton(
                   onPressed: () {
@@ -169,9 +199,7 @@ class _ProjectPageState extends State<ProjectPage> {
                   },
                   child: const Text('대본 파트 할당하기'),
                 ),
-
               const SizedBox(height: 24),
-
               PracticeButton(project: project),
             ],
           ),

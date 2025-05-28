@@ -17,39 +17,80 @@ class ScriptComparisonView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final recognizedWords = splitText(recognizedText);
-    final matchedFlags = List<bool>.filled(scriptChunks.length, false);
-    final usedRecognizedIndexes = <int>{};
+    if (scriptChunks.isEmpty) {
+      return const Text('');
+    }
 
-    int lastMatchedRecognizedIndex = -1;
+    final matchedFlags = List<bool>.filled(scriptChunks.length, false);
+    final bigramFlags = List<bool>.filled(scriptChunks.length, false);
+    final matchedRecognizedIndexes = <int>{};
 
     for (int i = 0; i < scriptChunks.length; i++) {
-      final start = (lastMatchedRecognizedIndex + 1 - 10).clamp(0, recognizedWords.length);
-      final end = (lastMatchedRecognizedIndex + 1 + 10).clamp(0, recognizedWords.length);
+      if (matchedFlags[i]) continue;
+
+      final start = (i - 8).clamp(0, recognizedWords.length);
+      final end = (i + 8).clamp(0, recognizedWords.length);
 
       for (int j = start; j < end; j++) {
-        if (usedRecognizedIndexes.contains(j)) continue;
-
+        if (matchedRecognizedIndexes.contains(j)) continue;
         if (isSimilar(scriptChunks[i], recognizedWords[j])) {
           matchedFlags[i] = true;
-          usedRecognizedIndexes.add(j);
-          lastMatchedRecognizedIndex = j;
+          matchedRecognizedIndexes.add(j);
           break;
+        }
+      }
+
+      if (!matchedFlags[i] &&
+          i < scriptChunks.length - 1 &&
+          !matchedFlags[i + 1]) {
+        final bigram = scriptChunks[i] + scriptChunks[i + 1];
+        for (int j = start; j < end; j++) {
+          if (matchedRecognizedIndexes.contains(j)) continue;
+          if (isSimilar(bigram, recognizedWords[j])) {
+            matchedFlags[i] = true;
+            matchedFlags[i + 1] = true;
+            bigramFlags[i] = true;
+            bigramFlags[i + 1] = true;
+            matchedRecognizedIndexes.add(j);
+            break;
+          }
         }
       }
     }
 
-    final scriptSpans = List<InlineSpan>.generate(scriptChunks.length, (i) {
-      final word = scriptChunks[i];
-      final matched = matchedFlags[i];
-      return TextSpan(
-        text: '$word ',
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: matched ? FontWeight.bold : FontWeight.normal,
-          color: matched ? Colors.deepPurple : Colors.black,
-        ),
-      );
-    });
+    final scriptSpans = <InlineSpan>[];
+    int idx = 0;
+
+    while (idx < scriptChunks.length) {
+      if (bigramFlags[idx] &&
+          idx + 1 < scriptChunks.length &&
+          bigramFlags[idx + 1]) {
+        scriptSpans.add(
+          TextSpan(
+            text: '${scriptChunks[idx]}${scriptChunks[idx + 1]} ',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple,
+            ),
+          ),
+        );
+        idx += 2;
+      } else {
+        scriptSpans.add(
+          TextSpan(
+            text: '${scriptChunks[idx]} ',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight:
+                  matchedFlags[idx] ? FontWeight.bold : FontWeight.normal,
+              color: matchedFlags[idx] ? Colors.deepPurple : Colors.black,
+            ),
+          ),
+        );
+        idx += 1;
+      }
+    }
 
     return RichText(text: TextSpan(children: scriptSpans));
   }

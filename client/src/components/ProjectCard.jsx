@@ -1,129 +1,96 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import Sidebar from '../../components/SideBar';
+import ProfileDropdown from '../Profile/ProfileDropdown';
+import { useUser } from '../../contexts/UserContext';
+import useProjects from '../../hooks/useProjects';
+import ProjectCard from '../../components/ProjectCard';
+import ProjectModal from '../../components/ProjectModal';
 
-const STATUS_COLORS = {
-    진행중: '#4CAF50',
-    보류: '#FFC107',
-    완료: '#F44336',
-};
+const mainColor = '#673AB7';
 
-export default function ProjectCard({ project, onEdit, onDelete, onStatusChange }) {
-    const [activeDropdown, setActiveDropdown] = useState(null); // 'menu' or 'status'
-    const dropdownRef = useRef();
+export default function MyPresentation() {
+    const { user } = useUser();
+    const {
+        projects,
+        create,
+        join,
+        update,
+        remove,
+        changeStatus,
+    } = useProjects(user);
 
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-                setActiveDropdown(null);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [showModal, setShowModal] = useState(false);
+    const [editProject, setEditProject] = useState(null); // null이면 create
+
+    const handleOpenCreate = () => {
+        setEditProject(null);
+        setShowModal(true);
+    };
+
+    const handleOpenEdit = (project) => {
+        setEditProject(project);
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setEditProject(null);
+    };
 
     return (
-        <div style={{ position: 'relative' }} ref={dropdownRef}>
-            <Link to={`/project/${project.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <div style={{ display: 'flex' }}>
+            <Sidebar isOpen={isSidebarOpen} />
+            <div style={{ flex: 1, padding: 20, marginLeft: isSidebarOpen ? 240 : 0 }}>
+                <ProfileDropdown
+                    isSidebarOpen={isSidebarOpen}
+                    onToggleSidebar={() => setIsSidebarOpen((o) => !o)}
+                />
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
+                    <button
+                        style={{
+                            backgroundColor: mainColor,
+                            color: '#fff',
+                            padding: '10px 16px',
+                            borderRadius: 8,
+                            border: 'none',
+                            cursor: 'pointer',
+                        }}
+                        onClick={handleOpenCreate}
+                    >
+                        프로젝트 추가
+                    </button>
+                </div>
+
                 <div
                     style={{
-                        padding: 16,
-                        backgroundColor: '#fff',
-                        borderRadius: 10,
-                        boxShadow: '0 6px 16px rgba(0,0,0,0.3)',
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                        gap: 20,
                     }}
                 >
-                    <h3>{project.title}</h3>
-                    <p>{project.description}</p>
-                    <small>생성일: {new Date(project.createdAt).toLocaleDateString()}</small>
-                    <br />
-                    <small>수정일: {formatRelativeTime(project.updatedAt)}</small>
-                </div>
-            </Link>
-
-            {/* 메뉴 버튼 */}
-            <div
-                style={{ position: 'absolute', top: 8, right: 32, cursor: 'pointer' }}
-                onClick={() =>
-                    setActiveDropdown((prev) => (prev === 'menu' ? null : 'menu'))
-                }
-            >
-                ⋮
-            </div>
-
-            {/* 상태 점 버튼 */}
-            <div
-                style={{
-                    position: 'absolute',
-                    top: 8,
-                    right: 8,
-                    width: 14,
-                    height: 14,
-                    borderRadius: '50%',
-                    border: '1px solid #ccc',
-                    backgroundColor: STATUS_COLORS[project.status],
-                    cursor: 'pointer',
-                }}
-                onClick={() =>
-                    setActiveDropdown((prev) => (prev === 'status' ? null : 'status'))
-                }
-            />
-
-            {/* 메뉴 드롭다운 */}
-            {activeDropdown === 'menu' && (
-                <div style={dropdownStyle}>
-                    <div style={dropdownItemStyle} onClick={() => onEdit(project)}>수정</div>
-                    <div style={dropdownItemStyle} onClick={() => onDelete(project.id)}>삭제</div>
-                </div>
-            )}
-
-            {/* 상태 드롭다운 */}
-            {activeDropdown === 'status' && (
-                <div style={dropdownStyle}>
-                    {Object.entries(STATUS_COLORS).map(([status, color]) => (
-                        <div
-                            key={status}
-                            style={dropdownItemStyle}
-                            onClick={() => onStatusChange(project.id, status)}
-                        >
-                            <div style={{ ...dotStyle, backgroundColor: color }} />
-                            <span>{status}</span>
-                        </div>
+                    {projects.map((project) => (
+                        <ProjectCard
+                            key={project.id}
+                            project={project}
+                            onEdit={handleOpenEdit}
+                            onDelete={remove}
+                            onStatusChange={changeStatus}
+                        />
                     ))}
                 </div>
+            </div>
+
+            {showModal && (
+                <ProjectModal
+                    mode={editProject ? 'edit' : 'createOrJoin'}
+                    project={editProject}
+                    onClose={handleCloseModal}
+                    onCreate={create}
+                    onJoin={(projectId) => join(projectId, user)}
+                    onUpdate={update}
+                />
             )}
         </div>
     );
 }
-
-const formatRelativeTime = (date) => {
-    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-    if (seconds < 60) return `${seconds}초 전`;
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}분 전`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}시간 전`;
-    const days = Math.floor(hours / 24);
-    return `${days}일 전`;
-};
-
-const dropdownStyle = {
-    position: 'absolute',
-    top: 30,
-    right: 8,
-    backgroundColor: '#fff',
-    border: '1px solid #ccc',
-    borderRadius: 6,
-    boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
-    zIndex: 10,
-};
-
-const dropdownItemStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '6px 12px',
-    cursor: 'pointer',
-    fontSize: 13,
-};
-
-const dotStyle = { width: 10, height: 10, borderRadius: '50%' };

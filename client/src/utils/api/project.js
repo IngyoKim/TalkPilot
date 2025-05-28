@@ -1,4 +1,5 @@
 import { getIdToken } from '../auth/auth';
+import { ProjectModel } from '../../models/projectModel';
 
 const API_URL = '/api/project';
 
@@ -25,7 +26,7 @@ export async function getProjects(uid) {
     });
 
     const json = await res.json();
-    return json.map((p) => createProjectModel(p.id, p));
+    return json.map((p) => ProjectModel(p.id, p));
 }
 
 
@@ -58,16 +59,17 @@ export async function deleteProject(projectId) {
 /// [projectId]로 단일 프로젝트를 조회
 export async function fetchProjectById(projectId) {
     const token = await getIdToken();
-    const res = await fetch(`${API_URL}/${projectId}`, {
+    const res = await fetch(`/api/project/${projectId}`, {
         headers: { Authorization: `Bearer ${token}` },
     });
 
-    /// 404 예외처리(id가 매칭되는 프로젝트가 없을 때)
     if (res.status === 404) {
         console.warn(`[projectAPI] 프로젝트 ${projectId} 가 존재하지 않음`);
         return null;
     }
 
     if (!res.ok) throw new Error('프로젝트 조회 실패');
-    return await res.json();
+
+    const json = await res.json();
+    return ProjectModel(projectId, json);
 }

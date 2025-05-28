@@ -15,20 +15,18 @@ export async function fetchUserByUid(uid) {
 }
 
 /// Nest에서 user의 [updates]를 업데이트함.
-
-export async function fetchProjectById(projectId) {
+export async function updateUser(updates) {
     const token = await getIdToken();
-    const res = await fetch(`/api/project/${projectId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+
+    const res = await fetch('/api/user', {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updates),
     });
 
-    if (res.status === 404) {
-        console.warn(`[projectAPI] 프로젝트 ${projectId} 가 존재하지 않음`);
-        return null;
-    }
-
-    if (!res.ok) throw new Error('프로젝트 조회 실패');
-
-    const json = await res.json();
-    return createProjectModel(projectId, json);
+    if (!res.ok) throw new Error('사용자 정보 업데이트 실패');
+    return await res.json();
 }

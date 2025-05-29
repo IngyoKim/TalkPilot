@@ -156,7 +156,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-            ),
+            ),            
           ],
         ),
       ),

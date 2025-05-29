@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:talk_pilot/src/components/bottom_bar.dart';
 import 'package:talk_pilot/src/models/cpm_record_model.dart';
 import 'package:talk_pilot/src/pages/practice_page/widgets/result_summary.dart';
-import 'package:talk_pilot/src/pages/work_page/work_page.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/services/database/cpm_history_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
@@ -83,7 +83,7 @@ class _PresentationResultPageState extends State<PresentationResultPage> {
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (_) => const WorkPage()),
+                    MaterialPageRoute(builder: (_) => const BottomBar()),
                     (route) => false,
                   );
                 },

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
-import 'package:talk_pilot/src/services/practice/score_service.dart';
+import 'package:talk_pilot/src/services/project/score_service.dart';
 
 class ResultSummary extends StatefulWidget {
   final double scriptAccuracy;
@@ -114,8 +114,8 @@ class _ResultSummaryState extends State<ResultSummary> {
         ),
         const SizedBox(height: 32),
         _buildResultCard(title: '대본 정확도', value: '${(widget.scriptAccuracy * 100).toStringAsFixed(1)}%'),
-        _buildResultCard(title: '평균 말하기 속도', value: '${widget.actualCpm.toStringAsFixed(1)} CPM'),
-        _buildResultCard(title: '내 기준 속도', value: '${widget.userCpm.toStringAsFixed(1)} CPM'),
+        _buildResultCard(title: '평균 CPM', value: '${widget.actualCpm.toStringAsFixed(1)} CPM'),
+        _buildResultCard(title: '나의 CPM', value: '${widget.userCpm.toStringAsFixed(1)} CPM'),
         _buildResultCard(title: '속도 차이', value: '${diffPercent.toStringAsFixed(1)}%'),
         _buildResultCard(title: '속도 해석', value: widget.cpmStatus),
         _buildResultCard(title: '발표 시간', value: '${widget.actualDuration.inSeconds}초'),

@@ -9,7 +9,7 @@ import 'package:talk_pilot/src/pages/project_page/widgets/read_only/info_row.dar
 import 'package:talk_pilot/src/pages/project_page/widgets/read_only/copyable_row.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/participant_list_button.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/editable/editable_date_picker.dart';
-import 'package:talk_pilot/src/pages/project_page/widgets/editable/editable_estimated_time.dart';
+import 'package:talk_pilot/src/pages/project_page/widgets/estimated_format.dart';
 
 class ProjectInfoCard extends StatelessWidget {
   final ProjectModel project;
@@ -51,10 +51,9 @@ class ProjectInfoCard extends StatelessWidget {
             ParticipantListButton(project: project),
             InfoRow(label: '상태', value: project.status),
             const SizedBox(height: 8),
-            EditableEstimatedTime(
-              projectId: project.id,
-              initialSeconds: project.estimatedTime,
-              editable: editable,
+            InfoRow(
+              label: '예상 시간',
+              value: formatEstimatedTime(project.estimatedTime?.toDouble()),
             ),
             const SizedBox(height: 6),
             EditableDatePicker(

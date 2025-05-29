@@ -32,13 +32,16 @@ class EstimatedTimeService {
           .toList()
         ..sort();
 
-      final currentState = '$script::${normalizedParts.join(',')}::${normalizedKeywords.join(',')}';
+      final currentState =
+          '$script::${normalizedParts.join(',')}::${normalizedKeywords.join(',')}';
       final prevState = _prevStateMap[project.id];
       final prevKeywords = _prevKeywordMap[project.id] ?? [];
 
-      final keywordChanged = normalizedKeywords.join(',') != prevKeywords.join(',');
+      final stateChanged = prevState == null || currentState != prevState;
+      final keywordChanged =
+          normalizedKeywords.join(',') != prevKeywords.join(',');
 
-      if (!keywordChanged && prevState == currentState) return;
+      if (!stateChanged && !keywordChanged && !force) return;
 
       _prevStateMap[project.id] = currentState;
       _prevKeywordMap[project.id] = normalizedKeywords;

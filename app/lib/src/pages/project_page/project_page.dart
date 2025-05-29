@@ -31,6 +31,7 @@ class _ProjectPageState extends State<ProjectPage> {
   @override
   void initState() {
     super.initState();
+    _estimatedTimeService.streamEstimatedTime(widget.projectId);
   }
 
   ProjectRole getUserRole(ProjectModel project, String? uid) {
@@ -140,11 +141,6 @@ class _ProjectPageState extends State<ProjectPage> {
                   await _projectService.updateProject(project.id, {
                     'keywords': keywords,
                   });
-
-                  _estimatedTimeService.streamEstimatedTime(
-                    project.id,
-                    force: true,
-                  );
                 },
               ),
               const SizedBox(height: 16),

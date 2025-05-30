@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { FaUserCircle, FaEdit, FaCheckCircle, FaChartLine, FaBullseye, FaPoll, FaAngellist, FaTachometerAlt } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+
 import { useUser } from '../../contexts/UserContext';
 import { updateUser } from '../../utils/api/user';
 
@@ -18,8 +20,10 @@ export default function ProfilePage() {
     const [nickname, setNickname] = useState(user?.name ?? '');
 
     const handleToggleSidebar = () => setIsSidebarOpen(prev => !prev);
-
+    const navigate = useNavigate();
     const [messages, setMessages] = useState([]);
+
+
 
     // 닉네임 수정 시작
     const startEditNickname = () => {
@@ -174,7 +178,9 @@ export default function ProfilePage() {
                             CPM 계산 페이지
                         </div>
                         <div style={styles.placeholder}>당신의 CPM이 몇인지 측정하세요.</div>
-                        <button style={styles.actionButton}>테스트</button>
+                        <button style={styles.actionButton} onClick={() => navigate('/cpmtest')}>
+                            테스트
+                        </button>
                     </div>
                 </div>
             </div>

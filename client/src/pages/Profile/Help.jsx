@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import Sidebar from '../../components/SideBar';
-import { FaSearch } from "react-icons/fa";
 import ProfileDropdown from './ProfileDropdown';
+
+import { FaSearch } from "react-icons/fa";
 
 export default function Help() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);

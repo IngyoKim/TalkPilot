@@ -14,26 +14,19 @@ export default function CPMtestPage() {
         '경청해 주셔서 감사합니다.'
     ];
 
-    const [currentIndex, setCurrentIndex] = useState(-1);
-    const [mode, setMode] = useState('start'); // 'start' | 'exit' | 'next'
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [started, setStarted] = useState(false);
 
-    const handleStart = () => {
-        setCurrentIndex(0);
-        setMode('exit');
-    };
+    const handleStart = () => setStarted(true);
 
     const handleExit = () => {
         if (currentIndex === script.length - 1) {
-            setCurrentIndex(-1);
-            setMode('start');
+            setCurrentIndex(0);
+            setStarted(false);
         } else {
             setCurrentIndex(prev => prev + 1);
-            setMode('next');
+            setStarted(false);
         }
-    };
-
-    const handleNext = () => {
-        setMode('exit');
     };
 
     return (
@@ -42,23 +35,20 @@ export default function CPMtestPage() {
             <div style={{ marginLeft: isSidebarOpen ? 240 : 0, flex: 1 }}>
                 <ProfileDropdown isSidebarOpen={isSidebarOpen} onToggleSidebar={handleToggleSidebar} />
 
-                <div style={containerStyle}>
-                    <p style={textStyle}>
-                        {currentIndex === -1 ? script[0] : script[currentIndex]}
-                    </p>
+                <div style={styles.container}>
+                    <p style={styles.description}>테스트 문장입니다. 그대로 읽으시면 CPM이 나옵니다.</p>
+                    <p style={styles.text}>{script[currentIndex]}</p>
 
-                    <div style={buttonContainerStyle}>
-                        {mode === 'start' && (
-                            <button onClick={handleStart} style={buttonStyleStart}>시작</button>
-                        )}
-                        {mode === 'exit' && (
-                            <button onClick={handleExit} style={buttonStyleExit}>종료</button>
-                        )}
-                        {mode === 'next' && (
-                            <>
-                                <button onClick={handleNext} style={buttonStyleNext}>다음 문장</button>
-                                <button onClick={handleStart} style={buttonStyleStart}>시작</button>
-                            </>
+                    <div style={styles.buttonContainer}>
+                        {!started ? (
+                            <button onClick={handleStart} style={styles.buttonBase}>시작</button>
+                        ) : (
+                            <button
+                                onClick={handleExit}
+                                style={styles.buttonBase}
+                            >
+                                {currentIndex === script.length - 1 ? '처음으로' : '종료'}
+                            </button>
                         )}
                     </div>
                 </div>
@@ -66,42 +56,39 @@ export default function CPMtestPage() {
         </div>
     );
 }
+const mainColor = '#673AB7';
 
-const containerStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '80vh',
-    textAlign: 'center',
-};
-
-const textStyle = {
-    fontSize: '2rem',
-    marginBottom: '2rem',
-};
-
-const buttonContainerStyle = {
-    display: 'flex',
-    gap: '1rem',
-};
-
-const buttonStyleStart = {
-    padding: '0.75rem 1.5rem',
-    fontSize: '1rem',
-    backgroundColor: '#4CAF50', // 초록
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    cursor: 'pointer',
-};
-
-const buttonStyleNext = {
-    ...buttonStyleStart,
-    backgroundColor: '#2196F3', // 파랑
-};
-
-const buttonStyleExit = {
-    ...buttonStyleStart,
-    backgroundColor: '#F44336', // 빨강
+const styles = {
+    container: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '80vh',
+        textAlign: 'center',
+    },
+    description: {
+        fontSize: '1.2rem',
+        color: '#333',
+        marginTop: '-8vh',
+        marginBottom: '2rem',
+        textAlign: 'center',
+    },
+    text: {
+        fontSize: '2rem',
+        marginBottom: '2rem',
+    },
+    buttonContainer: {
+        display: 'flex',
+        gap: '1rem',
+    },
+    buttonBase: {
+        padding: '0.75rem 1.5rem',
+        fontSize: '1rem',
+        color: 'white',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        backgroundColor: mainColor,
+    }
 };

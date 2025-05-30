@@ -1,11 +1,9 @@
-// MyPresentation.jsx (최종 수정 반영)
-
 import { Link } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import Sidebar from '../../components/SideBar';
 import ProfileDropdown from '../Profile/ProfileDropdown';
 import { useUser } from '../../contexts/UserContext';
-import * as projectAPI from '../../utils/api/project';
+import useProjects from '../../utils/userProjects';
 
 const mainColor = '#673AB7';
 const STATUS_COLORS = {
@@ -27,7 +25,15 @@ const formatRelativeTime = (date) => {
 
 export default function MyPresentation() {
     const { user, setUser } = useUser();
-    const [projects, setProjects] = useState([]);
+    const {
+        projects,
+        create,
+        join,
+        remove,
+        update,
+        changeStatus,
+    } = useProjects(user, setUser);
+
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editMode, setEditMode] = useState(false);
@@ -40,35 +46,6 @@ export default function MyPresentation() {
     const [isSaving, setIsSaving] = useState(false);
 
     const containerRef = useRef();
-
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (containerRef.current && !containerRef.current.contains(e.target)) {
-                setActiveDropdown(null);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    useEffect(() => {
-        if (!user?.projectIds) return;
-        const entries = Object.entries(user.projectIds).filter(([id]) => id && id !== 'undefined');
-        if (entries.length === 0) return;
-        (async () => {
-            try {
-                const fetched = await Promise.all(
-                    entries.map(async ([id, status]) => {
-                        const project = await projectAPI.fetchProjectById(id);
-                        return project ? { ...project, status } : null;
-                    })
-                );
-                setProjects(fetched.filter(Boolean).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
-            } catch (e) {
-                console.error('[MyPresentation] 프로젝트 불러오기 실패:', e);
-            }
-        })();
-    }, [user]);
 
     const resetModal = () => {
         setTitle('');
@@ -85,27 +62,12 @@ export default function MyPresentation() {
         setIsSaving(true);
         try {
             if (editMode && editId) {
-                await projectAPI.updateProject(editId, { title, description });
-                setProjects((ps) => ps.map((p) => (p.id === editId ? { ...p, title, description } : p)));
+                await update(editId, { title, description });
             } else if (tab === 'join') {
                 if (!joinProjectId.trim()) return alert('유효한 프로젝트 ID를 입력하세요.');
-                const project = await projectAPI.fetchProjectById(joinProjectId);
-                if (!project) return alert('존재하지 않는 프로젝트입니다.');
-                if (project.participants[user.uid]) return alert('이미 참여 중입니다.');
-
-                await projectAPI.updateProject(joinProjectId, {
-                    participants: { ...project.participants, [user.uid]: 'member' },
-                });
-                const updatedProjectIds = { ...(user.projectIds || {}), [joinProjectId]: project.status };
-                await projectAPI.updateUser({ projectIds: updatedProjectIds });
-                setUser({ ...user, projectIds: updatedProjectIds });
-                setProjects((prev) => [
-                    { ...project, participants: { ...project.participants, [user.uid]: 'member' } },
-                    ...prev,
-                ]);
+                await join(joinProjectId);
             } else {
-                const res = await projectAPI.createProject({ title, description });
-                setProjects((prev) => [{ ...res, title, description }, ...prev]);
+                await create({ title, description });
             }
         } catch {
             alert('프로젝트 저장 중 오류 발생');
@@ -117,19 +79,21 @@ export default function MyPresentation() {
 
     const handleDelete = async (id) => {
         if (!window.confirm('정말로 삭제하시겠습니까?')) return;
-        await projectAPI.deleteProject(id);
-        const updatedProjectIds = { ...user.projectIds };
-        delete updatedProjectIds[id];
-        await projectAPI.updateUser({ projectIds: updatedProjectIds });
-        setUser({ ...user, projectIds: updatedProjectIds });
-        setProjects((ps) => ps.filter((p) => p.id !== id));
-        setActiveDropdown(null);
+        try {
+            await remove(id);
+            setActiveDropdown(null);
+        } catch {
+            alert('삭제 중 오류 발생');
+        }
     };
 
     const handleStatusChange = async (id, newStatus) => {
-        await projectAPI.updateProject(id, { status: newStatus });
-        setProjects((ps) => ps.map((p) => (p.id === id ? { ...p, status: newStatus } : p)));
-        setActiveDropdown(null);
+        try {
+            await changeStatus(id, newStatus);
+            setActiveDropdown(null);
+        } catch {
+            alert('상태 변경 중 오류 발생');
+        }
     };
 
     const openEditModal = (project) => {
@@ -222,7 +186,6 @@ export default function MyPresentation() {
                     ))}
                 </div>
 
-                {/* ✅ 프로젝트 생성/수정 모달 추가 */}
                 {showModal && (
                     <div style={styles.modalOverlay}>
                         <div style={styles.modal}>
@@ -299,7 +262,6 @@ export default function MyPresentation() {
             </div>
         </div>
     );
-
 }
 
 const styles = {

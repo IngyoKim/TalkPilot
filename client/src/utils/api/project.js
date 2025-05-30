@@ -53,8 +53,16 @@ export async function deleteProject(projectId) {
             Authorization: `Bearer ${token}`,
         },
     });
-    return res.json();
+
+    /// 본문이 없으면 .json() 호출 시 오류 나므로 안전 처리
+    if (res.status === 204 || res.headers.get('content-length') === '0') {
+        return null;
+    }
+
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
 }
+
 
 /// [projectId]로 단일 프로젝트를 조회
 export async function fetchProjectById(projectId) {

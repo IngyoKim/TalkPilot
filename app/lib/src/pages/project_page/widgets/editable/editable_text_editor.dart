@@ -128,7 +128,6 @@ class _EditableTextEditorState extends State<EditableTextEditor> {
     return spans;
   }
 
-  /// 텍스트 수정 시 파트 인덱스 자동 보정 함수
   List<ScriptPartModel> adjustScriptParts(
     List<ScriptPartModel> parts,
     int changePos,
@@ -144,7 +143,6 @@ class _EditableTextEditorState extends State<EditableTextEditor> {
       int end = part.endIndex;
 
       if (changeLen > 0) {
-        // 삽입: 단순 인덱스 증가
         if (start >= changePos) start += changeLen;
         if (end >= changePos) end += changeLen;
         adjusted.add(
@@ -208,58 +206,58 @@ class _EditableTextEditorState extends State<EditableTextEditor> {
         const SizedBox(height: 6),
         widget.editable
             ? TextField(
-              controller: _controller,
-              maxLength: widget.maxLength,
-              maxLines: null,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
+                controller: _controller,
+                maxLength: widget.maxLength,
+                maxLines: null,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                ),
+                onChanged: (text) async {
+                  int changePos = 0;
+                  while (changePos < _oldText.length &&
+                      changePos < text.length &&
+                      _oldText[changePos] == text[changePos]) {
+                    changePos++;
+                  }
+                  int oldLenRem = _oldText.length - changePos;
+                  int newLenRem = text.length - changePos;
+
+                  int changeLen = newLenRem - oldLenRem;
+
+                  _scriptParts = adjustScriptParts(
+                    _scriptParts,
+                    changePos,
+                    changeLen,
+                  );
+
+                  await ProjectService().updateProject(widget.projectId, {
+                    widget.field.key: text,
+                    ProjectField.scriptParts.key:
+                        _scriptParts.map((e) => e.toMap()).toList(),
+                  });
+
+                  _oldText = text;
+                },
+              )
+            : Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  border: Border.all(color: Colors.grey[300]!),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                filled: true,
-                fillColor: Colors.grey[100],
-              ),
-              onChanged: (text) async {
-                int changePos = 0;
-                while (changePos < _oldText.length &&
-                    changePos < text.length &&
-                    _oldText[changePos] == text[changePos]) {
-                  changePos++;
-                }
-                int oldLenRem = _oldText.length - changePos;
-                int newLenRem = text.length - changePos;
-
-                int changeLen = newLenRem - oldLenRem;
-
-                _scriptParts = adjustScriptParts(
-                  _scriptParts,
-                  changePos,
-                  changeLen,
-                );
-
-                await ProjectService().updateProject(widget.projectId, {
-                  widget.field.key: text,
-                  ProjectField.scriptParts.key:
-                      _scriptParts.map((e) => e.toMap()).toList(),
-                });
-
-                _oldText = text;
-              },
-            )
-            : Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: RichText(
-                text: TextSpan(
-                  children: buildTextSpans(widget.scriptParts, widget.value),
-                  style: const TextStyle(fontSize: 14),
+                child: RichText(
+                  text: TextSpan(
+                    children: buildTextSpans(widget.scriptParts, widget.value),
+                    style: const TextStyle(fontSize: 14),
+                  ),
                 ),
               ),
-            ),
       ],
     );
   }

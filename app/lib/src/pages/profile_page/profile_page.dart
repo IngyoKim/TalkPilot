@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:talk_pilot/src/models/user_model.dart';
-import 'package:talk_pilot/src/pages/stt_page.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
 
@@ -193,27 +192,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueGrey,
-                minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SttPage()),
-                );
-              },
-              icon: const Icon(Icons.note_alt, color: Colors.white),
-              label: const Text(
-                'TXT 텍스트 추출 테스트',
-                style: TextStyle(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
                 minimumSize: const Size.fromHeight(50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

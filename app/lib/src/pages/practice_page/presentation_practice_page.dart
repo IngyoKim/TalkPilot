@@ -10,8 +10,7 @@ class PresentationPracticePage extends StatefulWidget {
   const PresentationPracticePage({super.key, required this.projectId});
 
   @override
-  State<PresentationPracticePage> createState() =>
-      _PresentationPracticePageState();
+  State<PresentationPracticePage> createState() => _PresentationPracticePageState();
 }
 
 class _PresentationPracticePageState extends State<PresentationPracticePage> {
@@ -31,17 +30,13 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
 
   @override
   void dispose() {
-    // dispose 작업은 WillPopScope에서 처리
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final progressPercent = (_controller.scriptProgress * 100).toStringAsFixed(
-      1,
-    );
-    final current =
-        (_controller.scriptChunks.length * _controller.scriptProgress).round();
+    final progressPercent = (_controller.scriptProgress * 100).toStringAsFixed(1);
+    final current = (_controller.scriptChunks.length * _controller.scriptProgress).round();
     final total = _controller.scriptChunks.length;
 
     return WillPopScope(
@@ -68,29 +63,48 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        _controller.isListening
-                            ? Colors.grey
-                            : Colors.deepPurple,
+                    backgroundColor: _controller.isListening ? Colors.grey : Colors.deepPurple,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  onPressed:
-                      _controller.isListening
-                          ? _controller.stopListening
-                          : _controller.startListening,
+                  onPressed: _controller.isListening
+                      ? _controller.stopListening
+                      : _controller.startListening,
                   child: Text(_controller.isListening ? '발표 중지' : '발표 시작'),
                 ),
                 const SizedBox(height: 16),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    InfoCard(title: '현재 속도', value: _controller.cpmStatus),
-                    InfoCard(title: '진행도', value: '$progressPercent%'),
-                    InfoCard(
-                      title: '정확도',
-                      value:
-                          '${(_controller.scriptAccuracy * 100).toStringAsFixed(1)}%',
+                    Expanded(
+                      child: InfoCard(
+                        title: '진행도',
+                        value: '$progressPercent%',
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: InfoCard(
+                        title: '정확도',
+                        value: '${(_controller.scriptAccuracy * 100).toStringAsFixed(1)}%',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: InfoCard(
+                        title: '발표자',
+                        value: _controller.currentSpeakerNickname ?? '-',
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: InfoCard(
+                        title: '현재 속도',
+                        value: _controller.cpmStatus,
+                      ),
                     ),
                   ],
                 ),
@@ -112,9 +126,7 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                         child: LinearProgressIndicator(
                           value: _controller.scriptProgress,
                           backgroundColor: Colors.grey[300],
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.deepPurple,
-                          ),
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
                           minHeight: 20,
                         ),
                       ),
@@ -160,10 +172,11 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                   progress: _controller.scriptProgress,
                   currentCpm: _controller.currentCpm,
                   alreadyUpdated: _controller.hasUpdatedCpm,
-                  onUpdated:
-                      () => setState(() {
-                        _controller.hasUpdatedCpm = true;
-                      }),
+                  onUpdated: () {
+                    setState(() {
+                      _controller.hasUpdatedCpm = true;
+                    });
+                  },
                 ),
               ],
             ),

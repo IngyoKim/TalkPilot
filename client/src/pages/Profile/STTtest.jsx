@@ -5,17 +5,43 @@ import ProfileDropdown from './ProfileDropdown';
 export default function STTtest() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [transcript, setTranscript] = useState('');
-    const [clickCount, setClickCount] = useState(0);
+    const [isListening, setIsListening] = useState(false);
 
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
     const handleClick = () => {
-        const dummyTexts = [
-            "이것은 STT 테스트 페이지입니다.",
-            "버튼을 누르면 더미 텍스트가 출력됩니다.",
-        ];
-        setTranscript(dummyTexts[clickCount % dummyTexts.length]);
-        setClickCount(prev => prev + 1);
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            alert("이 브라우저는 STT를 지원하지 않습니다.");
+            return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'ko-KR';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+            setIsListening(true);
+            setTranscript('듣는 중...');
+        };
+
+        recognition.onresult = (event) => {
+            const result = event.results[0][0].transcript;
+            setTranscript(result);
+        };
+
+        recognition.onerror = (event) => {
+            alert('음성 인식 중 오류 발생: ' + event.error);
+            setIsListening(false);
+        };
+
+        recognition.onend = () => {
+            setIsListening(false);
+        };
+
+        recognition.start();
     };
 
     return (
@@ -27,20 +53,24 @@ export default function STTtest() {
                 ...styles.pageContainer,
                 marginLeft: isSidebarOpen ? 260 : 0,
             }}>
-                <h1 style={styles.title}>STT 테스트</h1>
-                <p style={styles.description}>
-                    버튼 클릭 시 텍스트가 출력됩니다.
-                </p>
-                <button onClick={handleClick} style={styles.button}>
-                    텍스트 출력
-                </button>
+                <div style={styles.leftArea}>
+                    <h1 style={styles.title}>STT 테스트</h1>
+                    <p style={styles.description}>
+                        마이크 버튼을 클릭하면 음성이 텍스트로 변환됩니다.
+                    </p>
+                    <button onClick={handleClick} style={styles.button}>
+                        {isListening ? '듣는 중...' : '말하기 시작'}
+                    </button>
+                </div>
 
-                {transcript && (
-                    <div style={styles.outputBox}>
-                        <strong>결과:</strong>
-                        <p>{transcript}</p>
-                    </div>
-                )}
+                <div style={styles.rightArea}>
+                    {transcript && (
+                        <div style={styles.outputBox}>
+                            <strong style={{ fontSize: '24px' }}>결과</strong>
+                            <p style={styles.outputText}>{transcript}</p>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -50,8 +80,25 @@ const mainColor = '#673AB7';
 
 const styles = {
     pageContainer: {
+        display: 'flex',
+        flexDirection: 'row',
         padding: '80px 32px',
         transition: 'margin-left 0.3s ease',
+        height: '100vh',
+        boxSizing: 'border-box',
+    },
+    leftArea: {
+        flex: 1,
+        paddingRight: '24px',
+    },
+    rightArea: {
+        flex: 1,
+        paddingLeft: '24px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
+        overflowY: 'auto',
     },
     title: {
         fontSize: '28px',
@@ -73,10 +120,18 @@ const styles = {
         cursor: 'pointer',
     },
     outputBox: {
-        marginTop: '32px',
-        padding: '16px',
+        padding: '32px',
         backgroundColor: '#f1f1f1',
-        borderRadius: '8px',
-        maxWidth: '600px',
+        borderRadius: '16px',
+        width: '100%',
+        maxWidth: '100%',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        marginTop: '16px',
+    },
+    outputText: {
+        fontSize: '20px',
+        lineHeight: '1.6',
+        color: '#333',
+        whiteSpace: 'pre-wrap',
     },
 };

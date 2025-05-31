@@ -1,4 +1,3 @@
-// pages/ProfilePage.jsx
 import { useState } from 'react';
 import { FaUserCircle, FaEdit, FaCheckCircle, FaChartLine, FaBullseye, FaPoll, FaAngellist, FaTachometerAlt } from 'react-icons/fa';
 import Sidebar from '../../components/SideBar';

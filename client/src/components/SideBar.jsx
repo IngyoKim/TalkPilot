@@ -42,9 +42,6 @@ function SidebarItem({ icon, text }) {
         else if (text === 'Schedule') {
             navigate('/schedule');
         }
-        else if (text === 'My Presentation') {
-            navigate('/presentation');
-        }
         else if (text === 'Extract .docx') {
             navigate('/extdocx');
         }
@@ -71,7 +68,6 @@ function SidebarItem({ icon, text }) {
 const sidebarItems = [
     { icon: <FaHome size={18} />, text: 'Home' },
     { icon: <FaCalendarAlt size={18} />, text: 'Schedule' },
-    { icon: <FaChalkboardTeacher size={18} />, text: 'My Presentation' },
     { icon: <FaFileAlt size={18} />, text: 'Extract .txt' },
     { icon: <FaFileInvoice size={18} />, text: 'Extract .docx' },
 ];

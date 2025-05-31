@@ -66,7 +66,8 @@ class PresentationPracticeController {
     await _progressService.loadScript(projectId);
 
     final script = _projectModel?.script ?? '';
-    _charStartIndices = _buildWordCharStartIndices(script, _progressService.scriptChunks);
+    _charStartIndices =
+        _buildWordCharStartIndices(script, _progressService.scriptChunks);
 
     onUpdate();
   }
@@ -78,7 +79,7 @@ class PresentationPracticeController {
     for (final word in chunks) {
       final index = script.indexOf(word, cursor);
       if (index == -1) {
-        charIndices.add(cursor); // fallback
+        charIndices.add(cursor);
       } else {
         charIndices.add(index);
         cursor = index + word.length;
@@ -89,7 +90,8 @@ class PresentationPracticeController {
   }
 
   int get _currentCharIndex {
-    final wordIndex = (_progressService.scriptChunks.length * scriptProgress).floor();
+    final wordIndex =
+        (_progressService.scriptChunks.length * scriptProgress).floor();
     if (_charStartIndices.isEmpty) return 0;
     if (wordIndex >= _charStartIndices.length) return _charStartIndices.last;
     return _charStartIndices[wordIndex];
@@ -136,9 +138,7 @@ class PresentationPracticeController {
 
       final currentIndex = _currentCharIndex;
 
-      final scriptParts = parts.map<ScriptPartModel>((e) {
-        return e;
-      }).toList();
+      final scriptParts = parts.map<ScriptPartModel>((e) => e).toList();
 
       ScriptPartModel? matchedPart;
       for (final part in scriptParts) {
@@ -152,9 +152,11 @@ class PresentationPracticeController {
 
       final userModel = await UserService().readUser(matchedPart.uid);
       final nickname = userModel?.nickname ?? '발표자';
+      final newUserCpm = userModel?.cpm ?? 200.0;
 
       if (currentSpeakerNickname != nickname) {
         currentSpeakerNickname = nickname;
+        _cpmService.updateUserCpm(newUserCpm); // 발표자 기준으로 CPM 업데이트
         onUpdate();
       }
     } catch (e) {

@@ -1,6 +1,10 @@
 import 'dart:async';
 
 class LiveCpmService {
+  void updateUserCpm(double newCpm) {
+    _userAverageCpm = newCpm;
+  }
+
   final Stopwatch _stopwatch = Stopwatch();
   Timer? _timer;
   int _totalCharacters = 0;

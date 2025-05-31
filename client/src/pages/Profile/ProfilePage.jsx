@@ -169,7 +169,9 @@ export default function ProfilePage() {
                             임시 STT 테스트
                         </div>
                         <div style={styles.placeholder}>STT 기능을 확인할 수 있습니다.</div>
-                        <button style={styles.actionButton}>테스트</button>
+                        <button style={styles.actionButton} onClick={() => navigate('/stttest')}>
+                            테스트
+                        </button>
                     </div>
 
                     <div style={styles.gridBox}>

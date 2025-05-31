@@ -7,6 +7,7 @@ import ProfilePage from './pages/Profile/ProfilePage';
 import Help from './pages/Profile/Help';
 import Contact from './pages/Profile/Contact';
 import CPMtestPage from './pages/Profile/CPMtestPage';
+import STTtest from './pages/Profile/STTtest';
 
 import Schedule from './pages/SidebarOP/Schedule';
 import MyPresentation from './pages/SidebarOP/MyPresentation';
@@ -24,6 +25,7 @@ export default function Router() {
             <Route path="/help" element={<Help />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/cpmtest" element={<CPMtestPage />} />
+            <Route path="/stttest" element={<STTtest />} />
 
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/presentation" element={<MyPresentation />} />

@@ -29,10 +29,18 @@ export default function CPMtestPage() {
         }
     };
 
+    const sidebarWidth = isSidebarOpen ? 240 : 60;
+
     return (
         <div style={{ display: 'flex' }}>
             <Sidebar isOpen={isSidebarOpen} />
-            <div style={{ marginLeft: isSidebarOpen ? 240 : 0, flex: 1 }}>
+            <div
+                style={{
+                    flex: 1,
+                    paddingLeft: sidebarWidth,
+                    transition: 'padding-left 0.3s ease',
+                }}
+            >
                 <ProfileDropdown isSidebarOpen={isSidebarOpen} onToggleSidebar={handleToggleSidebar} />
 
                 <div style={styles.container}>
@@ -56,6 +64,7 @@ export default function CPMtestPage() {
         </div>
     );
 }
+
 const mainColor = '#673AB7';
 
 const styles = {
@@ -66,13 +75,13 @@ const styles = {
         justifyContent: 'center',
         height: '80vh',
         textAlign: 'center',
+        transition: 'all 0.3s ease',
     },
     description: {
         fontSize: '1.2rem',
         color: '#333',
         marginTop: '-8vh',
         marginBottom: '2rem',
-        textAlign: 'center',
     },
     text: {
         fontSize: '2rem',

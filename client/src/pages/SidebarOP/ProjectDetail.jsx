@@ -20,8 +20,7 @@ export default function ProjectDetailPage() {
     const [ownerName, setOwnerName] = useState(null);
 
     const getUserRole = (project, uid) => {
-        const role = project.participants?.[uid] || 'member';
-        return role;
+        return project.participants?.[uid] || 'member';
     };
 
     useEffect(() => {
@@ -37,12 +36,10 @@ export default function ProjectDetailPage() {
                 setProject(result);
 
                 const ownerUid = result.ownerUid;
-
                 if (ownerUid) {
                     const ownerUser = await userAPI.fetchUserByUid(ownerUid);
                     setOwnerName(ownerUser?.nickname || ownerUid);
                 } else {
-                    console.warn('ownerUid가 존재하지 않습니다.');
                     setOwnerName('(소유자 없음)');
                 }
             } catch (e) {
@@ -85,7 +82,7 @@ export default function ProjectDetailPage() {
                 />
 
                 <div style={styles.section}>
-                    <h2 style={styles.title}>프로젝트 수정</h2>
+                    <h2 style={styles.title}>프로젝트 정보</h2>
                     <p style={styles.subtitle}>프로젝트 ID: <strong>{id}</strong></p>
                     <p style={styles.metaInfo}>참여자 수: {Object.keys(project.participants || {}).length}</p>
                     <p style={styles.metaInfo}>소유자: {ownerName || '없음'}</p>
@@ -99,6 +96,7 @@ export default function ProjectDetailPage() {
                             value={project.title || ''}
                             onChange={e => handleChange('title', e.target.value)}
                             style={styles.input}
+                            disabled={!isEditable}
                         />
                     </div>
 
@@ -108,6 +106,7 @@ export default function ProjectDetailPage() {
                             value={project.description || ''}
                             onChange={e => handleChange('description', e.target.value)}
                             style={{ ...styles.input, height: '60px' }}
+                            disabled={!isEditable}
                         />
                     </div>
 
@@ -138,12 +137,15 @@ export default function ProjectDetailPage() {
                             }
                             onChange={e => handleChange('scheduledDate', e.target.value)}
                             style={styles.input}
+                            disabled={!isEditable}
                         />
                     </div>
 
                     <div style={styles.buttonRow}>
                         <button onClick={() => navigate(-1)} style={styles.backButton}>← 뒤로가기</button>
-                        <button onClick={handleSave} style={styles.saveButton}>저장</button>
+                        {isEditable && (
+                            <button onClick={handleSave} style={styles.saveButton}>저장</button>
+                        )}
                     </div>
 
                     {isEditable && (

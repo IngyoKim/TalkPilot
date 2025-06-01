@@ -4,12 +4,13 @@ import ProfileDropdown from './ProfileDropdown';
 
 export default function STTtest() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [transcript, setTranscript] = useState('');
-    const [isListening, setIsListening] = useState(false);
+    const [transcript, setTranscript] = useState(''); // 음성 인식 결과 텍스트 저장
+    const [isListening, setIsListening] = useState(false); // 현재 음성 인식 중인지 여부
 
-    const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
+    const toggleSidebar = () => setIsSidebarOpen(prev => !prev); // 사이드바 열기/닫기 토글
 
     const handleClick = () => {
+        // 브라우저의 STT API객체 가져오기
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
         if (!SpeechRecognition) {
@@ -17,31 +18,36 @@ export default function STTtest() {
             return;
         }
 
+        // 음성 인식 인스턴스 생성
         const recognition = new SpeechRecognition();
         recognition.lang = 'ko-KR';
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
+        recognition.interimResults = false; // 중간 결과를 사용하지 않음
+        recognition.maxAlternatives = 1; // 최대 대안 결과 1개
 
+        // 음성 인식 시작 시 호출되는 이벤트 핸들러
         recognition.onstart = () => {
-            setIsListening(true);
+            setIsListening(true); // UI에 듣는 중 표시
             setTranscript('듣는 중...');
         };
 
+        // 음성 인식 결과를 처리하는 이벤트 핸들러
         recognition.onresult = (event) => {
-            const result = event.results[0][0].transcript;
-            setTranscript(result);
+            const result = event.results[0][0].transcript; // 결과 텍스트 추출
+            setTranscript(result); // 텍스트 상태 업데이트
         };
 
+        // 오류 발생 시 처리
         recognition.onerror = (event) => {
             alert('음성 인식 중 오류 발생: ' + event.error);
             setIsListening(false);
         };
 
+        // 음성 인식이 종료되었을 때 호출
         recognition.onend = () => {
             setIsListening(false);
         };
 
-        recognition.start();
+        recognition.start(); // 음성 인식 시작
     };
 
     return (
@@ -75,6 +81,7 @@ export default function STTtest() {
         </div>
     );
 }
+
 
 const mainColor = '#673AB7';
 

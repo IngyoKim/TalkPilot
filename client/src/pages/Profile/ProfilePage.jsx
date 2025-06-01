@@ -160,7 +160,7 @@ export default function ProfilePage() {
                             발표 기록 보기
                         </div>
                         <div style={styles.placeholder}>당신의 발표 기록 데이터를 확인할 수 있습니다.</div>
-                        <button style={styles.actionButton}>확인하기</button>
+                        <button style={styles.actionButton} onClick={() => navigate('/projectrecord')}>확인하기</button>
                     </div>
 
                     <div style={styles.gridBox}>

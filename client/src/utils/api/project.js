@@ -1,5 +1,6 @@
-import { getIdToken } from '../auth/auth';
-import { ProjectModel } from '../../models/projectModel';
+import { getIdToken } from '@/utils/auth/auth';
+import { ProjectModel } from '@/models/projectModel';
+
 
 const API_URL = '/api/project';
 

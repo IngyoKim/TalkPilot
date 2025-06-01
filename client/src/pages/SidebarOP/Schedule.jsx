@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
+
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
-import Sidebar from '../../components/SideBar';
-import ProfileDropdown from '../Profile/ProfileDropdown';
-import { useUser } from '../../contexts/UserContext';
-import useProjects from '../../utils/userProjects';
+import Sidebar from '@/components/SideBar';
+import { useUser } from '@/contexts/UserContext';
+import useProjects from '@/utils/userProjects';
+import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
+
 
 export default function SchedulePage() {
     const { user, setUser } = useUser();

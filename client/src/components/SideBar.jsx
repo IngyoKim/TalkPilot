@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import {
     FaHome,
     FaCalendarAlt,
-    FaChalkboardTeacher,
     FaFileAlt,
     FaFileInvoice,
 } from 'react-icons/fa';

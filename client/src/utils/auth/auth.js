@@ -1,5 +1,5 @@
+import { auth } from '@/utils/auth/firebaseConfig';
 import { signOut, getAuth } from "firebase/auth";
-import { auth } from "./firebaseConfig";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 

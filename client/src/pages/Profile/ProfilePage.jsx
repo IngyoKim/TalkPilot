@@ -1,9 +1,19 @@
 import { useState } from 'react';
-import { FaUserCircle, FaEdit, FaCheckCircle, FaChartLine, FaBullseye, FaPoll, FaAngellist, FaTachometerAlt } from 'react-icons/fa';
-import Sidebar from '../../components/SideBar';
-import ProfileDropdown from './ProfileDropdown';
-import { useUser } from '../../contexts/UserContext';
-import { updateUser } from '../../utils/api/user';
+import {
+    FaUserCircle,
+    FaEdit,
+    FaCheckCircle,
+    FaChartLine,
+    FaBullseye,
+    FaPoll,
+    FaAngellist,
+    FaTachometerAlt,
+} from 'react-icons/fa';
+
+import { updateUser } from '@/utils/api/user';
+import Sidebar from '@/components/SideBar';
+import { useUser } from '@/contexts/UserContext';
+import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
 
 const mainColor = '#673AB7';
 

@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useState, useRef, useEffect } from 'react';
-import Sidebar from '../components/SideBar';
-import ProfileDropdown from './Profile/ProfileDropdown';
-import { useUser } from '../contexts/UserContext';
-import useProjects from '../utils/userProjects';
-import { fetchUserByUid } from '../utils/api/user';
+
+import Sidebar from '@/components/SideBar';
+import { useUser } from '@/contexts/UserContext';
+import { fetchUserByUid } from '@/utils/api/user';
+import useProjects from '@/utils/userProjects';
+import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
+
 
 const mainColor = '#673AB7';
 const STATUS_COLORS = {

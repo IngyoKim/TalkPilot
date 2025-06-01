@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     FaChevronLeft,
     FaChevronRight,
@@ -6,11 +7,11 @@ import {
     FaQuestionCircle,
     FaEnvelope,
     FaSignOutAlt,
-    FaUserEdit
+    FaUserEdit,
 } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import { logout } from '../../utils/auth/auth';
-import { useUser } from '../../contexts/UserContext';
+
+import { logout } from '@/utils/auth/auth';
+import { useUser } from '@/contexts/UserContext';
 
 const mainColor = '#673AB7';
 

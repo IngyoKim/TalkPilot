@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import Sidebar from '../../components/SideBar';
-import ProfileDropdown from '../Profile/ProfileDropdown';
-import * as projectAPI from '../../utils/api/project';
-import * as userAPI from '../../utils/api/user';
-import { useUser } from '../../contexts/UserContext';
+import { useNavigate, useParams } from 'react-router-dom';
+
+import Sidebar from '@/components/SideBar';
+import { useUser } from '@/contexts/UserContext';
+import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
+
 
 export default function ProjectDetailPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);

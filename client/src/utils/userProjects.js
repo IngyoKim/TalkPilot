@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import * as projectAPI from '../utils/api/project';
-import * as userAPI from '../utils/api/user';
+import * as userAPI from '@/utils/api/user';
+import * as projectAPI from '@/utils/api/project';
 
 export default function useProjects(user, setUser) {
     const [projects, setProjects] = useState([]);

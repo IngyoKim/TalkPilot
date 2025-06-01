@@ -1,5 +1,5 @@
-import { getIdToken } from '../auth/auth';
-import { UserModel } from '../../models/userModel';
+import { getIdToken } from '@/utils/auth/auth';
+import { UserModel } from '@/models/userModel';
 
 /// 유저 조회
 export async function fetchUserByUid(uid) {

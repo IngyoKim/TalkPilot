@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import Sidebar from '../../components/SideBar';
-import ProfileDropdown from '../Profile/ProfileDropdown';
-import { useUser } from '../../contexts/UserContext';
-import useProjects from '../../hooks/useProjects';
-import ProjectCard from '../../components/ProjectCard';
-import ProjectModal from '../../components/ProjectModal';
+
+import { Sidebar } from '@/components/SideBar';
+import { useUser } from '@/contexts/UserContext';
+import { useProjects } from '@/utils/useProjects';
+import { ProjectCard } from '@/components/ProjectCard';
+import { ProjectModal } from '@/components/ProjectModal';
+import { ProfileDropdown } from '@/pages/Profile/ProfileDropdown';
+
 
 const mainColor = '#673AB7';
 

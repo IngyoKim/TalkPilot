@@ -10,7 +10,8 @@ class PresentationPracticePage extends StatefulWidget {
   const PresentationPracticePage({super.key, required this.projectId});
 
   @override
-  State<PresentationPracticePage> createState() => _PresentationPracticePageState();
+  State<PresentationPracticePage> createState() =>
+      _PresentationPracticePageState();
 }
 
 class _PresentationPracticePageState extends State<PresentationPracticePage> {
@@ -33,10 +34,19 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
     super.dispose();
   }
 
+  String formatDuration(Duration duration) {
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final progressPercent = (_controller.scriptProgress * 100).toStringAsFixed(1);
-    final current = (_controller.scriptChunks.length * _controller.scriptProgress).round();
+    final progressPercent = (_controller.scriptProgress * 100).toStringAsFixed(
+      1,
+    );
+    final current =
+        (_controller.scriptChunks.length * _controller.scriptProgress).round();
     final total = _controller.scriptChunks.length;
 
     return WillPopScope(
@@ -63,29 +73,31 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _controller.isListening ? Colors.grey : Colors.deepPurple,
+                    backgroundColor:
+                        _controller.isListening
+                            ? Colors.grey
+                            : Colors.deepPurple,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  onPressed: _controller.isListening
-                      ? _controller.stopListening
-                      : _controller.startListening,
+                  onPressed:
+                      _controller.isListening
+                          ? _controller.stopListening
+                          : _controller.startListening,
                   child: Text(_controller.isListening ? '발표 중지' : '발표 시작'),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
-                      child: InfoCard(
-                        title: '진행도',
-                        value: '$progressPercent%',
-                      ),
+                      child: InfoCard(title: '진행도', value: '$progressPercent%'),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: InfoCard(
                         title: '정확도',
-                        value: '${(_controller.scriptAccuracy * 100).toStringAsFixed(1)}%',
+                        value:
+                            '${(_controller.scriptAccuracy * 100).toStringAsFixed(1)}%',
                       ),
                     ),
                   ],
@@ -126,7 +138,9 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                         child: LinearProgressIndicator(
                           value: _controller.scriptProgress,
                           backgroundColor: Colors.grey[300],
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.deepPurple,
+                          ),
                           minHeight: 20,
                         ),
                       ),
@@ -137,6 +151,28 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.deepPurple),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${formatDuration(_controller.presentationDuration)} / ${formatDuration(_controller.expectedDuration)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color:
+                            _controller.presentationDuration >
+                                    _controller.expectedDuration
+                                ? Colors.red
+                                : Colors.black,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),

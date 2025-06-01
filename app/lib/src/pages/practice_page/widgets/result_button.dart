@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:talk_pilot/src/pages/practice_page/presentation_result_page.dart';
+import 'package:talk_pilot/src/pages/practice_page/widgets/speaker_cpm_result.dart';
 
 class ResultButton extends StatelessWidget {
   final double progress;
@@ -9,6 +10,7 @@ class ResultButton extends StatelessWidget {
   final String cpmStatus;
   final Duration actualDuration;
   final Duration expectedDuration;
+  final List<SpeakerCpmResult> speakerResults;
 
   const ResultButton({
     super.key,
@@ -19,13 +21,14 @@ class ResultButton extends StatelessWidget {
     required this.cpmStatus,
     required this.actualDuration,
     required this.expectedDuration,
+    required this.speakerResults,
   });
 
   @override
   Widget build(BuildContext context) {
     final bool isProgressEnough = progress >= 0.9;
 
-    if (!isProgressEnough) return const SizedBox.shrink(); 
+    if (!isProgressEnough) return const SizedBox.shrink();
 
     return ElevatedButton(
       onPressed: () {
@@ -39,6 +42,7 @@ class ResultButton extends StatelessWidget {
               cpmStatus: cpmStatus,
               actualDuration: actualDuration,
               expectedDuration: expectedDuration,
+              speakerResults: speakerResults,
             ),
           ),
         );

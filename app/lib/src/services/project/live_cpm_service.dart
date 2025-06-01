@@ -5,6 +5,7 @@ class LiveCpmService {
   Timer? _timer;
   int _totalCharacters = 0;
   double _userAverageCpm = 0.0;
+  double _currentCpm = 0.0;
 
   Function(double cpm, String status)? _onCpmUpdate;
 
@@ -22,7 +23,8 @@ class LiveCpmService {
       final minutes = _stopwatch.elapsed.inSeconds / 60;
       if (minutes > 0.1) {
         final cpm = _totalCharacters / minutes;
-        final status = _getCpmStatus(_userAverageCpm, cpm);
+        _currentCpm = cpm; // 저장
+        final status = getCpmStatus(_userAverageCpm, cpm);
         _onCpmUpdate?.call(cpm, status);
       }
     });
@@ -45,9 +47,11 @@ class LiveCpmService {
     _stopwatch.reset();
   }
 
-  String _getCpmStatus(double userCpm, double currentCpm) {
+  String getCpmStatus(double userCpm, double currentCpm) {
     if (currentCpm < userCpm * 0.7) return '느림';
     if (currentCpm > userCpm * 1.3) return '빠름';
     return '적당함';
   }
+
+  double get currentCpm => _currentCpm;
 }

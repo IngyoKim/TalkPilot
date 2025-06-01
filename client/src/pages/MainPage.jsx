@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Sidebar from '../components/SideBar';
 import ProfileDropdown from './Profile/ProfileDropdown';
 import { useUser } from '../contexts/UserContext';
 import useProjects from '../utils/userProjects';
+import { fetchUserByUid } from '../utils/api/user';
 
 const mainColor = '#673AB7';
 const STATUS_COLORS = {
@@ -34,6 +35,7 @@ export default function MainPage() {
         changeStatus,
     } = useProjects(user, setUser);
 
+    const [ownerNicknames, setOwnerNicknames] = useState({});
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editMode, setEditMode] = useState(false);
@@ -46,6 +48,26 @@ export default function MainPage() {
     const [activeDropdown, setActiveDropdown] = useState(null);
 
     const containerRef = useRef();
+
+    useEffect(() => {
+        const loadNicknames = async () => {
+            const map = {};
+            await Promise.all(
+                projects.map(async (p) => {
+                    if (!map[p.ownerUid]) {
+                        try {
+                            const owner = await fetchUserByUid(p.ownerUid);
+                            map[p.ownerUid] = owner.nickname || '(알 수 없음)';
+                        } catch {
+                            map[p.ownerUid] = '(오류)';
+                        }
+                    }
+                })
+            );
+            setOwnerNicknames(map);
+        };
+        if (projects.length > 0) loadNicknames();
+    }, [projects]);
 
     const resetModal = () => {
         setTitle('');
@@ -135,7 +157,8 @@ export default function MainPage() {
                                     <h3>{p.title}</h3>
                                     <p>{p.description}</p>
                                     <small>생성일: {new Date(p.createdAt).toLocaleDateString()}</small><br />
-                                    <small>수정일: {formatRelativeTime(p.updatedAt)}</small>
+                                    <small>수정일: {formatRelativeTime(p.updatedAt)}</small><br />
+                                    <small>소유자: {ownerNicknames[p.ownerUid] || '(불러오는 중)'}</small>
                                 </div>
                             </Link>
                             <div

@@ -2,48 +2,60 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/SideBar';
 import ProfileDropdown from '../Profile/ProfileDropdown';
-import * as projectAPI from '../../utils/api/project'; // 추가
+import * as projectAPI from '../../utils/api/project';
+import * as userAPI from '../../utils/api/user';
+import { useUser } from '../../contexts/UserContext';
 
-export default function ProjectDetail() {
+export default function ProjectDetailPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [content, setContent] = useState('');
-    const [presentationDate, setPresentationDate] = useState('');
+    const { user } = useUser();
+    const [project, setProject] = useState(null);
+    const [isScriptEditable, setIsScriptEditable] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [ownerName, setOwnerName] = useState(null);
+
+    const getUserRole = (project, uid) => {
+        const role = project.participants?.[uid] || 'member';
+        return role;
+    };
 
     useEffect(() => {
+        if (!user?.uid) return;
+
         const fetchProject = async () => {
             try {
-                const project = await projectAPI.fetchProjectById(id);
-                if (!project) {
+                const result = await projectAPI.fetchProjectById(id);
+                if (!result) {
                     alert('프로젝트를 찾을 수 없습니다.');
                     return navigate(-1);
                 }
-                setTitle(project.title || '');
-                setDescription(project.description || '');
-                setContent(project.script || '');
-                setPresentationDate(project.scheduledDate?.split('T')[0] || '');
+                setProject(result);
+
+                const ownerUid = result.ownerUid;
+
+                if (ownerUid) {
+                    const ownerUser = await userAPI.fetchUserByUid(ownerUid);
+                    setOwnerName(ownerUser?.nickname || ownerUid);
+                } else {
+                    console.warn('ownerUid가 존재하지 않습니다.');
+                    setOwnerName('(소유자 없음)');
+                }
             } catch (e) {
                 console.error('프로젝트 로드 실패:', e);
             } finally {
                 setLoading(false);
             }
         };
+
         fetchProject();
-    }, [id, navigate]);
+    }, [id, navigate, user?.uid]);
 
     const handleSave = async () => {
         try {
-            await projectAPI.updateProject(id, {
-                title,
-                description,
-                script: content,
-                scheduledDate: presentationDate || null,
-            });
+            await projectAPI.updateProject(id, project);
             alert('프로젝트가 저장되었습니다.');
         } catch (e) {
             console.error('저장 실패:', e);
@@ -51,54 +63,96 @@ export default function ProjectDetail() {
         }
     };
 
-    if (loading) return <div style={{ padding: 20 }}>로딩 중...</div>;
+    const handleChange = (field, value) => {
+        setProject(prev => ({ ...prev, [field]: value }));
+    };
+
+    if (!user?.uid) return <div style={styles.centered}>사용자 정보를 불러오는 중입니다...</div>;
+    if (loading || !project) return <div style={styles.centered}>로딩 중...</div>;
+
+    const role = getUserRole(project, user.uid);
+    const isEditable = ['owner', 'editor'].includes(role);
 
     return (
         <div style={styles.container}>
             <Sidebar isOpen={isSidebarOpen} />
-            <div
-                style={{
-                    ...styles.content,
-                    marginLeft: isSidebarOpen ? 240 : 0,
-                }}
-            >
+            <div style={{ ...styles.content, marginLeft: isSidebarOpen ? 240 : 0 }}>
                 <ProfileDropdown
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
                 />
 
-                <div style={styles.formWrapper}>
-                    <h2>프로젝트 수정</h2>
-                    <p>프로젝트 ID: <strong>{id}</strong></p>
+                <div style={styles.section}>
+                    <h2 style={styles.title}>프로젝트 수정</h2>
+                    <p style={styles.subtitle}>프로젝트 ID: <strong>{id}</strong></p>
+                    <p style={styles.metaInfo}>참여자 수: {Object.keys(project.participants || {}).length}</p>
+                    <p style={styles.metaInfo}>소유자: {ownerName || '없음'}</p>
+                    <p style={styles.metaInfo}>생성일: {new Date(project.createdAt).toLocaleString()}</p>
+                    {project.updatedAt && <p style={styles.metaInfo}>마지막 수정일: {new Date(project.updatedAt).toLocaleString()}</p>}
 
                     <div style={styles.inputGroup}>
-                        <label>제목</label>
-                        <input type="text" value={title} onChange={e => setTitle(e.target.value)}
-                            style={styles.input} />
+                        <label style={styles.label}>제목</label>
+                        <input
+                            type="text"
+                            value={project.title || ''}
+                            onChange={e => handleChange('title', e.target.value)}
+                            style={styles.input}
+                        />
                     </div>
 
                     <div style={styles.inputGroup}>
-                        <label>설명</label>
-                        <textarea value={description} onChange={e => setDescription(e.target.value)}
-                            style={{ ...styles.input, height: '60px' }} />
+                        <label style={styles.label}>설명</label>
+                        <textarea
+                            value={project.description || ''}
+                            onChange={e => handleChange('description', e.target.value)}
+                            style={{ ...styles.input, height: '60px' }}
+                        />
                     </div>
 
                     <div style={styles.inputGroup}>
-                        <label>내용</label>
-                        <textarea value={content} onChange={e => setContent(e.target.value)}
-                            style={{ ...styles.input, height: '100px' }} placeholder="대본을 입력하세요" />
+                        <label style={styles.label}>대본</label>
+                        <textarea
+                            value={project.script || ''}
+                            onChange={e => handleChange('script', e.target.value)}
+                            style={{ ...styles.input, height: '120px' }}
+                            placeholder="대본을 입력하세요"
+                            disabled={!isEditable || !isScriptEditable}
+                        />
+                        {isEditable && (
+                            <button onClick={() => setIsScriptEditable(prev => !prev)} style={styles.editToggleButton}>
+                                {isScriptEditable ? '편집 종료' : '편집 시작'}
+                            </button>
+                        )}
                     </div>
 
                     <div style={styles.inputGroup}>
-                        <label>발표일</label>
-                        <input type="date" value={presentationDate} onChange={e => setPresentationDate(e.target.value)}
-                            style={styles.input} />
+                        <label style={styles.label}>발표일</label>
+                        <input
+                            type="date"
+                            value={
+                                project.scheduledDate
+                                    ? new Date(project.scheduledDate).toISOString().split('T')[0]
+                                    : ''
+                            }
+                            onChange={e => handleChange('scheduledDate', e.target.value)}
+                            style={styles.input}
+                        />
                     </div>
 
-                    <div style={styles.buttonGroup}>
+                    <div style={styles.buttonRow}>
                         <button onClick={() => navigate(-1)} style={styles.backButton}>← 뒤로가기</button>
                         <button onClick={handleSave} style={styles.saveButton}>저장</button>
                     </div>
+
+                    {isEditable && (
+                        <button onClick={() => navigate(`/script-part/${project.id}`)} style={styles.secondaryButton}>
+                            대본 파트 할당하기
+                        </button>
+                    )}
+
+                    <button onClick={() => navigate(`/practice/${project.id}`)} style={styles.secondaryButton}>
+                        연습 시작하기
+                    </button>
                 </div>
             </div>
         </div>
@@ -106,23 +160,41 @@ export default function ProjectDetail() {
 }
 
 const styles = {
-    container: { display: 'flex' },
-    content: { flex: 1, transition: 'margin-left 0.3s ease' },
-    formWrapper: { padding: '20px', maxWidth: '640px' },
-    inputGroup: { marginTop: '20px', display: 'flex', flexDirection: 'column' },
-    input: {
-        padding: '10px', fontSize: '14px', borderRadius: '6px', border: '1px solid #ccc',
-        marginTop: '8px'
+    container: {
+        display: 'flex', fontFamily: 'sans-serif', backgroundColor: '#f9f7fc',
+        minHeight: '100vh', paddingBottom: '40px'
     },
-
-    buttonGroup: { marginTop: '24px', display: 'flex', justifyContent: 'space-between' },
+    content: {
+        flex: 1, transition: 'margin-left 0.3s ease', padding: '40px', backgroundColor: '#f9f7fc'
+    },
+    centered: { padding: 40, fontSize: '16px', textAlign: 'center' },
+    section: {
+        backgroundColor: 'transparent', padding: '0 8px', maxWidth: '1200px', margin: '0 auto'
+    },
+    title: { fontSize: '28px', fontWeight: 'bold', marginBottom: '8px' },
+    subtitle: { fontSize: '14px', color: '#888', marginBottom: '12px' },
+    metaInfo: { fontSize: '13px', color: '#777', marginBottom: '4px' },
+    inputGroup: { marginTop: '24px', display: 'flex', flexDirection: 'column' },
+    label: { fontSize: '14px', fontWeight: '500', marginBottom: '6px' },
+    input: {
+        padding: '12px', fontSize: '14px', borderRadius: '8px', border: '1px solid #ccc',
+        backgroundColor: '#fff', transition: 'border-color 0.2s'
+    },
+    buttonRow: { marginTop: '28px', display: 'flex', justifyContent: 'space-between' },
     backButton: {
         background: 'transparent', border: 'none', color: '#673AB7', fontWeight: 'bold',
         cursor: 'pointer', fontSize: '14px'
     },
-
     saveButton: {
         backgroundColor: '#673AB7', color: '#fff', border: 'none', borderRadius: '8px',
         padding: '10px 20px', fontWeight: 'bold', cursor: 'pointer'
+    },
+    editToggleButton: {
+        marginTop: '10px', alignSelf: 'flex-end', backgroundColor: '#eee', border: 'none',
+        borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontSize: '13px'
+    },
+    secondaryButton: {
+        marginTop: '16px', width: '100%', backgroundColor: '#EDE7F6', color: '#673AB7',
+        border: 'none', borderRadius: '8px', padding: '12px', fontWeight: 'bold', cursor: 'pointer'
     },
 };

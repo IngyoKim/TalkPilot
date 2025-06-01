@@ -12,6 +12,35 @@ export async function fetchUserByUid(uid) {
     return UserModel(json.uid, json);
 }
 
+/// uid로 nickname을 가져옴
+export async function fetchNicknameByUid(uid) {
+    if (!uid) {
+        console.warn('유효하지 않은 uid입니다. 닉네임 요청을 건너뜁니다.');
+        return uid;
+    }
+
+    if (nicknameCache.has(uid)) {
+        return nicknameCache.get(uid);
+    }
+
+    const token = await getIdToken();
+    const res = await fetch(`/api/user/nickname/${uid}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) {
+        console.error(`닉네임 요청 실패 (uid: ${uid})`);
+        return uid;
+    }
+
+    const json = await res.json();
+    const nickname = json.nickname || uid;
+
+    nicknameCache.set(uid, nickname);
+    return nickname;
+}
+
+
 /// 유저 정보 업데이트
 export async function updateUser(updates) {
     const token = await getIdToken();

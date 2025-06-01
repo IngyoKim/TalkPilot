@@ -18,11 +18,48 @@ class _PresentationHistoryPageState extends State<PresentationHistoryPage> {
   @override
   void initState() {
     super.initState();
+    _loadCpmHistory();
+  }
+
+  void _loadCpmHistory() {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid != null) {
       _cpmHistoryFuture = _userService.getCpmHistory(uid);
     } else {
       _cpmHistoryFuture = Future.value([]);
+    }
+  }
+
+  Future<void> _clearCpmHistory() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('기록 초기화'),
+        content: const Text('모든 발표 기록을 삭제하시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('삭제'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid != null) {
+        await _userService.clearCpmHistory(uid);
+        setState(() {
+          _cpmHistoryFuture = Future.value([]);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('발표 기록이 삭제되었습니다')),
+        );
+      }
     }
   }
 
@@ -33,6 +70,13 @@ class _PresentationHistoryPageState extends State<PresentationHistoryPage> {
         backgroundColor: Colors.deepPurple,
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text('발표 기록 확인', style: TextStyle(color: Colors.white)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_forever),
+            tooltip: '발표 기록 초기화',
+            onPressed: _clearCpmHistory,
+          ),
+        ],
       ),
       body: FutureBuilder<List<CpmRecordModel>>(
         future: _cpmHistoryFuture,
@@ -47,6 +91,7 @@ class _PresentationHistoryPageState extends State<PresentationHistoryPage> {
           if (records.isEmpty) {
             return const Center(child: Text('CPM 기록이 없습니다.'));
           }
+
           records.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
           return ListView.separated(

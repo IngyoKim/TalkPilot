@@ -109,7 +109,9 @@ export default function ProfilePage() {
                                 </div>
                                 <div style={styles.infoRow}><strong>이름:</strong> {user.name ?? ''}</div>
                                 <div style={styles.infoRow}><strong>이메일:</strong> {user.email}</div>
-                                <div style={styles.infoRow}><strong>가입일:</strong> {user.createdAt?.slice(0, 10)}</div>
+                                <div style={styles.infoRow}>
+                                    <strong>가입일:</strong> {new Date(user.createdAt).toLocaleDateString('ko-KR')}
+                                </div>
                             </div>
                         </div>
                     </div>

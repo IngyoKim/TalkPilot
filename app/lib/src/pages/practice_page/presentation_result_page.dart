@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:talk_pilot/src/components/bottom_bar.dart';
 import 'package:talk_pilot/src/models/cpm_record_model.dart';
 import 'package:talk_pilot/src/pages/practice_page/widgets/result_summary.dart';
+import 'package:talk_pilot/src/pages/practice_page/widgets/speaker_cpm_result.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/services/database/cpm_history_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
@@ -14,6 +15,7 @@ class PresentationResultPage extends StatefulWidget {
   final String cpmStatus;
   final Duration actualDuration;
   final Duration expectedDuration;
+  final List<SpeakerCpmResult> speakerResults;
 
   const PresentationResultPage({
     super.key,
@@ -23,6 +25,7 @@ class PresentationResultPage extends StatefulWidget {
     required this.cpmStatus,
     required this.actualDuration,
     required this.expectedDuration,
+    required this.speakerResults,
   });
 
   @override
@@ -38,17 +41,20 @@ class _PresentationResultPageState extends State<PresentationResultPage> {
 
   Future<void> _saveCpmRecord() async {
     final userProvider = context.read<UserProvider>();
-    final user = userProvider.currentUser;
-    if (user == null) return;
-
-    final record = CpmRecordModel(
-      cpm: widget.actualCpm,
-      timestamp: DateTime.now(),
-    );
+    final currentUser = userProvider.currentUser;
+    if (currentUser == null) return;
 
     final userService = UserService();
-    await userService.addCpmRecord(user.uid, record);
-    await userService.updateAverageCpm(user.uid);
+    final now = DateTime.now();
+
+    for (final speaker in widget.speakerResults) {
+      final record = CpmRecordModel(cpm: speaker.actualCpm, timestamp: now);
+      await userService.addCpmRecord(speaker.uid, record);
+
+      if (speaker.uid == currentUser.uid) {
+        await userService.updateAverageCpm(speaker.uid);
+      }
+    }
   }
 
   @override
@@ -77,6 +83,7 @@ class _PresentationResultPageState extends State<PresentationResultPage> {
                 cpmStatus: widget.cpmStatus,
                 actualDuration: widget.actualDuration,
                 expectedDuration: widget.expectedDuration,
+                speakerResults: widget.speakerResults,
               ),
               const SizedBox(height: 24),
               ElevatedButton(

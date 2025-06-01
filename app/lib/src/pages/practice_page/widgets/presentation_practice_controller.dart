@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/models/script_part_model.dart';
+import 'package:talk_pilot/src/pages/practice_page/widgets/speaker_cpm_result.dart';
 import 'package:talk_pilot/src/services/stt/stt_service.dart';
 import 'package:talk_pilot/src/services/project/live_cpm_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
@@ -13,8 +14,10 @@ class PresentationPracticeController {
   final String projectId;
   final VoidCallback onUpdate;
 
+  final Map<String, SpeakerCpmResult> _speakerCpmResults = {};
+  final Map<String, LiveCpmService> _cpmServices = {};
+
   final SttService _sttService = SttService();
-  final LiveCpmService _cpmService = LiveCpmService();
   final ScriptProgressService _progressService = ScriptProgressService();
   final ProjectService _projectService = ProjectService();
   final Stopwatch _stopwatch = Stopwatch();
@@ -22,13 +25,12 @@ class PresentationPracticeController {
   String recognizedText = '';
   bool isListening = false;
   bool hasUpdatedCpm = false;
-  double currentCpm = 0.0;
-  String cpmStatus = '적당함';
   double userCpm = 0.0;
   double scriptProgress = 0.0;
 
   ProjectModel? _projectModel;
   String? currentSpeakerNickname;
+  String? currentSpeakerUid;
 
   List<int> _charStartIndices = [];
 
@@ -38,6 +40,28 @@ class PresentationPracticeController {
       Duration(seconds: _projectModel?.estimatedTime ?? 120);
   double get scriptAccuracy =>
       _progressService.calculateAccuracy(recognizedText);
+
+  double get currentCpm {
+    final active = currentSpeakerUid;
+    if (active == null) return 0;
+    final service = _cpmServices[active];
+    return service?.currentCpm ?? 0;
+  }
+
+  String get cpmStatus {
+    final active = currentSpeakerUid;
+    if (active == null) return '적당함';
+    return _speakerCpmResults[active]?.cpmStatus ?? '적당함';
+  }
+
+  double get userCpmForCurrentSpeaker {
+    final active = currentSpeakerUid;
+    if (active == null) return userCpm;
+    return _speakerCpmResults[active]?.userCpm ?? userCpm;
+  }
+
+  List<SpeakerCpmResult> get speakerResults =>
+      _speakerCpmResults.values.toList();
 
   PresentationPracticeController({
     required this.projectId,
@@ -66,8 +90,10 @@ class PresentationPracticeController {
     await _progressService.loadScript(projectId);
 
     final script = _projectModel?.script ?? '';
-    _charStartIndices =
-        _buildWordCharStartIndices(script, _progressService.scriptChunks);
+    _charStartIndices = _buildWordCharStartIndices(
+      script,
+      _progressService.scriptChunks,
+    );
 
     onUpdate();
   }
@@ -75,7 +101,6 @@ class PresentationPracticeController {
   List<int> _buildWordCharStartIndices(String script, List<String> chunks) {
     final List<int> charIndices = [];
     int cursor = 0;
-
     for (final word in chunks) {
       final index = script.indexOf(word, cursor);
       if (index == -1) {
@@ -85,7 +110,6 @@ class PresentationPracticeController {
         cursor = index + word.length;
       }
     }
-
     return charIndices;
   }
 
@@ -101,15 +125,6 @@ class PresentationPracticeController {
     _stopwatch.reset();
     _stopwatch.start();
 
-    _cpmService.start(
-      userAverageCpm: userCpm,
-      onCpmUpdate: (cpm, status) {
-        currentCpm = cpm;
-        cpmStatus = status;
-        onUpdate();
-      },
-    );
-
     await _sttService.startListening((text) async {
       recognizedText = text;
       isListening = true;
@@ -117,7 +132,11 @@ class PresentationPracticeController {
 
       await _updateCurrentSpeakerByProgress();
 
-      _cpmService.updateRecognizedText(text);
+      final active = currentSpeakerUid;
+      if (active != null && _cpmServices.containsKey(active)) {
+        _cpmServices[active]!.updateRecognizedText(text);
+      }
+
       onUpdate();
     });
 
@@ -126,61 +145,76 @@ class PresentationPracticeController {
   }
 
   Future<void> _updateCurrentSpeakerByProgress() async {
-    try {
-      final parts = _projectModel?.scriptParts;
-      if (parts == null || parts.isEmpty) {
-        if (currentSpeakerNickname != null) {
-          currentSpeakerNickname = null;
-          onUpdate();
-        }
-        return;
-      }
+    final parts = _projectModel?.scriptParts;
+    if (parts == null || parts.isEmpty) return;
 
-      final currentIndex = _currentCharIndex;
+    final currentIndex = _currentCharIndex;
+    ScriptPartModel? matchedPart;
 
-      final scriptParts = parts.map<ScriptPartModel>((e) => e).toList();
-
-      ScriptPartModel? matchedPart;
-      for (final part in scriptParts) {
-        if (part.startIndex <= currentIndex && currentIndex <= part.endIndex) {
-          matchedPart = part;
-          break;
-        }
-      }
-
-      matchedPart ??= scriptParts.last;
-
-      final userModel = await UserService().readUser(matchedPart.uid);
-      final nickname = userModel?.nickname ?? '발표자';
-      final newUserCpm = userModel?.cpm ?? 200.0;
-
-      if (currentSpeakerNickname != nickname) {
-        currentSpeakerNickname = nickname;
-        _cpmService.updateUserCpm(newUserCpm); // 발표자 기준으로 CPM 업데이트
-        onUpdate();
-      }
-    } catch (e) {
-      if (currentSpeakerNickname != '발표자') {
-        currentSpeakerNickname = '발표자';
-        onUpdate();
+    for (final part in parts) {
+      if (part.startIndex <= currentIndex && currentIndex <= part.endIndex) {
+        matchedPart = part;
+        break;
       }
     }
+
+    matchedPart ??= parts.last;
+
+    final userModel = await UserService().readUser(matchedPart.uid);
+    final uid = userModel?.uid;
+    final nickname = userModel?.nickname ?? '발표자';
+    final targetCpm = userModel?.cpm ?? 200.0;
+
+    if (uid == null || currentSpeakerUid == uid) return;
+
+    currentSpeakerUid = uid;
+    currentSpeakerNickname = nickname;
+
+    _speakerCpmResults.putIfAbsent(
+      uid,
+      () => SpeakerCpmResult(
+        uid: uid,
+        nickname: nickname,
+        actualCpm: 0,
+        userCpm: targetCpm,
+        cpmStatus: '적당함',
+      ),
+    );
+
+    _cpmServices[uid]?.stop();
+    _cpmServices[uid] = LiveCpmService()
+      ..start(
+        userAverageCpm: targetCpm,
+        onCpmUpdate: (cpm, status) {
+          final result = _speakerCpmResults[uid];
+          if (result != null) {
+            result.actualCpm = cpm;
+            result.cpmStatus = status;
+          }
+          onUpdate();
+        },
+      );
+
+    onUpdate();
   }
 
   Future<void> stopListening() async {
     _stopwatch.stop();
     await _sttService.stopListening();
-    _cpmService.stop();
+    for (final service in _cpmServices.values) {
+      service.stop();
+    }
     isListening = false;
     onUpdate();
   }
 
   Future<void> dispose() async {
     await _sttService.dispose();
-    _cpmService.stop();
+    for (final service in _cpmServices.values) {
+      service.stop();
+    }
   }
 
   bool isSimilar(String a, String b) => _progressService.isSimilar(a, b);
-
   List<String> splitText(String text) => _progressService.splitText(text);
 }

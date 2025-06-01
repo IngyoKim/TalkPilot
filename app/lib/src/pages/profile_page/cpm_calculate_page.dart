@@ -22,7 +22,6 @@ class _CpmCalculateView extends StatelessWidget {
     final service = context.watch<CpmCalculateService>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: Colors.deepPurple,
         iconTheme: const IconThemeData(color: Colors.white),

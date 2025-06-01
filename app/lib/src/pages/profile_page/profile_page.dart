@@ -7,7 +7,6 @@ import 'package:talk_pilot/src/pages/profile_page/widgets/stats_summary_card.dar
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
 
-import 'package:talk_pilot/src/pages/profile_page/cpm_calculate_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_drawer.dart';
 
@@ -125,33 +124,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
-                minimumSize: const Size.fromHeight(50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CpmCalculatePage(),
-                  ),
-                );
-
-                if (result != null && result is double) {
-                  await context.read<UserProvider>().refreshUser();
-                }
-              },
-              icon: const Icon(Icons.calculate, color: Colors.white),
-              label: const Text(
-                'CPM 계산 페이지',
-                style: TextStyle(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo,
                 minimumSize: const Size.fromHeight(50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

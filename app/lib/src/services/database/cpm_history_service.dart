@@ -30,4 +30,10 @@ extension CpmHistoryService on UserService {
     await _cpmDb.deleteDB("users/$uid/cpmHistory");
     await updateUser(uid, {'cpm': 0.0});
   }
+
+  Future<void> deleteCpmRecord(String uid, int timestampMillis) async {
+    final recordId = timestampMillis.toString();
+    await _cpmDb.deleteDB("users/$uid/cpmHistory/$recordId");
+    await updateAverageCpm(uid);
+  }
 }

@@ -63,6 +63,39 @@ class _PresentationHistoryPageState extends State<PresentationHistoryPage> {
     }
   }
 
+  Future<void> _deleteSingleRecord(CpmRecordModel record) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('기록 삭제'),
+        content: const Text('이 발표 기록을 삭제하시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('삭제'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid != null) {
+        await _userService.deleteCpmRecord(uid, record.timestamp.millisecondsSinceEpoch);
+        setState(() {
+          _cpmHistoryFuture = _userService.getCpmHistory(uid);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('기록이 삭제되었습니다')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,6 +138,11 @@ class _PresentationHistoryPageState extends State<PresentationHistoryPage> {
                 subtitle: Text(
                   '${record.timestamp.toLocal()}'.split('.').first,
                   style: const TextStyle(fontSize: 12),
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete),
+                  tooltip: '기록 삭제',
+                  onPressed: () => _deleteSingleRecord(record),
                 ),
               );
             },

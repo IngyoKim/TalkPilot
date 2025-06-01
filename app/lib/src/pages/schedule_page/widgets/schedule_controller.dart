@@ -21,7 +21,7 @@ class ScheduleController {
     final projects = await _projectService.fetchProjects(uid);
 
     for (final project in projects) {
-      if (project.scheduledDate != null) {
+      if (project.scheduledDate != null && project.status == 'preparing') {
         final day = normalize(project.scheduledDate!);
         final color =
             eventColorMap[project.title] != null

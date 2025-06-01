@@ -21,6 +21,13 @@ export class UserController {
         return { uid, ...user };
     }
 
+    @Get('nickname/:uid')
+    async getNicknameByUid(@Param('uid') uid: string) {
+        const user = await this.userService.readUser(uid);
+        if (!user) throw new NotFoundException('User not found');
+        return { nickname: user.nickname ?? uid };
+    }
+
     @Post('init')
     async initUser(@Req() req: Request) {
         const user = req['user'] as DecodedUser;

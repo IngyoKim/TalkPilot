@@ -2,11 +2,10 @@ import { useState } from 'react';
 import { FaUserCircle, FaEdit, FaCheckCircle, FaChartLine, FaBullseye, FaPoll, FaAngellist, FaTachometerAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-import { useUser } from '../../contexts/UserContext';
-import { updateUser } from '../../utils/api/user';
-
-import Sidebar from '../../components/SideBar';
-import ProfileDropdown from './ProfileDropdown';
+import { updateUser } from '@/utils/api/user';
+import Sidebar from '@/components/SideBar';
+import { useUser } from '@/contexts/UserContext';
+import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
 import ToastMessage from '../../components/ToastMessage';
 
 const mainColor = '#673AB7';
@@ -121,7 +120,9 @@ export default function ProfilePage() {
                                 </div>
                                 <div style={styles.infoRow}><strong>이름:</strong> {user.name ?? ''}</div>
                                 <div style={styles.infoRow}><strong>이메일:</strong> {user.email}</div>
-                                <div style={styles.infoRow}><strong>가입일:</strong> {user.createdAt?.slice(0, 10)}</div>
+                                <div style={styles.infoRow}>
+                                    <strong>가입일:</strong> {new Date(user.createdAt).toLocaleDateString('ko-KR')}
+                                </div>
                             </div>
                         </div>
                     </div>

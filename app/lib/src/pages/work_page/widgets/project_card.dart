@@ -41,6 +41,7 @@ class _ProjectCardState extends State<ProjectCard> {
     return GestureDetector(
       onTap: widget.onTap,
       child: Card(
+        color: Colors.white,
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(

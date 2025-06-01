@@ -17,8 +17,13 @@ class EventList extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('저장된 일정:', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
+          const Center(
+            child: Text(
+              '저장된 일정',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 20),
           ...events.asMap().entries.map((entry) {
             final i = entry.key;
             final e = entry.value;
@@ -26,7 +31,7 @@ class EventList extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(

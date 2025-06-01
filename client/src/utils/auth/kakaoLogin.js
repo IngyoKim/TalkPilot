@@ -1,4 +1,4 @@
-import { serverLogin } from "./auth";
+import { serverLogin } from '@/utils/auth/auth';
 import { getAuth, signInWithCustomToken } from "firebase/auth";
 
 const TOKEN_URL = import.meta.env.VITE_FIREBASE_CUSTOM_TOKEN_URL;

@@ -12,7 +12,6 @@ import STTtest from './pages/Profile/STTtest';
 import ProjectRecord from './pages/Profile/ProjectRecord';
 
 import Schedule from './pages/SidebarOP/Schedule';
-import MyPresentation from './pages/SidebarOP/MyPresentation';
 import ProjectDetail from './pages/SidebarOP/ProjectDetail';
 
 import ExtractDOCX from './pages/SidebarOP/ExtractDOCX';
@@ -32,7 +31,6 @@ export default function Router() {
             <Route path="/projectrecord" element={<ProjectRecord />} />
 
             <Route path="/schedule" element={<Schedule />} />
-            <Route path="/presentation" element={<MyPresentation />} />
             <Route path="/project/:id" element={<ProjectDetail />} />
 
             <Route path="/extdocx" element={<ExtractDOCX />} />

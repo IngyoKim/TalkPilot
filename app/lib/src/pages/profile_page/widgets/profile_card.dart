@@ -23,6 +23,7 @@ class ProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 3,
       child: Padding(
@@ -75,7 +76,7 @@ class ProfileCard extends StatelessWidget {
                       ),
                   const SizedBox(height: 6),
                   Text(
-                    'Email: $realName',
+                    realName,
                     style: const TextStyle(fontSize: 15, color: Colors.grey),
                   ),
                 ],

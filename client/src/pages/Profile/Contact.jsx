@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import Sidebar from '../../components/SideBar';
-import ProfileDropdown from './ProfileDropdown';
+
+import Sidebar from '@/components/SideBar';
+import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
+
 
 const mainColor = '#673AB7';
 

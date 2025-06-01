@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useAuth } from './AuthContext';
-import { fetchUserByUid } from '../utils/api/user';
+
+import { useAuth } from '@/contexts/AuthContext';
+import { fetchUserByUid } from '@/utils/api/user';
+
 
 const UserContext = createContext(null);
 

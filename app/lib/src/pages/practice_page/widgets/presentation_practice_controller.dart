@@ -182,18 +182,18 @@ class PresentationPracticeController {
     );
 
     _cpmServices[uid]?.stop();
-    _cpmServices[uid] = LiveCpmService()
-      ..start(
-        userAverageCpm: targetCpm,
-        onCpmUpdate: (cpm, status) {
-          final result = _speakerCpmResults[uid];
-          if (result != null) {
-            result.actualCpm = cpm;
-            result.cpmStatus = status;
-          }
-          onUpdate();
-        },
-      );
+    _cpmServices[uid] =
+        LiveCpmService()..start(
+          userAverageCpm: targetCpm,
+          onCpmUpdate: (cpm, status) {
+            final result = _speakerCpmResults[uid];
+            if (result != null) {
+              result.actualCpm = cpm;
+              result.cpmStatus = status;
+            }
+            onUpdate();
+          },
+        );
 
     onUpdate();
   }

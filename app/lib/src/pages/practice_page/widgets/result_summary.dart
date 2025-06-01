@@ -160,7 +160,7 @@ class _ResultSummaryState extends State<ResultSummary> {
                 _buildResultCard(title: '속도 해석', value: speaker.cpmStatus),
               ],
             );
-          }).toList(),
+          }),
         ],
       ),
     );

@@ -1,14 +1,17 @@
-import React, { useEffect } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { signInWithGoogle } from "../utils/auth/googleLogin";
-import { signInWithKakao } from "../utils/auth/kakaoLogin";
-import SocialLoginButton from "../components/SocialLoginButton";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+
+import { signInWithKakao } from '@/utils/auth/kakaoLogin';
+import { signInWithGoogle } from '@/utils/auth/googleLogin';
+
+import SocialLoginButton from '@/components/SocialLoginButton';
+
 
 export default function LoginPage() {
     const navigate = useNavigate();
 
-    // 이미 로그인된 경우 /로 리다이렉트
+    /// 이미 로그인된 경우 `/`(MainPage)로 리다이렉트
     useEffect(() => {
         const unsub = onAuthStateChanged(getAuth(), (user) => {
             if (user) {

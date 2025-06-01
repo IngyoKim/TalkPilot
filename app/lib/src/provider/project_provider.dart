@@ -96,11 +96,36 @@ class ProjectProvider with ChangeNotifier {
 
   /// 프로젝트 삭제
   Future<void> deleteProject(String projectId) async {
+    /// 먼저 프로젝트를 찾음.
+    final project = _projects.firstWhere(
+      (p) => p.id == projectId,
+      orElse:
+          () =>
+              _selectedProject ??
+              (throw Exception('프로젝트를 찾을 수 없습니다: $projectId')),
+    );
+
+    /// 모든 참여자의 projectIds 항목에서도 제거
+    for (final uid in project.participants.keys) {
+      final user = await _userService.readUser(uid);
+      if (user == null || user.projectIds == null) continue;
+
+      final updatedProjectIds = {...user.projectIds!};
+      if (updatedProjectIds.containsKey(projectId)) {
+        updatedProjectIds.remove(projectId);
+        await _userService.updateUser(uid, {'projectIds': updatedProjectIds});
+      }
+    }
+
+    /// 프로젝트 삭제
     await _projectService.deleteProject(projectId);
+
+    /// 로컬 상태에서도 제거
     _projects.removeWhere((p) => p.id == projectId);
     if (_selectedProject?.id == projectId) {
       _selectedProject = null;
     }
+
     notifyListeners();
   }
 }

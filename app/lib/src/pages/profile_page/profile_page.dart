@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:talk_pilot/src/models/user_model.dart';
+import 'package:talk_pilot/src/pages/profile_page/presentation_history_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/stats_summary_card.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
@@ -10,7 +11,7 @@ import 'package:talk_pilot/src/pages/profile_page/cpm_calculate_page.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_card.dart';
 import 'package:talk_pilot/src/pages/profile_page/widgets/profile_drawer.dart';
 
-import 'presentation_history_page.dart';
+// ignore_for_file: use_build_context_synchronously
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -156,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-            ),            
+            ),
           ],
         ),
       ),

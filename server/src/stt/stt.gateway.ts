@@ -73,6 +73,7 @@ export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
                     encoding: 'LINEAR16',
                     sampleRateHertz: 16000,
                     languageCode: 'ko-KR',
+                    enableSpeakerDiarization: false,
                 },
                 interimResults: true,
             })

@@ -1,6 +1,7 @@
-import { serverLogin } from "./auth";
-import { auth } from "./firebaseConfig";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { serverLogin } from '@/utils/auth/auth';
+import { auth } from '@/utils/auth/firebaseConfig';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+
 
 export const signInWithGoogle = () => {
     return new Promise(async (resolve, reject) => {

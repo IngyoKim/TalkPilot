@@ -8,7 +8,6 @@ import Help from './pages/Profile/Help';
 import Contact from './pages/Profile/Contact';
 
 import Schedule from './pages/SidebarOP/Schedule';
-import MyPresentation from './pages/SidebarOP/MyPresentation';
 import ProjectDetail from './pages/SidebarOP/ProjectDetail';
 
 import ExtractDOCX from './pages/SidebarOP/ExtractDOCX';
@@ -24,7 +23,6 @@ export default function Router() {
             <Route path="/contact" element={<Contact />} />
 
             <Route path="/schedule" element={<Schedule />} />
-            <Route path="/presentation" element={<MyPresentation />} />
             <Route path="/project/:id" element={<ProjectDetail />} />
 
             <Route path="/extdocx" element={<ExtractDOCX />} />

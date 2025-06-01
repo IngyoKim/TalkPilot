@@ -10,8 +10,7 @@ class PresentationPracticePage extends StatefulWidget {
   const PresentationPracticePage({super.key, required this.projectId});
 
   @override
-  State<PresentationPracticePage> createState() =>
-      _PresentationPracticePageState();
+  State<PresentationPracticePage> createState() => _PresentationPracticePageState();
 }
 
 class _PresentationPracticePageState extends State<PresentationPracticePage> {
@@ -31,16 +30,24 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
 
   @override
   void dispose() {
-    // dispose 작업은 WillPopScope에서 처리
     super.dispose();
+  }
+
+  String formatDuration(Duration duration) {
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
   }
 
   @override
   Widget build(BuildContext context) {
-    // ignore: deprecated_member_use
+    final progressPercent = (_controller.scriptProgress * 100).toStringAsFixed(1);
+    final current = (_controller.scriptChunks.length * _controller.scriptProgress).round();
+    final total = _controller.scriptChunks.length;
+
     return WillPopScope(
       onWillPop: () async {
-        await _controller.dispose(); // 소켓 및 마이크 안전 종료
+        await _controller.dispose();
         return true;
       },
       child: Scaffold(
@@ -62,41 +69,83 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        _controller.isListening
-                            ? Colors.grey
-                            : Colors.deepPurple,
+                    backgroundColor: _controller.isListening ? Colors.grey : Colors.deepPurple,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                  onPressed:
-                      _controller.isListening
-                          ? _controller.stopListening
-                          : _controller.startListening,
+                  onPressed: _controller.isListening ? _controller.stopListening : _controller.startListening,
                   child: Text(_controller.isListening ? '발표 중지' : '발표 시작'),
                 ),
                 const SizedBox(height: 16),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    InfoCard(title: '현재 속도', value: _controller.cpmStatus),
-                    InfoCard(
-                      title: '진행도',
-                      value:
-                          '${(_controller.scriptProgress * 100).toStringAsFixed(1)}%',
-                    ),
-                    InfoCard(
-                      title: '정확도',
-                      value:
-                          '${(_controller.scriptAccuracy * 100).toStringAsFixed(1)}%',
-                    ),
+                    Expanded(child: InfoCard(title: '진행도', value: '$progressPercent%')),
+                    const SizedBox(width: 12),
+                    Expanded(child: InfoCard(title: '정확도', value: '${(_controller.scriptAccuracy * 100).toStringAsFixed(1)}%')),
                   ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(child: InfoCard(title: '발표자', value: _controller.currentSpeakerNickname ?? '-')),
+                    const SizedBox(width: 12),
+                    Expanded(child: InfoCard(title: '현재 속도', value: _controller.cpmStatus)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  height: 80,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.deepPurple),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(40),
+                        child: LinearProgressIndicator(
+                          value: _controller.scriptProgress,
+                          backgroundColor: Colors.grey[300],
+                          valueColor: const AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+                          minHeight: 20,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '$current / $total • $progressPercent%',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.deepPurple),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${formatDuration(_controller.presentationDuration)} / ${formatDuration(_controller.expectedDuration)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: _controller.presentationDuration > _controller.expectedDuration ? Colors.red : Colors.black,
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
+                      color: Colors.white,
                       border: Border.all(color: Colors.deepPurple),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -119,16 +168,17 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                   cpmStatus: _controller.cpmStatus,
                   actualDuration: _controller.presentationDuration,
                   expectedDuration: _controller.expectedDuration,
+                  speakerResults: _controller.speakerResults,
                 ),
-
                 CpmUpdater(
                   progress: _controller.scriptProgress,
                   currentCpm: _controller.currentCpm,
                   alreadyUpdated: _controller.hasUpdatedCpm,
-                  onUpdated:
-                      () => setState(() {
-                        _controller.hasUpdatedCpm = true;
-                      }),
+                  onUpdated: () {
+                    setState(() {
+                      _controller.hasUpdatedCpm = true;
+                    });
+                  },
                 ),
               ],
             ),

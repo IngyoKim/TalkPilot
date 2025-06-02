@@ -124,7 +124,7 @@ export default function MainPage() {
         try {
             await changeStatus(id, newStatus);
             setActiveDropdown(null);
-            showMessage(`${newStatus}로 바뀌었습니다.`, STATUS_COLORS);
+            showMessage(`${newStatus}(으)로 바뀌었습니다.`, 'blue');
         } catch {
             alert('상태 변경 중 오류 발생');
         }

@@ -9,7 +9,7 @@ import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
 import ToastMessage from '@/components/ToastMessage';
 
 const mainColor = '#673AB7';
-const STATUS_COLORS = {
+const STATUS_COLORS = { //상태 이름 변경
     preparing: '#4CAF50',
     보류: '#FFC107',
     completed: '#F44336',
@@ -96,7 +96,7 @@ export default function MainPage() {
             } else if (tab === 'join') {
                 if (!joinProjectId.trim()) return alert('유효한 프로젝트 ID를 입력하세요.');
                 await join(joinProjectId);
-                showMessage('프로젝트에 참여했습니다.', 'green');
+                showMessage('프로젝트에 참여했습니다.', 'blue');
             } else {
                 await create({ title, description });
                 showMessage('프로젝트를 생성했습니다.', 'green');

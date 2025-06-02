@@ -7,6 +7,7 @@ import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
 
 import Sidebar from '@/components/SideBar';
 import { useUser } from '@/contexts/UserContext';
+import ToastMessage from '@/components/ToastMessage';
 
 export default function ProjectDetailPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -18,6 +19,12 @@ export default function ProjectDetailPage() {
     const [isScriptEditable, setIsScriptEditable] = useState(false);
     const [loading, setLoading] = useState(true);
     const [ownerName, setOwnerName] = useState(null);
+    const [messages, setMessages] = useState([]);
+
+    const showMessage = (text, type = 'green', duration = 3000) => { //토스트메시지
+        setMessages((prev) => [...prev, { id: Date.now(), text, type, duration }]);
+    };
+
 
     const getUserRole = (project, uid) => {
         return project.participants?.[uid] || 'member';
@@ -30,7 +37,7 @@ export default function ProjectDetailPage() {
             try {
                 const result = await projectAPI.fetchProjectById(id);
                 if (!result) {
-                    alert('프로젝트를 찾을 수 없습니다.');
+                    setMessages('프로젝트를 찾을 수 없습니다.', 'red');
                     return navigate(-1);
                 }
                 setProject(result);
@@ -44,6 +51,7 @@ export default function ProjectDetailPage() {
                 }
             } catch (e) {
                 console.error('프로젝트 로드 실패:', e);
+                showMessage('프로젝트 로드 실패:', 'red', e);
             } finally {
                 setLoading(false);
             }
@@ -55,10 +63,11 @@ export default function ProjectDetailPage() {
     const handleSave = async () => {
         try {
             await projectAPI.updateProject(id, project);
-            alert('프로젝트가 저장되었습니다.');
+            showMessage('프로젝트가 저장되었습니다.', 'green');
+
         } catch (e) {
             console.error('저장 실패:', e);
-            alert('저장 중 오류가 발생했습니다.');
+            showMessage('저장 실패: ', 'red', e);
         }
     };
 
@@ -159,6 +168,8 @@ export default function ProjectDetailPage() {
                     </button>
                 </div>
             </div>
+            <ToastMessage messages={messages} setMessages={setMessages} />
+
         </div>
     );
 }

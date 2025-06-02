@@ -6,7 +6,7 @@ import { updateUser } from '@/utils/api/user';
 import Sidebar from '@/components/SideBar';
 import { useUser } from '@/contexts/UserContext';
 import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
-import ToastMessage from '../../components/ToastMessage';
+import ToastMessage from '@/components/ToastMessage';
 
 const mainColor = '#673AB7';
 
@@ -22,7 +22,9 @@ export default function ProfilePage() {
     const navigate = useNavigate();
     const [messages, setMessages] = useState([]);
 
-
+    const showMessage = (text, type = 'green', duration = 3000) => { //토스트 메시지
+        setMessages((prev) => [...prev, { id: Date.now(), text, type, duration }]);
+    };
 
     // 닉네임 수정 시작
     const startEditNickname = () => {
@@ -36,23 +38,10 @@ export default function ProfilePage() {
             await updateUser({ nickname: nickname });
             setUser(prev => ({ ...prev, nickname: nickname }));
             setIsEditingNickname(false);
-            setMessages(prev => [
-                ...prev,
-                {
-                    text: '닉네임이 변경되었습니다.',
-                    duration: 3000,
-                    type: 'green',
-                },
-            ]);
+            showMessage('닉네임을 수정했습니다.', 'yellow');
+
         } catch (err) {
-            setMessages(prev => [
-                ...prev,
-                {
-                    text: '닉네임 변경에 실패했습니다.',
-                    duration: 3000,
-                    type: 'red',
-                },
-            ]);
+            showMessage('닉네임 수정하는데 실패했습니다.', 'red');
             console.error(err);
         }
     };

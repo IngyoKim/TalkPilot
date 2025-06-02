@@ -5,7 +5,6 @@ const TOAST_COLORS = {
     red: '#F44336',
     yellow: '#FFC107',
     blue: '#2196F3',
-    info: '#2196F3',
 };
 
 export default function ToastMessage({ messages, setMessages }) {

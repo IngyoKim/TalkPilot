@@ -11,6 +11,7 @@ import Contact from './pages/Profile/Contact';
 import Schedule from './pages/SidebarOP/Schedule';
 import ProjectDetail from './pages/SidebarOP/ProjectDetail';
 import PracticePage from "./pages/PracticePage";
+import ResultPage from "./pages/ResultPage";
 
 import ExtractTXT from './pages/SidebarOP/ExtractTXT';
 import ExtractDOCX from './pages/SidebarOP/ExtractDOCX';
@@ -63,6 +64,14 @@ export default function Router() {
                 element={
                     <PrivateRoute>
                         <PracticePage />
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/result/:id"
+                element={
+                    <PrivateRoute>
+                        <ResultPage />
                     </PrivateRoute>
                 }
             />

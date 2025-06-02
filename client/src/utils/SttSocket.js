@@ -6,7 +6,7 @@ export default function SttSocket(firebaseToken) {
     const [transcripts, setTranscripts] = useState([]);
 
     useEffect(() => {
-        const socket = io(import.meta.env.VITE_STT_SERVER_URL, {
+        const socket = io(import.meta.env.VITE_SERVER_URL, {
             transports: ['websocket'],
             auth: { token: `Bearer ${firebaseToken}` },
         });

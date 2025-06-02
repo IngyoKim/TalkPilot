@@ -50,3 +50,25 @@ export function calculateAccuracy(script, recognized) {
     );
     return recognizedWords.length === 0 ? 1 : matched.length / recognizedWords.length;
 }
+
+/// 매칭이 되는 단어 반환(대본 하이라이트 처리를 위해서 추가함;;)
+export function getMatchedFlags(script, recognized) {
+    const scriptWords = splitText(script);
+    const recognizedWords = splitText(recognized);
+
+    const matchedFlags = new Array(scriptWords.length).fill(false);
+    const usedIndexes = new Set();
+
+    for (let i = 0; i < scriptWords.length; i++) {
+        for (let j = Math.max(0, i - 8); j <= Math.min(recognizedWords.length - 1, i + 8); j++) {
+            if (usedIndexes.has(j)) continue;
+            if (isSimilar(scriptWords[i], recognizedWords[j])) {
+                matchedFlags[i] = true;
+                usedIndexes.add(j);
+                break;
+            }
+        }
+    }
+
+    return matchedFlags;
+}

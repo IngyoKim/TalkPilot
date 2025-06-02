@@ -1,7 +1,7 @@
 import { auth } from '@/utils/auth/firebaseConfig';
 import { signOut, getAuth } from "firebase/auth";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL;
 
 /// Nest Server 인증 로직
 export const serverLogin = async (idToken) => {

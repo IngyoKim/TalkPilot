@@ -5,7 +5,12 @@ import { useUser } from '@/contexts/UserContext';
 import SttSocket from '@/utils/SttSocket';
 import { AudioRecorder } from '@/utils/AudioRecorder';
 import LiveCpm from '@/utils/LiveCpm';
-import { calculateAccuracy, calculateProgress, splitText } from '@/utils/scriptUtils';
+import {
+    calculateAccuracy,
+    calculateProgress,
+    splitText,
+    getMatchedFlags
+} from '@/utils/scriptUtils';
 
 export default function PracticePage() {
     const { id: projectId } = useParams();
@@ -57,7 +62,7 @@ export default function PracticePage() {
         const accuracy = calculateAccuracy(project.script, recognizedText);
         const progress = calculateProgress(project.script, recognizedText);
 
-        navigate(`/presentation/${projectId}/result`, {
+        navigate(`/result/${projectId}`, {
             state: { wpm, cpm, recognizedText, accuracy, progress, status },
         });
     };
@@ -65,7 +70,8 @@ export default function PracticePage() {
     if (!project) return <div>로딩 중...</div>;
 
     const scriptWords = splitText(project.script ?? '');
-    const recognizedWords = splitText(recognizedText);
+    const matchedFlags = getMatchedFlags(project.script ?? '', recognizedText);
+    const currentIndex = matchedFlags.findIndex(flag => !flag);
 
     return (
         <div style={styles.container}>
@@ -79,8 +85,9 @@ export default function PracticePage() {
 
             <div style={styles.scriptBox}>
                 {scriptWords.map((word, idx) => {
-                    const isSpoken = idx < recognizedWords.length;
-                    const isCurrent = idx === recognizedWords.length;
+                    const isMatched = matchedFlags[idx];
+                    const isCurrent = idx === currentIndex;
+
                     return (
                         <span
                             key={idx}
@@ -88,7 +95,7 @@ export default function PracticePage() {
                                 ...styles.word,
                                 backgroundColor: isCurrent
                                     ? '#FFD54F'
-                                    : isSpoken
+                                    : isMatched
                                         ? '#D1C4E9'
                                         : 'transparent'
                             }}

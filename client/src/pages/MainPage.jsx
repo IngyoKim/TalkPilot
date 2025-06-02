@@ -6,7 +6,7 @@ import { useUser } from '@/contexts/UserContext';
 import { fetchUserByUid } from '@/utils/api/user';
 import useProjects from '@/utils/userProjects';
 import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
-
+import ToastMessage from '@/components/ToastMessage';
 
 const mainColor = '#673AB7';
 const STATUS_COLORS = {
@@ -37,6 +37,10 @@ export default function MainPage() {
         changeStatus,
     } = useProjects(user, setUser);
 
+    const showMessage = (text, type = 'green', duration = 3000) => { //토스트메시지
+        setMessages((prev) => [...prev, { id: Date.now(), text, type, duration }]);
+    };
+
     const [ownerNicknames, setOwnerNicknames] = useState({});
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -48,7 +52,7 @@ export default function MainPage() {
     const [tab, setTab] = useState('create');
     const [isSaving, setIsSaving] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState(null);
-
+    const [messages, setMessages] = useState([]);
     const containerRef = useRef();
 
     useEffect(() => {
@@ -87,11 +91,15 @@ export default function MainPage() {
         try {
             if (editMode && editId) {
                 await update(editId, { title, description });
+                showMessage('프로젝트를 수정했습니다.', 'yellow');
+
             } else if (tab === 'join') {
                 if (!joinProjectId.trim()) return alert('유효한 프로젝트 ID를 입력하세요.');
                 await join(joinProjectId);
+                showMessage('프로젝트에 참여했습니다.', 'green');
             } else {
                 await create({ title, description });
+                showMessage('프로젝트를 생성했습니다.', 'green');
             }
         } catch {
             alert('프로젝트 저장 중 오류 발생');
@@ -106,6 +114,7 @@ export default function MainPage() {
         try {
             await remove(id);
             setActiveDropdown(null);
+            showMessage('프로젝트를 삭제했습니다.', 'red');
         } catch {
             alert('삭제 중 오류 발생');
         }
@@ -115,6 +124,7 @@ export default function MainPage() {
         try {
             await changeStatus(id, newStatus);
             setActiveDropdown(null);
+            showMessage(`${newStatus}로 바뀌었습니다.`, STATUS_COLORS);
         } catch {
             alert('상태 변경 중 오류 발생');
         }
@@ -210,7 +220,6 @@ export default function MainPage() {
                         </div>
                     ))}
                 </div>
-
                 {showModal && (
                     <div style={styles.modalOverlay}>
                         <div style={styles.modal}>
@@ -284,6 +293,7 @@ export default function MainPage() {
                         </div>
                     </div>
                 )}
+                <ToastMessage messages={messages} setMessages={setMessages} />
             </div>
         </div>
     );

@@ -5,38 +5,43 @@ const TOAST_COLORS = {
     red: '#F44336',
     yellow: '#FFC107',
     blue: '#2196F3',
+    info: '#2196F3',
 };
 
 export default function ToastMessage({ messages, setMessages }) {
+    if (!Array.isArray(messages)) return null;
+
     const remove = (id) => {
         setMessages((prev) => prev.filter((m) => m.id !== id));
     };
 
     return (
         <div style={styles.stack}>
-            {messages.map((m) => (
-                <Toast
-                    key={m.id}
-                    message={m.text}
-                    duration={m.duration}
-                    onClose={() => remove(m.id)}
-                    type={m.type}
-                />
-            ))}
-
+            {messages.map((m) => {
+                if (!m || typeof m !== 'object' || !m.id) return null;
+                return (
+                    <Toast
+                        key={m.id}
+                        message={m.text || ''}
+                        duration={m.duration || 3000}
+                        onClose={() => remove(m.id)}
+                        type={m.type || 'info'}
+                    />
+                );
+            })}
         </div>
     );
 }
 
-function Toast({ message, duration = 3000, onClose, type = 'info' }) {
+function Toast({ message, duration, onClose, type }) {
     const [fadeOut, setFadeOut] = useState(false);
 
     useEffect(() => {
-        const timer1 = setTimeout(() => setFadeOut(true), duration - 500);
-        const timer2 = setTimeout(onClose, duration);
+        const t1 = setTimeout(() => setFadeOut(true), duration - 500);
+        const t2 = setTimeout(onClose, duration);
         return () => {
-            clearTimeout(timer1);
-            clearTimeout(timer2);
+            clearTimeout(t1);
+            clearTimeout(t2);
         };
     }, [duration, onClose]);
 
@@ -66,7 +71,6 @@ const styles = {
         zIndex: 9999,
     },
     toast: {
-        backgroundColor: '#673AB7',
         color: '#fff',
         padding: '12px 20px',
         borderRadius: '12px',
@@ -74,5 +78,4 @@ const styles = {
         fontSize: '14px',
         maxWidth: '300px',
     },
-
 };

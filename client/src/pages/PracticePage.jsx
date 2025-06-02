@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as projectAPI from '@/utils/api/project';
 import { useUser } from '@/contexts/UserContext';
 import SttSocket from '@/utils/SttSocket';
 import { AudioRecorder } from '@/utils/AudioRecorder';
+import LiveCpm from '@/utils/LiveCpm';
+import { calculateAccuracy, calculateProgress, splitText } from '@/utils/scriptUtils';
 
 export default function PracticePage() {
     const { id: projectId } = useParams();
@@ -12,12 +14,11 @@ export default function PracticePage() {
 
     const [project, setProject] = useState(null);
     const [recognizedText, setRecognizedText] = useState('');
-    const [startTime, setStartTime] = useState(null);
     const [wpm, setWpm] = useState(0);
-    const [cpm, setCpm] = useState(0);
 
     const { socket, transcripts } = SttSocket(user.token);
     const { startRecording, stopRecording } = AudioRecorder(socket);
+    const { cpm, status, start: startCpm, update: updateCpm, stop: stopCpm } = LiveCpm(user.cpm ?? 200);
 
     useEffect(() => {
         const load = async () => {
@@ -30,32 +31,41 @@ export default function PracticePage() {
     useEffect(() => {
         const allText = transcripts.map(t => t.transcript).join(' ');
         setRecognizedText(allText);
+        updateCpm(allText);
 
-        if (!startTime || allText.trim() === '') return;
-        const elapsedMin = (Date.now() - startTime) / 60000;
-        const wordCount = allText.trim().split(/\s+/).length;
-        const charCount = allText.replace(/\s/g, '').length;
-        setWpm(Math.round(wordCount / elapsedMin));
-        setCpm(Math.round(charCount / elapsedMin));
-    }, [transcripts, startTime]);
+        const startTime = transcripts[0]?.timestamp;
+        const elapsedMin = startTime
+            ? (Date.now() - new Date(startTime)) / 60000
+            : 0;
+
+        if (elapsedMin > 0.1) {
+            const wordCount = allText.trim().split(/\s+/).length;
+            setWpm(Math.round(wordCount / elapsedMin));
+        }
+    }, [transcripts]);
 
     const handleStart = () => {
         setRecognizedText('');
-        setStartTime(Date.now());
         startRecording();
+        startCpm();
     };
 
     const handleStop = () => {
         stopRecording();
+        stopCpm();
+
+        const accuracy = calculateAccuracy(project.script, recognizedText);
+        const progress = calculateProgress(project.script, recognizedText);
+
         navigate(`/presentation/${projectId}/result`, {
-            state: { wpm, cpm, recognizedText },
+            state: { wpm, cpm, recognizedText, accuracy, progress, status },
         });
     };
 
     if (!project) return <div>로딩 중...</div>;
 
-    const scriptWords = project.script?.split(/\s+/) ?? [];
-    const recognizedWords = recognizedText.trim().split(/\s+/);
+    const scriptWords = splitText(project.script ?? '');
+    const recognizedWords = splitText(recognizedText);
 
     return (
         <div style={styles.container}>
@@ -91,7 +101,7 @@ export default function PracticePage() {
 
             <div style={styles.resultBox}>
                 <p><strong>STT 결과:</strong> {recognizedText}</p>
-                <p>WPM: {wpm} / CPM: {cpm}</p>
+                <p>WPM: {wpm} / CPM: {cpm} ({status})</p>
             </div>
         </div>
     );

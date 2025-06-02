@@ -34,7 +34,7 @@ admin.initializeApp({
 
 exports.createCustomToken = functions.https.onRequest(async (request, response) => {
     cors({
-        origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+        origin: ["http://localhost:5173", "https://talkpilot.vercel.app"],
         methods: ["POST"],
         credentials: false,
     })(request, response, async () => {
@@ -53,7 +53,7 @@ exports.createCustomToken = functions.https.onRequest(async (request, response) 
             try {
                 await admin.auth().updateUser(uid, updateParams);
                 console.log("User updated:", uid);
-            } catch (error) {
+            } catch (e) {
                 /// 사용자가 없으면 새로 생성
                 updateParams["uid"] = uid;
                 await admin.auth().createUser(updateParams);
@@ -63,9 +63,9 @@ exports.createCustomToken = functions.https.onRequest(async (request, response) 
             /// 커스텀 토큰 생성
             const token = await admin.auth().createCustomToken(uid);
             response.json({ token });
-        } catch (error) {
-            console.error("Error creating custom token:", error);
-            response.status(500).json({ error: "Error creating custom token" });
+        } catch (e) {
+            console.error("e creating custom token:", e);
+            response.status(500).json({ e: "error creating custom token" });
         }
     });
 });

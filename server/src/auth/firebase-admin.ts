@@ -20,9 +20,9 @@ export function initializeFirebase() {
         } else {
             logger.log('Firebase는 이미 초기화된 상태입니다.');
         }
-    } catch (error) {
-        logger.error('Firebase 초기화 실패', error.stack);
-        throw error;
+    } catch (e) {
+        logger.error('Firebase 초기화 실패', e.stack);
+        throw e;
     }
 }
 

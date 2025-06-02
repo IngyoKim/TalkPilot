@@ -40,8 +40,8 @@ export function AuthProvider({ children }) {
                 });
 
                 setAuthUser(user);
-            } catch (err) {
-                console.error('[Nest] 서버 인증 실패:', err);
+            } catch (e) {
+                console.error('[Nest] 서버 인증 실패:', e);
                 setAuthUser(null);
                 setServerError('서버 인증 실패. 잠시 후 다시 시도해주세요.');
             } finally {

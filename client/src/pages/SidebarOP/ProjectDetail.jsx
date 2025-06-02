@@ -20,15 +20,21 @@ export default function ProjectDetailPage() {
     const [ownerName, setOwnerName] = useState(null);
 
     const getUserRole = (project, uid) => {
-        return project.participants?.[uid] || 'member';
+        const role = project.participants?.[uid] || 'member';
+        console.log(`[ProjectDetailPage] 역할 판별 - uid: ${uid}, role: ${role}`);
+        return role;
     };
 
     useEffect(() => {
         if (!user?.uid) return;
+        let isMounted = true;
 
         const fetchProject = async () => {
+            console.log('[ProjectDetailPage] fetchProject called');
             try {
                 const result = await projectAPI.fetchProjectById(id);
+                if (!isMounted) return;
+
                 if (!result) {
                     alert('프로젝트를 찾을 수 없습니다.');
                     return navigate(-1);
@@ -38,31 +44,38 @@ export default function ProjectDetailPage() {
                 const ownerUid = result.ownerUid;
                 if (ownerUid) {
                     const ownerUser = await userAPI.fetchUserByUid(ownerUid);
-                    setOwnerName(ownerUser?.nickname || ownerUid);
+                    if (isMounted) setOwnerName(ownerUser?.nickname || ownerUid);
                 } else {
-                    setOwnerName('(소유자 없음)');
+                    if (isMounted) setOwnerName('(소유자 없음)');
                 }
             } catch (e) {
-                console.error('프로젝트 로드 실패:', e);
+                console.error('[ProjectDetailPage] 프로젝트 로드 실패:', e);
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         };
 
         fetchProject();
-    }, [id, navigate, user?.uid]);
+        return () => {
+            isMounted = false;
+        };
+    }, [id, user?.uid]);
+
 
     const handleSave = async () => {
+        console.log('[ProjectDetailPage] 저장 시도:', project);
         try {
             await projectAPI.updateProject(id, project);
+            console.log('[ProjectDetailPage] 저장 성공');
             alert('프로젝트가 저장되었습니다.');
         } catch (e) {
-            console.error('저장 실패:', e);
+            console.error('[ProjectDetailPage] 저장 실패:', e);
             alert('저장 중 오류가 발생했습니다.');
         }
     };
 
     const handleChange = (field, value) => {
+        console.log(`[ProjectDetailPage] 필드 변경 - ${field}:`, value);
         setProject(prev => ({ ...prev, [field]: value }));
     };
 

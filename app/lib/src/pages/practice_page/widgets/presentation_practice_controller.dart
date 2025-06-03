@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
@@ -23,10 +23,12 @@ class PresentationPracticeController {
   final Stopwatch _stopwatch = Stopwatch();
 
   String recognizedText = '';
+  String savedText = '';
   bool isListening = false;
   bool hasUpdatedCpm = false;
   double userCpm = 0.0;
   double scriptProgress = 0.0;
+  Timer? _silenceTimer;
 
   ProjectModel? _projectModel;
   String? currentSpeakerNickname;
@@ -39,7 +41,7 @@ class PresentationPracticeController {
   Duration get expectedDuration =>
       Duration(seconds: _projectModel?.estimatedTime ?? 120);
   double get scriptAccuracy =>
-      _progressService.calculateAccuracy(recognizedText);
+      _progressService.calculateAccuracy(savedText + recognizedText);
 
   double get currentCpm {
     final active = currentSpeakerUid;
@@ -124,12 +126,51 @@ class PresentationPracticeController {
   Future<void> startListening() async {
     _stopwatch.reset();
     _stopwatch.start();
-
+    savedText = '';
     await _sttService.startListening((text) async {
       recognizedText = text;
-      isListening = true;
-      scriptProgress = _progressService.calculateProgressByLastMatch(text);
 
+      debugPrint('🟢 recognizedText updated to: "$recognizedText"');
+      debugPrint('🟠 Current savedText: "$savedText"');
+
+      _silenceTimer?.cancel();
+      _silenceTimer = Timer(const Duration(seconds: 1), () {
+        final currentText = recognizedText.trim();
+        final lastSaved = savedText.trim();
+
+        if (currentText.isEmpty) return;
+
+        if (lastSaved.isEmpty) {
+          savedText = '$currentText ';
+          debugPrint('⏱ 침묵 감지됨. 새로 저장됨: "$currentText"');
+          return;
+        }
+
+        final compareLength = 5;
+        final currentPrefix =
+            currentText.length >= compareLength
+                ? currentText.substring(0, compareLength)
+                : currentText;
+
+        final savedPrefix =
+            lastSaved.length >= compareLength
+                ? lastSaved.substring(0, compareLength)
+                : lastSaved;
+
+        if (currentPrefix == savedPrefix) {
+          final newPart = currentText.substring(lastSaved.length).trim();
+          if (newPart.isNotEmpty) {
+            savedText += '$newPart ';
+            debugPrint('⏱ 침묵 감지됨. 덧붙여 저장됨: "$newPart"');
+          }
+        } else {
+          savedText += '$currentText ';
+          debugPrint('⏱ 침묵 감지됨. 전체 새 텍스트 저장됨: "$currentText"');
+        }
+      });
+
+      isListening = true;
+      scriptProgress = _progressService.calculateProgressByLastMatch(savedText + recognizedText);
       await _updateCurrentSpeakerByProgress();
 
       final active = currentSpeakerUid;
@@ -200,6 +241,7 @@ class PresentationPracticeController {
 
   Future<void> stopListening() async {
     _stopwatch.stop();
+    _silenceTimer?.cancel();
     await _sttService.stopListening();
     for (final service in _cpmServices.values) {
       service.stop();

@@ -1,38 +1,62 @@
-import { useRef } from 'react';
-
-export function AudioRecorder(socketRef) {
-    const mediaStreamRef = useRef(null);
-    const mediaRecorderRef = useRef(null);
+export function AudioRecorder(socket) {
+    let audioContext;
+    let processor;
+    let input;
+    let stream;
 
     const startRecording = async () => {
-        const stream = await navigator.mediaDevices.getUserMedia({
-            audio: { channelCount: 1, sampleRate: 16000 },
-            video: false,
-        });
-        mediaStreamRef.current = stream;
+        try {
+            console.log('[Recorder] 마이크 스트림 요청 중...');
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            console.log('[Recorder] 마이크 스트림 획득 성공');
 
-        const mediaRecorder = new MediaRecorder(stream, {
-            mimeType: 'audio/webm',
-        });
+            audioContext = new AudioContext();
+            input = audioContext.createMediaStreamSource(stream);
 
-        mediaRecorder.ondataavailable = async (e) => {
-            if (e.data.size > 0 && socketRef.current?.connected) {
-                const arrayBuffer = await e.data.arrayBuffer();
-                socketRef.current.emit('audio-chunk', arrayBuffer);
+            processor = audioContext.createScriptProcessor(4096, 1, 1);
+            processor.onaudioprocess = (e) => {
+                const inputData = e.inputBuffer.getChannelData(0);
+                const pcm = float32ToInt16(inputData);
+
+                if (socket?.connected) {  // 여기서 socket은 소켓 인스턴스
+                    socket.emit('audio-chunk', pcm);
+                }
+            };
+
+            input.connect(processor);
+            processor.connect(audioContext.destination);
+
+            if (socket?.connected) {
+                socket.emit('start-audio');
             }
-        };
-
-        mediaRecorderRef.current = mediaRecorder;
-
-        socketRef.current.emit('start-audio');
-        mediaRecorder.start(250);
+        } catch (err) {
+            console.error('[Recorder] startRecording 실패:', err);
+        }
     };
 
     const stopRecording = () => {
-        mediaRecorderRef.current?.stop();
-        mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
-        socketRef.current.emit('end-audio');
+        console.log('[Recorder] 녹음 중지 요청');
+
+        processor?.disconnect();
+        input?.disconnect();
+        stream?.getTracks().forEach(track => track.stop());
+        audioContext?.close();
+
+        if (socket?.connected) {
+            socket.emit('end-audio');
+        }
     };
 
     return { startRecording, stopRecording };
+}
+
+function float32ToInt16(buffer) {
+    const l = buffer.length;
+    const result = new Int16Array(l);
+    for (let i = 0; i < l; i++) {
+        const s = Math.max(-1, Math.min(1, buffer[i]));
+        result[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+    }
+    // Uint8Array로 변환해서 전송하는 게 일반적임
+    return new Uint8Array(result.buffer);
 }

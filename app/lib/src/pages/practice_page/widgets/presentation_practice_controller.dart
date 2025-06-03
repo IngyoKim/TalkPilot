@@ -9,6 +9,7 @@ import 'package:talk_pilot/src/services/project/live_cpm_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
 import 'package:talk_pilot/src/services/project/script_progress_service.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
+import 'package:talk_pilot/src/services/project/tts_service.dart';
 
 class PresentationPracticeController {
   final String projectId;
@@ -20,6 +21,7 @@ class PresentationPracticeController {
   final SttService _sttService = SttService();
   final ScriptProgressService _progressService = ScriptProgressService();
   final ProjectService _projectService = ProjectService();
+  final TtsService _ttsService = TtsService();
   final Stopwatch _stopwatch = Stopwatch();
 
   String recognizedText = '';
@@ -29,6 +31,7 @@ class PresentationPracticeController {
   double userCpm = 0.0;
   double scriptProgress = 0.0;
   Timer? _silenceTimer;
+  Timer? _ttsTimer;
 
   ProjectModel? _projectModel;
   String? currentSpeakerNickname;
@@ -79,10 +82,8 @@ class PresentationPracticeController {
   Future<void> _loadUserCpm() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-
     final userModel = await UserService().readUser(user.uid);
     if (userModel == null) return;
-
     userCpm = userModel.cpm ?? 200.0;
     onUpdate();
   }
@@ -90,13 +91,11 @@ class PresentationPracticeController {
   Future<void> _loadScript() async {
     _projectModel = await _projectService.readProject(projectId);
     await _progressService.loadScript(projectId);
-
     final script = _projectModel?.script ?? '';
     _charStartIndices = _buildWordCharStartIndices(
       script,
       _progressService.scriptChunks,
     );
-
     onUpdate();
   }
 
@@ -130,9 +129,6 @@ class PresentationPracticeController {
     await _sttService.startListening((text) async {
       recognizedText = text;
 
-      debugPrint('🟢 recognizedText updated to: "$recognizedText"');
-      debugPrint('🟠 Current savedText: "$savedText"');
-
       _silenceTimer?.cancel();
       _silenceTimer = Timer(const Duration(seconds: 1), () {
         final currentText = recognizedText.trim();
@@ -142,35 +138,39 @@ class PresentationPracticeController {
 
         if (lastSaved.isEmpty) {
           savedText = '$currentText ';
-          debugPrint('⏱ 침묵 감지됨. 새로 저장됨: "$currentText"');
           return;
         }
 
         final compareLength = 5;
-        final currentPrefix =
-            currentText.length >= compareLength
-                ? currentText.substring(0, compareLength)
-                : currentText;
+        final currentPrefix = currentText.length >= compareLength
+            ? currentText.substring(0, compareLength)
+            : currentText;
 
-        final savedPrefix =
-            lastSaved.length >= compareLength
-                ? lastSaved.substring(0, compareLength)
-                : lastSaved;
+        final savedPrefix = lastSaved.length >= compareLength
+            ? lastSaved.substring(0, compareLength)
+            : lastSaved;
 
         if (currentPrefix == savedPrefix) {
           final newPart = currentText.substring(lastSaved.length).trim();
           if (newPart.isNotEmpty) {
             savedText += '$newPart ';
-            debugPrint('⏱ 침묵 감지됨. 덧붙여 저장됨: "$newPart"');
           }
         } else {
           savedText += '$currentText ';
-          debugPrint('⏱ 침묵 감지됨. 전체 새 텍스트 저장됨: "$currentText"');
+        }
+      });
+
+      _ttsTimer?.cancel();
+      _ttsTimer = Timer(const Duration(seconds: 10), () async {
+        final nextChunks = _getNextScriptChunks(5);
+        if (nextChunks.isNotEmpty) {
+          await _ttsService.speak(nextChunks.join(' '));
         }
       });
 
       isListening = true;
-      scriptProgress = _progressService.calculateProgressByLastMatch(savedText + recognizedText);
+      scriptProgress =
+          _progressService.calculateProgressByLastMatch(savedText + recognizedText);
       await _updateCurrentSpeakerByProgress();
 
       final active = currentSpeakerUid;
@@ -183,6 +183,15 @@ class PresentationPracticeController {
 
     isListening = true;
     onUpdate();
+  }
+
+  List<String> _getNextScriptChunks(int count) {
+    final currentIndex =
+        (_progressService.scriptChunks.length * scriptProgress).floor();
+    final nextIndex = currentIndex;
+    final endIndex =
+        (nextIndex + count).clamp(0, _progressService.scriptChunks.length);
+    return _progressService.scriptChunks.sublist(nextIndex, endIndex);
   }
 
   Future<void> _updateCurrentSpeakerByProgress() async {
@@ -223,18 +232,18 @@ class PresentationPracticeController {
     );
 
     _cpmServices[uid]?.stop();
-    _cpmServices[uid] =
-        LiveCpmService()..start(
-          userAverageCpm: targetCpm,
-          onCpmUpdate: (cpm, status) {
-            final result = _speakerCpmResults[uid];
-            if (result != null) {
-              result.actualCpm = cpm;
-              result.cpmStatus = status;
-            }
-            onUpdate();
-          },
-        );
+    _cpmServices[uid] = LiveCpmService()
+      ..start(
+        userAverageCpm: targetCpm,
+        onCpmUpdate: (cpm, status) {
+          final result = _speakerCpmResults[uid];
+          if (result != null) {
+            result.actualCpm = cpm;
+            result.cpmStatus = status;
+          }
+          onUpdate();
+        },
+      );
 
     onUpdate();
   }
@@ -242,6 +251,8 @@ class PresentationPracticeController {
   Future<void> stopListening() async {
     _stopwatch.stop();
     _silenceTimer?.cancel();
+    _ttsTimer?.cancel();
+    await _ttsService.stop();
     await _sttService.stopListening();
     for (final service in _cpmServices.values) {
       service.stop();
@@ -251,6 +262,7 @@ class PresentationPracticeController {
   }
 
   Future<void> dispose() async {
+    await _ttsService.stop();
     await _sttService.dispose();
     for (final service in _cpmServices.values) {
       service.stop();

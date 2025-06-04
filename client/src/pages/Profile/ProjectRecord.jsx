@@ -1,48 +1,107 @@
-import { useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Sidebar from '@/components/SideBar';
 import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
 import ToastMessage from '@/components/ToastMessage';
 import { FaTachometerAlt, FaTrashAlt } from 'react-icons/fa';
 
-const mockData = [
-    { id: 1, name: 'AI 프로젝트 발표', cpm: 320, date: '2025-05-30' },
-    { id: 2, name: '웹 개발 보고서', cpm: 295, date: '2025-05-21' },
-];
+// API 연결
+const fetchProjectList = async () => {
+    return [
+        { id: 1, name: 'AI 프로젝트 발표', cpm: 320, date: '2025-05-30' },
+        { id: 2, name: '웹 개발 보고서', cpm: 295, date: '2025-05-21' },
+    ];
+};
 
 export default function ProjectRecord() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [projects, setProjects] = useState(mockData);
+    const [projects, setProjects] = useState([]);
+    const [modal, setModal] = useState({ isOpen: false, projectId: null });
+    const [messages, setMessages] = useState([]);
 
     const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
-    const handleDelete = (id) => setProjects(projects.filter(p => p.id !== id));
+
+    const showMessage = useCallback((text, type = 'blue', duration = 3000) => {
+        const id = Date.now() + Math.random();
+        setMessages(prev => [...prev, { id, text, type, duration }]);
+    }, []);
+
+    const handleDeleteClick = (id) => {
+        setModal({ isOpen: true, projectId: id });
+    };
+
+    const handleDeleteConfirm = () => {
+        setProjects(prev => prev.filter(p => p.id !== modal.projectId));
+        setModal({ isOpen: false, projectId: null });
+        showMessage('삭제되었습니다.', 'red');
+    };
+
+    useEffect(() => {
+        const loadProjects = async () => {
+            const data = await fetchProjectList();
+            setProjects(data);
+        };
+        loadProjects();
+    }, []);
 
     return (
         <div style={styles.container}>
             <Sidebar isOpen={isSidebarOpen} />
-
             <div style={styles.content(isSidebarOpen)}>
                 <ProfileDropdown isSidebarOpen={isSidebarOpen} onToggleSidebar={toggleSidebar} />
                 <h2 style={styles.header}>발표 기록</h2>
-
                 <div style={styles.projectList}>
                     {projects.map(item => (
-                        <div key={item.id} style={styles.projectBox}>
-                            <div style={styles.projectInfo}>
-                                <h3 style={styles.projectName}>{item.name}</h3>
-                                <div style={styles.cpmRow}>
-                                    <FaTachometerAlt style={styles.tachometerIcon} />
-                                    <span style={styles.cpmText}>{item.cpm} CPM</span>
-                                </div>
-                                <p style={styles.date}>{item.date}</p>
-                            </div>
-                            <button
-                                onClick={() => handleDelete(item.id)}
-                                style={styles.deleteButton}
-                            >
-                                <FaTrashAlt />
-                            </button>
-                        </div>
+                        <ProjectCard
+                            key={item.id}
+                            item={item}
+                            isSidebarOpen={isSidebarOpen}
+                            onDelete={() => handleDeleteClick(item.id)}
+                        />
                     ))}
+                </div>
+            </div>
+            {modal.isOpen && (
+                <ConfirmModal
+                    onCancel={() => setModal({ isOpen: false, projectId: null })}
+                    onConfirm={handleDeleteConfirm}
+                />
+            )}
+            <ToastMessage messages={messages} setMessages={setMessages} />
+        </div>
+    );
+}
+
+function ProjectCard({ item, isSidebarOpen, onDelete }) {
+    return (
+        <div
+            style={{
+                ...styles.projectBox,
+                width: isSidebarOpen ? 'calc(20% - 20px)' : 'calc(16.66% - 20px)',
+            }}
+        >
+            <div style={styles.projectInfo}>
+                <h3 style={styles.projectName}>{item.name}</h3>
+                <div style={styles.cpmRow}>
+                    <FaTachometerAlt style={styles.tachometerIcon} />
+                    <span style={styles.cpmText}>{item.cpm} CPM</span>
+                </div>
+                <p style={styles.date}>{item.date}</p>
+            </div>
+            <button onClick={onDelete} style={styles.deleteButton}>
+                <FaTrashAlt />
+            </button>
+        </div>
+    );
+}
+
+function ConfirmModal({ onCancel, onConfirm }) {
+    return (
+        <div style={styles.modalOverlay}>
+            <div style={styles.modal}>
+                <p style={styles.modalText}>정말로 삭제하시겠습니까?</p>
+                <div style={styles.modalActions}>
+                    <button onClick={onCancel} style={styles.cancelBtn}>취소</button>
+                    <button onClick={onConfirm} style={styles.deleteBtn}>삭제</button>
                 </div>
             </div>
         </div>
@@ -59,6 +118,7 @@ const styles = {
         flex: 1,
         marginLeft: isSidebarOpen ? 240 : 60,
         transition: 'margin-left 0.3s ease',
+        padding: '24px',
     }),
     header: {
         fontSize: '24px',
@@ -67,18 +127,19 @@ const styles = {
     },
     projectList: {
         display: 'flex',
-        flexDirection: 'column',
-        gap: '16px',
+        flexWrap: 'wrap',
+        gap: '20px',
     },
     projectBox: {
-        position: 'relative',
         background: 'white',
         borderRadius: '12px',
         padding: '20px',
+        boxShadow: '0 8px 6px rgba(0,0,0,0.3)',
+        minWidth: '200px',
+        boxSizing: 'border-box',
+        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-        transition: 'box-shadow 0.3s ease-in-out',
     },
     projectInfo: {
         display: 'flex',
@@ -110,12 +171,54 @@ const styles = {
     deleteButton: {
         position: 'absolute',
         right: '20px',
-        top: '50%',
-        transform: 'translateY(-50%)',
+        top: '10px',
         background: 'none',
         border: 'none',
         color: '#cc0000',
         cursor: 'pointer',
         fontSize: '16px',
+    },
+    modalOverlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+    },
+    modal: {
+        backgroundColor: 'white',
+        padding: '24px',
+        borderRadius: '12px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+        minWidth: '300px',
+        textAlign: 'center',
+    },
+    modalText: {
+        fontSize: '18px',
+        marginBottom: '16px',
+    },
+    modalActions: {
+        display: 'flex',
+        justifyContent: 'space-around',
+    },
+    cancelBtn: {
+        padding: '8px 16px',
+        backgroundColor: '#ccc',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: 'pointer',
+    },
+    deleteBtn: {
+        padding: '8px 16px',
+        backgroundColor: '#cc0000',
+        color: 'white',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: 'pointer',
     },
 };

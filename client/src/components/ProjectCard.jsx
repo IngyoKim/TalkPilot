@@ -10,7 +10,7 @@ import { ProfileDropdown } from '@/pages/Profile/ProfileDropdown';
 
 const mainColor = '#673AB7';
 
-export default function MyPresentation() {
+export default function ProjectCard() {
     const { user } = useUser();
     const {
         projects,
@@ -42,12 +42,13 @@ export default function MyPresentation() {
 
     return (
         <div style={{ display: 'flex' }}>
-            <Sidebar isOpen={isSidebarOpen} />
             <div style={{ flex: 1, padding: 20, marginLeft: isSidebarOpen ? 240 : 0 }}>
                 <ProfileDropdown
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={() => setIsSidebarOpen((o) => !o)}
                 />
+                <Sidebar isOpen={isSidebarOpen} />
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
                     <button
                         style={{
@@ -81,18 +82,18 @@ export default function MyPresentation() {
                         />
                     ))}
                 </div>
-            </div>
 
-            {showModal && (
-                <ProjectModal
-                    mode={editProject ? 'edit' : 'createOrJoin'}
-                    project={editProject}
-                    onClose={handleCloseModal}
-                    onCreate={create}
-                    onJoin={(projectId) => join(projectId, user)}
-                    onUpdate={update}
-                />
-            )}
+                {showModal && (
+                    <ProjectModal
+                        mode={editProject ? 'edit' : 'createOrJoin'}
+                        project={editProject}
+                        onClose={handleCloseModal}
+                        onCreate={create}
+                        onJoin={(projectId) => join(projectId, user)}
+                        onUpdate={update}
+                    />
+                )}
+            </div>
         </div>
     );
 }

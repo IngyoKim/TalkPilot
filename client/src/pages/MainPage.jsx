@@ -37,7 +37,7 @@ export default function MainPage() {
         changeStatus,
     } = useProjects(user, setUser);
 
-    const showMessage = (text, type = 'green', duration = 3000) => { //토스트메시지
+    const showMessage = (text, type = 'green', duration = 3000) => { //토스트 메시지
         setMessages((prev) => [...prev, { id: Date.now(), text, type, duration }]);
     };
 
@@ -140,12 +140,12 @@ export default function MainPage() {
 
     return (
         <div ref={containerRef} style={{ display: 'flex' }}>
-            <Sidebar isOpen={isSidebarOpen} />
             <div style={{ flex: 1, padding: 20, marginLeft: isSidebarOpen ? 240 : 0 }}>
                 <ProfileDropdown
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={() => setIsSidebarOpen((o) => !o)}
                 />
+                <Sidebar isOpen={isSidebarOpen} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
                     <button
                         style={{

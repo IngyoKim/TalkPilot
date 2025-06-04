@@ -140,7 +140,7 @@ export default function MainPage() {
 
     return (
         <div ref={containerRef} style={{ display: 'flex' }}>
-            <div style={{ flex: 1, padding: 20, marginLeft: isSidebarOpen ? 240 : 0 }}>
+            <div style={{ flex: 1, padding: 20, paddingLeft: isSidebarOpen ? 260 : 20, transition: 'padding-left 0.3s ease' }}>
                 <ProfileDropdown
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={() => setIsSidebarOpen((o) => !o)}

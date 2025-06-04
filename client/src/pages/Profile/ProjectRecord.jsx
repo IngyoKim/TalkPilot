@@ -112,7 +112,7 @@ const styles = {
     container: {
         display: 'flex',
         minHeight: '100vh',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#ffffff',
     },
     content: (isSidebarOpen) => ({
         flex: 1,

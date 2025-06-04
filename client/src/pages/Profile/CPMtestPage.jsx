@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import Sidebar from '../../components/SideBar';
-import ProfileDropdown from './ProfileDropdown';
+import Sidebar from '@/components/SideBar';
+import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
 
 export default function CPMtestPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);

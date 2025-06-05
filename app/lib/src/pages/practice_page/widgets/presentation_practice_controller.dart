@@ -1,15 +1,18 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/models/script_part_model.dart';
-import 'package:talk_pilot/src/pages/practice_page/widgets/speaker_cpm_result.dart';
+
+import 'package:talk_pilot/src/utils/project/tts_service.dart';
+import 'package:talk_pilot/src/utils/project/live_cpm_service.dart';
+import 'package:talk_pilot/src/utils/project/script_progress_service.dart';
+
 import 'package:talk_pilot/src/services/stt/stt_service.dart';
-import 'package:talk_pilot/src/services/project/live_cpm_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
-import 'package:talk_pilot/src/services/project/script_progress_service.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
-import 'package:talk_pilot/src/services/project/tts_service.dart';
+import 'package:talk_pilot/src/pages/practice_page/widgets/speaker_cpm_result.dart';
 
 class PresentationPracticeController {
   final String projectId;
@@ -144,18 +147,21 @@ class PresentationPracticeController {
         }
 
         final compareLength = 2;
-        final currentPrefix = currentText.length >= compareLength
-            ? currentText.substring(0, compareLength)
-            : currentText;
+        final currentPrefix =
+            currentText.length >= compareLength
+                ? currentText.substring(0, compareLength)
+                : currentText;
 
-        final savedPrefix = lastSaved.length >= compareLength
-            ? lastSaved.substring(0, compareLength)
-            : lastSaved;
+        final savedPrefix =
+            lastSaved.length >= compareLength
+                ? lastSaved.substring(0, compareLength)
+                : lastSaved;
 
         if (currentPrefix == savedPrefix) {
-          final newPart = currentText.length > lastSaved.length
-              ? currentText.substring(lastSaved.length).trim()
-              : '';
+          final newPart =
+              currentText.length > lastSaved.length
+                  ? currentText.substring(lastSaved.length).trim()
+                  : '';
           if (newPart.isNotEmpty) {
             savedText += '$newPart ';
           }
@@ -173,8 +179,9 @@ class PresentationPracticeController {
       });
 
       isListening = true;
-      scriptProgress =
-          _progressService.calculateProgressByLastMatch(savedText + recognizedText);
+      scriptProgress = _progressService.calculateProgressByLastMatch(
+        savedText + recognizedText,
+      );
       await _updateCurrentSpeakerByProgress();
 
       final active = currentSpeakerUid;
@@ -193,8 +200,10 @@ class PresentationPracticeController {
     final currentIndex =
         (_progressService.scriptChunks.length * scriptProgress).floor();
     final nextIndex = currentIndex;
-    final endIndex =
-        (nextIndex + count).clamp(0, _progressService.scriptChunks.length);
+    final endIndex = (nextIndex + count).clamp(
+      0,
+      _progressService.scriptChunks.length,
+    );
     return _progressService.scriptChunks.sublist(nextIndex, endIndex);
   }
 
@@ -236,18 +245,18 @@ class PresentationPracticeController {
     );
 
     _cpmServices[uid]?.stop();
-    _cpmServices[uid] = LiveCpmService()
-      ..start(
-        userAverageCpm: targetCpm,
-        onCpmUpdate: (cpm, status) {
-          final result = _speakerCpmResults[uid];
-          if (result != null) {
-            result.actualCpm = cpm;
-            result.cpmStatus = status;
-          }
-          onUpdate();
-        },
-      );
+    _cpmServices[uid] =
+        LiveCpmService()..start(
+          userAverageCpm: targetCpm,
+          onCpmUpdate: (cpm, status) {
+            final result = _speakerCpmResults[uid];
+            if (result != null) {
+              result.actualCpm = cpm;
+              result.cpmStatus = status;
+            }
+            onUpdate();
+          },
+        );
 
     onUpdate();
   }

@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
-import 'package:talk_pilot/src/services/database/project_service.dart';
-import 'package:talk_pilot/src/services/text_extract/docx_extract_service.dart';
-import 'package:talk_pilot/src/services/text_extract/txt_extract_service.dart';
+
 import 'package:talk_pilot/src/components/toast_message.dart';
+import 'package:talk_pilot/src/services/database/project_service.dart';
+import 'package:talk_pilot/src/utils/text_extract/docx_extract_service.dart';
+import 'package:talk_pilot/src/utils/text_extract/txt_extract_service.dart';
 
 Future<void> pickAndExtractScriptText({
   required String projectId,

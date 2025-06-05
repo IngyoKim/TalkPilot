@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:talk_pilot/src/services/stt/cpm_calculate_service.dart';
+import 'package:talk_pilot/src/utils/project/cpm_calculate_service.dart';
 
 class CpmCalculatePage extends StatelessWidget {
   const CpmCalculatePage({super.key});

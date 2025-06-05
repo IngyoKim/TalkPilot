@@ -26,7 +26,9 @@ class ScriptComparisonView extends StatelessWidget {
     for (int i = 0; i < recognizedWords.length; i++) {
       final start = (lastMatchedIndex - 8).clamp(0, scriptChunks.length);
       final end = (lastMatchedIndex + 8).clamp(0, scriptChunks.length);
-      debugPrint('start: $start, end: $end');
+
+      /// 이미 구현이 되었으니 주석 처리함(로그가 너무 난잡해짐)
+      /// debugPrint('start: $start, end: $end');
       for (int j = start; j < end; j++) {
         if (matchedFlags[j]) continue;
         if (recognizedWords[i] == scriptChunks[j]) {

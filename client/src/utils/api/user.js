@@ -1,10 +1,14 @@
 import { getIdToken } from '@/utils/auth/auth';
 import { UserModel } from '@/models/userModel';
 
+const API_URL = `${import.meta.env.VITE_SERVER_URL}/user`;
+
+const nicknameCache = new Map(); // 누락된 변수 보완
+
 /// 유저 조회
 export async function fetchUserByUid(uid) {
     const token = await getIdToken();
-    const res = await fetch(`/api/user/${uid}`, {
+    const res = await fetch(`${API_URL}/${uid}`, {
         headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error('사용자 정보 요청 실패');
@@ -24,7 +28,7 @@ export async function fetchNicknameByUid(uid) {
     }
 
     const token = await getIdToken();
-    const res = await fetch(`/api/user/nickname/${uid}`, {
+    const res = await fetch(`${API_URL}/nickname/${uid}`, {
         headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -40,11 +44,10 @@ export async function fetchNicknameByUid(uid) {
     return nickname;
 }
 
-
 /// 유저 정보 업데이트
 export async function updateUser(updates) {
     const token = await getIdToken();
-    const res = await fetch('/api/user', {
+    const res = await fetch(`${API_URL}`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -59,7 +62,7 @@ export async function updateUser(updates) {
 /// 유저 초기화 (서버에서 누락 필드 채우기 포함)
 export async function initUser() {
     const token = await getIdToken();
-    const res = await fetch('/api/user/init', {
+    const res = await fetch(`${API_URL}/init`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
     });
@@ -70,7 +73,7 @@ export async function initUser() {
 /// 유저 삭제
 export async function deleteUser() {
     const token = await getIdToken();
-    const res = await fetch('/api/user', {
+    const res = await fetch(`${API_URL}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
     });

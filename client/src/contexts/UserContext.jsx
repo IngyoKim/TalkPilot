@@ -17,8 +17,8 @@ export function UserProvider({ children }) {
             try {
                 const data = await fetchUserByUid(authUser.uid);
                 setUser(data);
-            } catch (error) {
-                console.error('[UserProvider] 사용자 정보 로딩 실패:', error);
+            } catch (e) {
+                console.error('[UserProvider] 사용자 정보 로딩 실패:', e);
             }
         }
 

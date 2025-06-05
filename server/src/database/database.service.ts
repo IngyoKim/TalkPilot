@@ -18,9 +18,9 @@ export class DatabaseService {
             }
 
             return value;
-        } catch (error) {
-            this.logger.error(`[READ] ${path}`, error instanceof Error ? error.stack : String(error));
-            throw error;
+        } catch (e) {
+            this.logger.error(`[READ] ${path}`, e instanceof e ? e.stack : String(e));
+            throw e;
         }
     }
 
@@ -28,9 +28,9 @@ export class DatabaseService {
         try {
             await this.db.ref(path).set(data);
             this.logger.log(`[WRITE] ${path}\n${JSON.stringify(data, null, 2)}`);
-        } catch (error) {
-            this.logger.error(`[WRITE] ${path}`, error instanceof Error ? error.stack : String(error));
-            throw error;
+        } catch (e) {
+            this.logger.error(`[WRITE] ${path}`, e instanceof e ? e.stack : String(e));
+            throw e;
         }
     }
 
@@ -38,9 +38,9 @@ export class DatabaseService {
         try {
             await this.db.ref(path).update(data);
             this.logger.log(`[UPDATE] ${path}\n${JSON.stringify(data, null, 2)}`);
-        } catch (error) {
-            this.logger.error(`[UPDATE] ${path}`, error instanceof Error ? error.stack : String(error));
-            throw error;
+        } catch (e) {
+            this.logger.error(`[UPDATE] ${path}`, e instanceof e ? e.stack : String(e));
+            throw e;
         }
     }
 
@@ -63,9 +63,9 @@ export class DatabaseService {
 
             this.logger.log(`[FETCH] ${path}\n${JSON.stringify(result, null, 2)}`);
             return result;
-        } catch (error) {
-            this.logger.error(`[FETCH] ${path}`, error instanceof Error ? error.stack : String(error));
-            throw error;
+        } catch (e) {
+            this.logger.error(`[FETCH] ${path}`, e instanceof e ? e.stack : String(e));
+            throw e;
         }
     }
 
@@ -73,9 +73,9 @@ export class DatabaseService {
         try {
             await this.db.ref(path).remove();
             this.logger.log(`[DELETE] ${path} - success`);
-        } catch (error) {
-            this.logger.error(`[DELETE] ${path}`, error instanceof Error ? error.stack : String(error));
-            throw error;
+        } catch (e) {
+            this.logger.error(`[DELETE] ${path}`, e instanceof e ? e.stack : String(e));
+            throw e;
         }
     }
 }

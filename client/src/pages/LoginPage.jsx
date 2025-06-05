@@ -25,9 +25,9 @@ export default function LoginPage() {
         try {
             await signInWithKakao();
             navigate("/");
-        } catch (err) {
+        } catch (e) {
             alert("Kakao 로그인 실패");
-            console.error(err);
+            console.error(e);
         }
     };
 
@@ -35,9 +35,9 @@ export default function LoginPage() {
         try {
             await signInWithGoogle();
             navigate("/");
-        } catch (err) {
+        } catch (e) {
             alert("Google 로그인 실패");
-            console.error(err);
+            console.error(e);
         }
     };
 

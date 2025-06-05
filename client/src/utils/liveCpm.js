@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-/// 실시간으로 Cpm 계산산
+/// 실시간으로 Cpm 계산
 export default function LiveCpm(userAverageCpm = 0) {
     const [cpm, setCpm] = useState(0);
     const [status, setStatus] = useState('대기 중');

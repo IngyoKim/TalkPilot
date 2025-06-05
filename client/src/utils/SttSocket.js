@@ -35,6 +35,8 @@ export default function useSttSocket() {
 
             /// url을 https 프로토콜에서 wss 프로토콜로 변경
             /// web socket은 secure websocket으로 통신함.
+            /// 일단 작동이 되니깐 건들지 말기!!
+            /// 제발...이거 만드는데 너무 힘들었어요...
             const rawUrl = import.meta.env.VITE_SERVER_URL;
             const wsUrl = rawUrl.startsWith('https')
                 ? rawUrl.replace(/^https/, 'wss')
@@ -62,16 +64,26 @@ export default function useSttSocket() {
             });
 
             socket.on('stt-result', (data) => {
+                console.log('[STT] 받은 데이터:', data);
+
                 const transcript = data?.transcript?.trim();
                 const timestamp = data?.timestamp;
-                if (!transcript) return;
+
+                if (!transcript) {
+                    console.warn('[STT] transcript가 비어있음. 무시함.');
+                    return;
+                }
 
                 const currentTime = new Date(timestamp);
-                if (!sessionStartRef.current) sessionStartRef.current = currentTime;
+
+                if (!sessionStartRef.current) {
+                    sessionStartRef.current = currentTime;
+                }
                 lastTranscriptRef.current = currentTime;
 
                 const words = transcript.split(/\s+/);
                 let newText = '';
+
                 for (const word of words) {
                     if (!sentWordsRef.current.has(word)) {
                         sentWordsRef.current.add(word);
@@ -81,8 +93,13 @@ export default function useSttSocket() {
 
                 setTranscriptText((prev) => (prev + newText).trim());
                 setTranscripts((prev) => [...prev, { transcript, timestamp }]);
-                onTranscriptCallbackRef.current?.(transcript);
+
+                /// 필요 시 외부 콜백 실행(실제로는 안 쓸 듯?)
+                if (onTranscriptCallbackRef.current) {
+                    onTranscriptCallbackRef.current(transcript);
+                }
             });
+
 
             socketRef.current = socket;
         });
@@ -95,8 +112,12 @@ export default function useSttSocket() {
     };
 
     const sendAudioChunk = (chunk) => {
+        console.log('[Socket] audio-chunk 전송:', chunk.length);
+
         if (socketRef.current?.connected) {
             socketRef.current.emit('audio-chunk', chunk);
+        } else {
+            console.warn('[Socket] 연결 안됨. 전송 실패');
         }
     };
 

@@ -31,9 +31,12 @@ export default function PracticePage() {
         isConnected,
         clearTranscript,
         endAudio,
+        sendAudioChunk,
     } = useSttSocket();
 
-    const { startRecording, stopRecording } = AudioRecorder(socket.current);
+    /// sendAudioChunk를 넘기도록 수정
+    /// 아 진짜 죽을거 같아요...왤케 해결이 안됨???
+    const { startRecording, stopRecording } = AudioRecorder(sendAudioChunk);
 
     const { cpm, status, start: startCpm, update: updateCpm, stop: stopCpm } = LiveCpm(user?.cpm ?? 200);
 
@@ -80,10 +83,10 @@ export default function PracticePage() {
         }
     };
 
-    const handleStop = () => {
-        stopRecording();
+    const handleStop = async () => {
+        await stopRecording();
         stopCpm();
-        endAudio();
+        await endAudio();
 
         const accuracy = calculateAccuracy(project.script, transcriptText);
         const progress = calculateProgress(project.script, transcriptText);
@@ -112,7 +115,6 @@ export default function PracticePage() {
             <h2>발표 연습 - {project.title}</h2>
             <p>대본 길이: {project.script?.length ?? 0}자</p>
 
-            {/* 현재 STT 텍스트 표시 영역 */}
             <div
                 style={{
                     marginBottom: 20,
@@ -128,12 +130,8 @@ export default function PracticePage() {
             </div>
 
             <div style={styles.controlRow}>
-                <button onClick={handleStart} style={styles.button}>
-                    시작
-                </button>
-                <button onClick={handleStop} style={styles.button}>
-                    종료
-                </button>
+                <button onClick={handleStart} style={styles.button}>시작</button>
+                <button onClick={handleStop} style={styles.button}>종료</button>
             </div>
 
             <div style={styles.scriptBox}>
@@ -155,12 +153,8 @@ export default function PracticePage() {
             </div>
 
             <div style={styles.resultBox}>
-                <p>
-                    <strong>STT 결과:</strong> {transcriptText}
-                </p>
-                <p>
-                    WPM: {wpm} / CPM: {cpm} ({status})
-                </p>
+                <p><strong>STT 결과:</strong> {transcriptText}</p>
+                <p>WPM: {wpm} / CPM: {cpm} ({status})</p>
                 <p>발표 시간: {(speakingDuration / 1000).toFixed(1)}초</p>
             </div>
         </div>

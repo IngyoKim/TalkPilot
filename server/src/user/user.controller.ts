@@ -14,13 +14,6 @@ interface DecodedUser {
 export class UserController {
     constructor(private readonly userService: UserService) { }
 
-    @Get(':uid')
-    async getUserById(@Param('uid') uid: string) {
-        const user = await this.userService.readUser(uid);
-        if (!user) throw new NotFoundException('User not found');
-        return { uid, ...user };
-    }
-
     @Get('nickname/:uid')
     async getNicknameByUid(@Param('uid') uid: string) {
         const user = await this.userService.readUser(uid);
@@ -28,12 +21,24 @@ export class UserController {
         return { nickname: user.nickname ?? uid };
     }
 
-    @Post('init')
-    async initUser(@Req() req: Request) {
-        const user = req['user'] as DecodedUser;
-        const loginMethod = user.firebase?.sign_in_provider ?? 'unknown';
-        await this.userService.initUser(user, loginMethod);
-        return { success: true };
+    @Get(':uid')
+    async getUserById(@Param('uid') uid: string, @Req() req: Request) {
+        let user = await this.userService.readUser(uid);
+
+        if (!user) {
+            const requester = req['user'] as DecodedUser;
+
+            if (requester.uid !== uid) {
+                throw new NotFoundException('User not found');
+            }
+
+            const loginMethod = requester.firebase?.sign_in_provider ?? 'unknown';
+            await this.userService.initUser(requester, loginMethod);
+
+            user = await this.userService.readUser(uid);
+        }
+
+        return { uid, ...user };
     }
 
     @Patch()

@@ -273,6 +273,5 @@ class PresentationPracticeController {
     }
   }
 
-  bool isSimilar(String a, String b) => _progressService.isSimilar(a, b);
   List<String> splitText(String text) => _progressService.splitText(text);
 }

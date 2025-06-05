@@ -16,7 +16,6 @@ void showProjectActionDialog(BuildContext context) {
   );
 }
 
-// ignore_for_file: use_build_context_synchronously
 class _ProjectActionDialog extends StatefulWidget {
   const _ProjectActionDialog();
 
@@ -26,6 +25,7 @@ class _ProjectActionDialog extends StatefulWidget {
 
 class _ProjectActionDialogState extends State<_ProjectActionDialog> {
   int currentIndex = 0;
+  bool isProcessing = false;
 
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -40,14 +40,19 @@ class _ProjectActionDialogState extends State<_ProjectActionDialog> {
   }
 
   Future<void> _handleCreate() async {
+    if (isProcessing) return;
+    setState(() => isProcessing = true);
+
     final title = titleController.text.trim();
     final desc = descriptionController.text.trim();
-    final userProvider = context.read<UserProvider>();
+    final user = context.read<UserProvider>().currentUser;
+
+    if (user == null || title.isEmpty) {
+      setState(() => isProcessing = false);
+      return;
+    }
+
     final projectProvider = context.read<ProjectProvider>();
-    final user = userProvider.currentUser;
-
-    if (user == null || title.isEmpty) return;
-
     final newProject = await projectProvider.createProject(
       title: title,
       description: desc,
@@ -59,65 +64,73 @@ class _ProjectActionDialogState extends State<_ProjectActionDialog> {
       newProject.id: newProject.status,
     };
 
-    await userProvider.updateUser({UserField.projectIds: mergedProjectIds});
+    await context.read<UserProvider>().updateUser({
+      UserField.projectIds: mergedProjectIds,
+    });
 
     ToastMessage.show(
       '프로젝트가 생성되었습니다.',
       backgroundColor: const Color(0xFF4CAF50),
     );
 
-    Navigator.pop(context);
+    if (!mounted) return;
+    Navigator.pop(context, true);
+    setState(() => isProcessing = false);
   }
 
   Future<void> _handleJoin() async {
+    if (isProcessing) return;
+    setState(() => isProcessing = true);
+
     final inputId = projectIdController.text.trim();
     final user = context.read<UserProvider>().currentUser;
-    if (inputId.isEmpty || user == null) return;
+
+    if (inputId.isEmpty || user == null) {
+      setState(() => isProcessing = false);
+      return;
+    }
 
     final projectService = ProjectService();
-    final userService = UserService();
-    final projectProvider = context.read<ProjectProvider>();
-
     final project = await projectService.readProject(inputId);
 
-    /// 잘못된 [projectId] 처리
     if (project == null) {
       ToastMessage.show(
         '존재하지 않는 프로젝트입니다.',
         backgroundColor: const Color(0xFFF44336),
       );
+      setState(() => isProcessing = false);
       return;
     }
 
-    /// 이미 참여중인 프로젝트 처리
     if (project.participants.containsKey(user.uid)) {
       ToastMessage.show(
         '이미 참여 중인 프로젝트입니다.',
         backgroundColor: const Color(0xFF9E9E9E),
       );
+      if (!mounted) return;
       Navigator.pop(context);
+      setState(() => isProcessing = false);
       return;
     }
 
-    /// DB에 참여자 추가
     await projectService.updateProject(project.id, {
       'participants': {...project.participants, user.uid: 'member'},
     });
 
-    /// 유저 정보에 프로젝트 추가
-    await userService.updateUser(user.uid, {
+    await UserService().updateUser(user.uid, {
       'projectIds': {...?user.projectIds, project.id: project.status},
     });
 
-    /// 전체 프로젝트 다시 로드
-    await projectProvider.loadProjects(user.uid);
+    await context.read<ProjectProvider>().loadProjects(user.uid);
 
     ToastMessage.show(
       '프로젝트에 참여했습니다.',
       backgroundColor: const Color(0xFF2196F3),
     );
 
-    Navigator.pop(context);
+    if (!mounted) return;
+    Navigator.pop(context, true);
+    setState(() => isProcessing = false);
   }
 
   @override
@@ -129,7 +142,9 @@ class _ProjectActionDialogState extends State<_ProjectActionDialog> {
           const Text('프로젝트'),
           ToggleButtons(
             isSelected: [currentIndex == 0, currentIndex == 1],
-            onPressed: (index) => setState(() => currentIndex = index),
+            onPressed: (index) {
+              if (!isProcessing) setState(() => currentIndex = index);
+            },
             constraints: const BoxConstraints(minWidth: 80),
             borderRadius: BorderRadius.circular(8),
             children: const [
@@ -150,7 +165,6 @@ class _ProjectActionDialogState extends State<_ProjectActionDialog> {
         children: [
           if (currentIndex == 0)
             Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: titleController,
@@ -179,11 +193,13 @@ class _ProjectActionDialogState extends State<_ProjectActionDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: isProcessing ? null : () => Navigator.pop(context),
           child: const Text('취소'),
         ),
         TextButton(
-          onPressed: () => currentIndex == 0 ? _handleCreate() : _handleJoin(),
+          onPressed: isProcessing
+              ? null
+              : () => currentIndex == 0 ? _handleCreate() : _handleJoin(),
           child: Text(currentIndex == 0 ? '생성' : '참여'),
         ),
       ],

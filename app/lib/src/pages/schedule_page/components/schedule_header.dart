@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class ScheduleHeader extends StatelessWidget {
   final DateTime focusedDay;
-  final VoidCallback onLeft;
-  final VoidCallback onRight;
+  final VoidCallback? onLeft;
+  final VoidCallback? onRight;
   final VoidCallback onTapMonth;
 
   const ScheduleHeader({
@@ -21,7 +21,11 @@ class ScheduleHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(icon: const Icon(Icons.chevron_left), onPressed: onLeft),
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            onPressed: onLeft,
+            color: onLeft == null ? Colors.grey : Colors.black,
+          ),
           GestureDetector(
             onTap: onTapMonth,
             child: Text(
@@ -33,9 +37,14 @@ class ScheduleHeader extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(icon: const Icon(Icons.chevron_right), onPressed: onRight),
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            onPressed: onRight,
+            color: onRight == null ? Colors.grey : Colors.black,
+          ),
         ],
       ),
     );
   }
 }
+

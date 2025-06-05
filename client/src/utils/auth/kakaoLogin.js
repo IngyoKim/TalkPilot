@@ -9,7 +9,7 @@ export const signInWithKakao = () => {
             const script = document.createElement("script");
             script.src = "https://developers.kakao.com/sdk/js/kakao.js";
             script.onload = () => initializeAndLogin(resolve, reject);
-            script.onerror = () => reject("Kakao SDK 로드 실패");
+            script.one = () => reject("Kakao SDK 로드 실패");
             document.head.appendChild(script);
         } else {
             initializeAndLogin(resolve, reject);
@@ -31,9 +31,9 @@ async function initializeAndLogin(resolve, reject) {
                 console.log("[Kakao] 로그인 시도");
                 userInfo = await window.Kakao.API.request({ url: "/v2/user/me" });
                 console.log("[Kakao] 사용자 정보:", userInfo);
-            } catch (error) {
-                console.error("[Kakao] 로그인 실패:", error);
-                return reject(error);
+            } catch (e) {
+                console.error("[Kakao] 로그인 실패:", e);
+                return reject(e);
             }
 
             let token;
@@ -54,17 +54,17 @@ async function initializeAndLogin(resolve, reject) {
 
                 if (!tokenRes.ok) {
                     const text = await tokenRes.text();
-                    throw new Error(`Token fetch 실패: ${text}`);
+                    throw new e(`Token fetch 실패: ${text}`);
                 }
 
                 const json = await tokenRes.json();
                 token = json.token;
-                if (!token) throw new Error("커스텀 토큰이 비어 있음");
+                if (!token) throw new error("커스텀 토큰이 비어 있음");
 
                 console.log("[Firebase] 커스텀 토큰 수신 완료");
-            } catch (error) {
-                console.error("[Firebase] 커스텀 토큰 생성 실패:", error);
-                return reject(error);
+            } catch (e) {
+                console.error("[Firebase] 커스텀 토큰 생성 실패:", e);
+                return reject(e);
             }
 
             let firebaseUser;
@@ -73,9 +73,9 @@ async function initializeAndLogin(resolve, reject) {
                 const userCredential = await signInWithCustomToken(auth, token);
                 firebaseUser = userCredential.user;
                 console.log("[Firebase] 로그인 성공:", firebaseUser);
-            } catch (error) {
-                console.error("[Firebase] 로그인 실패:", error);
-                return reject(error);
+            } catch (e) {
+                console.error("[Firebase] 로그인 실패:", e);
+                return reject(e);
             }
 
             try {
@@ -85,14 +85,14 @@ async function initializeAndLogin(resolve, reject) {
                 await serverLogin(idToken);
                 console.log("[Nest] 서버 로그인 성공");
                 resolve(firebaseUser);
-            } catch (error) {
-                console.error("[Nest] 서버 인증 실패:", error);
-                reject(error);
+            } catch (e) {
+                console.error("[Nest] 서버 인증 실패:", e);
+                reject(e);
             }
         },
-        fail: (error) => {
-            console.error("[Kakao] 로그인 실패", error);
-            reject(error);
+        fail: (e) => {
+            console.error("[Kakao] 로그인 실패", e);
+            reject(e);
         },
     });
 }

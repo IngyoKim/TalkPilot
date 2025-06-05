@@ -224,7 +224,7 @@ const styles = {
     },
     profileCard: {
         backgroundColor: '#fff',
-        borderRadius: '12px',
+        bordeadius: '12px',
         padding: '24px 32px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
         flex: 2,
@@ -233,7 +233,7 @@ const styles = {
     profileSideBox: {
         flex: 1,
         backgroundColor: '#fff',
-        borderRadius: '12px',
+        bordeadius: '12px',
         padding: '24px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
         minWidth: '200px',
@@ -274,14 +274,14 @@ const styles = {
     image: {
         width: '100px',
         height: '100px',
-        borderRadius: '50%',
+        bordeadius: '50%',
         objectFit: 'cover',
         border: '2px solid #ccc',
     },
     imagePlaceholder: {
         width: '100px',
         height: '100px',
-        borderRadius: '50%',
+        bordeadius: '50%',
         backgroundColor: '#eee',
         display: 'flex',
         alignItems: 'center',
@@ -326,7 +326,7 @@ const styles = {
     },
     gridBox: {
         backgroundColor: '#fff',
-        borderRadius: '12px',
+        bordeadius: '12px',
         padding: '24px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
         minHeight: '180px',
@@ -347,7 +347,7 @@ const styles = {
         backgroundColor: mainColor,
         color: '#fff',
         border: 'none',
-        borderRadius: '6px',
+        bordeadius: '6px',
         cursor: 'pointer',
         fontSize: '14px',
         alignSelf: 'flex-start',

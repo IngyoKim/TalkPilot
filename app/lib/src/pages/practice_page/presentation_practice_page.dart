@@ -188,8 +188,7 @@ class _PresentationPracticePageState extends State<PresentationPracticePage> {
                     child: SingleChildScrollView(
                       child: ScriptComparisonView(
                         scriptChunks: _controller.scriptChunks,
-                        recognizedText: _controller.recognizedText,
-                        isSimilar: _controller.isSimilar,
+                        recognizedText: _controller.savedText + _controller.recognizedText,
                         splitText: _controller.splitText,
                       ),
                     ),

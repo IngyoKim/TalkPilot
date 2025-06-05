@@ -21,6 +21,9 @@ class _SchedulePageState extends State<SchedulePage> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay = DateTime.now();
 
+  final DateTime _minDate = DateTime.utc(2025, 1, 1);
+  final DateTime _maxDate = DateTime.utc(2035, 12, 31);
+
   @override
   void initState() {
     super.initState();
@@ -28,14 +31,15 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   Future<void> _initialize() async {
-  await controller.loadColors();
-  final uid = FirebaseAuth.instance.currentUser?.uid;
-  if (uid != null) {
-    await controller.loadEvents(uid);
-    if (!mounted) return;
-    setState(() {});
+    await controller.loadColors();
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      await controller.loadEvents(uid);
+      if (!mounted) return;
+      setState(() {});
+    }
   }
-}
+
   void _onDayTapped(DateTime selected, DateTime focused) {
     setState(() {
       _selectedDay = controller.normalize(selected);
@@ -70,8 +74,11 @@ class _SchedulePageState extends State<SchedulePage> {
       initialYear: _focusedDay.year,
       initialMonth: _focusedDay.month,
       onSelected: (year, month) {
+        final newDate = DateTime(year, month);
+        if (newDate.isBefore(_minDate) || newDate.isAfter(_maxDate)) return;
+
         setState(() {
-          _focusedDay = DateTime(year, month);
+          _focusedDay = newDate;
           _selectedDay = DateTime(year, month, 1);
         });
       },
@@ -83,6 +90,9 @@ class _SchedulePageState extends State<SchedulePage> {
     final selected = _selectedDay ?? _focusedDay;
     final events = controller.getEvents(selected);
 
+    final bool canGoPrev = !(_focusedDay.year == _minDate.year && _focusedDay.month == _minDate.month);
+    final bool canGoNext = !(_focusedDay.year == _maxDate.year && _focusedDay.month == _maxDate.month);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('스케줄', style: TextStyle(color: Colors.white)),
@@ -93,20 +103,22 @@ class _SchedulePageState extends State<SchedulePage> {
         children: [
           ScheduleHeader(
             focusedDay: _focusedDay,
-            onLeft:
-                () => setState(() {
-                  _focusedDay = DateTime(
-                    _focusedDay.year,
-                    _focusedDay.month - 1,
-                  );
-                }),
-            onRight:
-                () => setState(() {
-                  _focusedDay = DateTime(
-                    _focusedDay.year,
-                    _focusedDay.month + 1,
-                  );
-                }),
+            onLeft: canGoPrev
+                ? () => setState(() {
+                      _focusedDay = DateTime(
+                        _focusedDay.year,
+                        _focusedDay.month - 1,
+                      );
+                    })
+                : null,
+            onRight: canGoNext
+                ? () => setState(() {
+                      _focusedDay = DateTime(
+                        _focusedDay.year,
+                        _focusedDay.month + 1,
+                      );
+                    })
+                : null,
             onTapMonth: _showMonthPicker,
           ),
           ScheduleCalendar(

@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
@@ -9,6 +9,7 @@ import 'package:talk_pilot/src/services/project/live_cpm_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
 import 'package:talk_pilot/src/services/project/script_progress_service.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
+import 'package:talk_pilot/src/services/project/tts_service.dart';
 
 class PresentationPracticeController {
   final String projectId;
@@ -20,13 +21,17 @@ class PresentationPracticeController {
   final SttService _sttService = SttService();
   final ScriptProgressService _progressService = ScriptProgressService();
   final ProjectService _projectService = ProjectService();
+  final TtsService _ttsService = TtsService();
   final Stopwatch _stopwatch = Stopwatch();
 
   String recognizedText = '';
+  String savedText = '';
   bool isListening = false;
   bool hasUpdatedCpm = false;
   double userCpm = 0.0;
   double scriptProgress = 0.0;
+  Timer? _silenceTimer;
+  Timer? _ttsTimer;
 
   ProjectModel? _projectModel;
   String? currentSpeakerNickname;
@@ -39,7 +44,7 @@ class PresentationPracticeController {
   Duration get expectedDuration =>
       Duration(seconds: _projectModel?.estimatedTime ?? 120);
   double get scriptAccuracy =>
-      _progressService.calculateAccuracy(recognizedText);
+      _progressService.calculateAccuracy(savedText + recognizedText);
 
   double get currentCpm {
     final active = currentSpeakerUid;
@@ -77,10 +82,8 @@ class PresentationPracticeController {
   Future<void> _loadUserCpm() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
-
     final userModel = await UserService().readUser(user.uid);
     if (userModel == null) return;
-
     userCpm = userModel.cpm ?? 200.0;
     onUpdate();
   }
@@ -88,13 +91,11 @@ class PresentationPracticeController {
   Future<void> _loadScript() async {
     _projectModel = await _projectService.readProject(projectId);
     await _progressService.loadScript(projectId);
-
     final script = _projectModel?.script ?? '';
     _charStartIndices = _buildWordCharStartIndices(
       script,
       _progressService.scriptChunks,
     );
-
     onUpdate();
   }
 
@@ -124,12 +125,56 @@ class PresentationPracticeController {
   Future<void> startListening() async {
     _stopwatch.reset();
     _stopwatch.start();
-
+    savedText = '';
     await _sttService.startListening((text) async {
       recognizedText = text;
-      isListening = true;
-      scriptProgress = _progressService.calculateProgressByLastMatch(text);
+      debugPrint('🟢 recognizedText updated to: "$recognizedText"');
+      debugPrint('🟠 Current savedText: "$savedText"');
 
+      _silenceTimer?.cancel();
+      _silenceTimer = Timer(const Duration(seconds: 1), () {
+        final currentText = recognizedText.trim();
+        final lastSaved = savedText.trim();
+
+        if (currentText.isEmpty) return;
+
+        if (lastSaved.isEmpty) {
+          savedText = '$currentText ';
+          return;
+        }
+
+        final compareLength = 2;
+        final currentPrefix = currentText.length >= compareLength
+            ? currentText.substring(0, compareLength)
+            : currentText;
+
+        final savedPrefix = lastSaved.length >= compareLength
+            ? lastSaved.substring(0, compareLength)
+            : lastSaved;
+
+        if (currentPrefix == savedPrefix) {
+          final newPart = currentText.length > lastSaved.length
+              ? currentText.substring(lastSaved.length).trim()
+              : '';
+          if (newPart.isNotEmpty) {
+            savedText += '$newPart ';
+          }
+        } else {
+          savedText += '$currentText ';
+        }
+      });
+
+      _ttsTimer?.cancel();
+      _ttsTimer = Timer(const Duration(seconds: 10), () async {
+        final nextChunks = _getNextScriptChunks(5);
+        if (nextChunks.isNotEmpty) {
+          await _ttsService.speak(nextChunks.join(' '));
+        }
+      });
+
+      isListening = true;
+      scriptProgress =
+          _progressService.calculateProgressByLastMatch(savedText + recognizedText);
       await _updateCurrentSpeakerByProgress();
 
       final active = currentSpeakerUid;
@@ -142,6 +187,15 @@ class PresentationPracticeController {
 
     isListening = true;
     onUpdate();
+  }
+
+  List<String> _getNextScriptChunks(int count) {
+    final currentIndex =
+        (_progressService.scriptChunks.length * scriptProgress).floor();
+    final nextIndex = currentIndex;
+    final endIndex =
+        (nextIndex + count).clamp(0, _progressService.scriptChunks.length);
+    return _progressService.scriptChunks.sublist(nextIndex, endIndex);
   }
 
   Future<void> _updateCurrentSpeakerByProgress() async {
@@ -182,24 +236,27 @@ class PresentationPracticeController {
     );
 
     _cpmServices[uid]?.stop();
-    _cpmServices[uid] =
-        LiveCpmService()..start(
-          userAverageCpm: targetCpm,
-          onCpmUpdate: (cpm, status) {
-            final result = _speakerCpmResults[uid];
-            if (result != null) {
-              result.actualCpm = cpm;
-              result.cpmStatus = status;
-            }
-            onUpdate();
-          },
-        );
+    _cpmServices[uid] = LiveCpmService()
+      ..start(
+        userAverageCpm: targetCpm,
+        onCpmUpdate: (cpm, status) {
+          final result = _speakerCpmResults[uid];
+          if (result != null) {
+            result.actualCpm = cpm;
+            result.cpmStatus = status;
+          }
+          onUpdate();
+        },
+      );
 
     onUpdate();
   }
 
   Future<void> stopListening() async {
     _stopwatch.stop();
+    _silenceTimer?.cancel();
+    _ttsTimer?.cancel();
+    await _ttsService.stop();
     await _sttService.stopListening();
     for (final service in _cpmServices.values) {
       service.stop();
@@ -209,12 +266,12 @@ class PresentationPracticeController {
   }
 
   Future<void> dispose() async {
+    await _ttsService.stop();
     await _sttService.dispose();
     for (final service in _cpmServices.values) {
       service.stop();
     }
   }
 
-  bool isSimilar(String a, String b) => _progressService.isSimilar(a, b);
   List<String> splitText(String text) => _progressService.splitText(text);
 }

@@ -9,7 +9,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: true,
+    origin: [
+      'http://localhost:5173',  // 로컬 환경
+      'https://talkpilot.vercel.app'  // Vercel 프론트 도메인
+    ],
     credentials: true,
   });
 

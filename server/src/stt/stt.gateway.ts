@@ -10,8 +10,15 @@ import { SpeechClient } from '@google-cloud/speech';
 import { readFileSync } from 'fs';
 import { admin } from '../auth/firebase-admin';
 
-@WebSocketGateway({ cors: true })
-export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
+@WebSocketGateway({
+    cors: {
+        origin: [
+            'http://localhost:5173',  // 로컬 환경
+            'https://talkpilot.vercel.app'  // Vercel 프론트 도메인
+        ],
+        credentials: true,
+    },
+}) export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private client: SpeechClient;
     private recognizeStreams = new Map<string, any>();
     private streamTimers = new Map<string, NodeJS.Timeout>();

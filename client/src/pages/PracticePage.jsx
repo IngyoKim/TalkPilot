@@ -171,8 +171,16 @@ export default function PracticePage() {
 }
 
 const styles = {
-    container: { padding: 40, fontFamily: 'sans-serif' },
-    controlRow: { marginTop: 20, marginBottom: 20, display: 'flex', gap: 12 },
+    container: {
+        padding: 40,
+        fontFamily: 'sans-serif'
+    },
+    controlRow: {
+        marginTop: 20,
+        marginBottom: 20,
+        display: 'flex',
+        gap: 12
+    },
     button: {
         padding: '10px 20px',
         fontWeight: 'bold',

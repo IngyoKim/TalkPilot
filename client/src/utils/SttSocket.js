@@ -112,8 +112,6 @@ export default function useSttSocket() {
     };
 
     const sendAudioChunk = (chunk) => {
-        console.log('[Socket] audio-chunk 전송:', chunk.length);
-
         if (socketRef.current?.connected) {
             socketRef.current.emit('audio-chunk', chunk);
         } else {

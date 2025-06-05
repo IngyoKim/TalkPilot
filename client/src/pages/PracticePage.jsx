@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as projectAPI from '@/utils/api/project';
 import { useUser } from '@/contexts/UserContext';
@@ -36,8 +36,7 @@ export default function PracticePage() {
 
     /// sendAudioChunk를 넘기도록 수정
     /// 아 진짜 죽을거 같아요...왤케 해결이 안됨???
-    const { startRecording, stopRecording } = AudioRecorder(sendAudioChunk);
-
+    const recorderRef = useRef(null);
     const { cpm, status, start: startCpm, update: updateCpm, stop: stopCpm } = LiveCpm(user?.cpm ?? 200);
 
     useEffect(() => {
@@ -75,7 +74,10 @@ export default function PracticePage() {
 
             clearTranscript();
             setRecognizedText('');
-            startRecording();
+
+            recorderRef.current = AudioRecorder(sendAudioChunk);
+            await recorderRef.current.startRecording();
+
             startCpm();
         } catch (e) {
             alert('STT 서버 연결에 실패했습니다.');
@@ -84,24 +86,31 @@ export default function PracticePage() {
     };
 
     const handleStop = async () => {
-        await stopRecording();
-        stopCpm();
-        await endAudio();
+        try {
+            await recorderRef.current?.stopRecording();
+            recorderRef.current = null;
 
-        const accuracy = calculateAccuracy(project.script, transcriptText);
-        const progress = calculateProgress(project.script, transcriptText);
+            stopCpm();
+            endAudio();
+            disconnect();
 
-        navigate(`/result/${projectId}`, {
-            state: {
-                wpm,
-                cpm,
-                recognizedText: transcriptText,
-                accuracy,
-                progress,
-                status,
-                speakingDuration,
-            },
-        });
+            const accuracy = calculateAccuracy(project.script, transcriptText);
+            const progress = calculateProgress(project.script, transcriptText);
+
+            navigate(`/result/${projectId}`, {
+                state: {
+                    wpm,
+                    cpm,
+                    recognizedText: transcriptText,
+                    accuracy,
+                    progress,
+                    status,
+                    speakingDuration,
+                },
+            });
+        } catch (e) {
+            console.error(e);
+        }
     };
 
     if (!project) return <div>프로젝트 정보 로딩 중...</div>;

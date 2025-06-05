@@ -128,6 +128,8 @@ class PresentationPracticeController {
     savedText = '';
     await _sttService.startListening((text) async {
       recognizedText = text;
+      debugPrint('🟢 recognizedText updated to: "$recognizedText"');
+      debugPrint('🟠 Current savedText: "$savedText"');
 
       _silenceTimer?.cancel();
       _silenceTimer = Timer(const Duration(seconds: 1), () {
@@ -141,7 +143,7 @@ class PresentationPracticeController {
           return;
         }
 
-        final compareLength = 5;
+        final compareLength = 2;
         final currentPrefix = currentText.length >= compareLength
             ? currentText.substring(0, compareLength)
             : currentText;
@@ -151,7 +153,9 @@ class PresentationPracticeController {
             : lastSaved;
 
         if (currentPrefix == savedPrefix) {
-          final newPart = currentText.substring(lastSaved.length).trim();
+          final newPart = currentText.length > lastSaved.length
+              ? currentText.substring(lastSaved.length).trim()
+              : '';
           if (newPart.isNotEmpty) {
             savedText += '$newPart ';
           }

@@ -2,15 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as projectAPI from '@/utils/api/project';
 import { useUser } from '@/contexts/UserContext';
-import useSttSocket from '@/utils/SttSocket';
-import { AudioRecorder } from '@/utils/AudioRecorder';
-import LiveCpm from '@/utils/LiveCpm';
+import useSttSocket from '@/utils/stt/SttSocket';
+import { AudioRecorder } from '@/utils/stt/AudioRecorder';
+import LiveCpm from '@/utils/stt/LiveCpm';
 import {
     calculateAccuracy,
     calculateProgress,
     splitText,
     getMatchedFlags,
-} from '@/utils/scriptUtils';
+} from '@/utils/stt/scriptUtils';
 
 export default function PracticePage() {
     const { id: projectId } = useParams();

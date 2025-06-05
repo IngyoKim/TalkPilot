@@ -42,10 +42,10 @@ function SidebarItem({ icon, text }) {
             navigate('/schedule');
         }
         else if (text === 'Extract .docx') {
-            navigate('/extdocx');
+            navigate('/docx');
         }
         else if (text === 'Extract .txt') {
-            navigate('/exttxt');
+            navigate('/txt');
         }
     };
     return (

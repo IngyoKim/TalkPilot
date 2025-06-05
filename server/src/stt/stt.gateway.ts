@@ -80,7 +80,7 @@ import { admin } from '../auth/firebase-admin';
                     encoding: 'LINEAR16',
                     sampleRateHertz: 16000,
                     languageCode: 'ko-KR',
-                    enableSpeakerDiarization: false,
+                    enableSpeakerDiarization: true,
                 },
                 interimResults: true,
             })

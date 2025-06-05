@@ -1,8 +1,7 @@
 import { getIdToken } from '@/utils/auth/auth';
 import { ProjectModel } from '@/models/projectModel';
 
-
-const API_URL = '/api/project';
+const API_URL = `${import.meta.env.VITE_SERVER_URL}/project`;
 
 /// Nest에서 새로운 프로젝트를 생성
 export async function createProject(data) {
@@ -18,11 +17,10 @@ export async function createProject(data) {
     return res.json();
 }
 
-/// 로그인된 uid를 기반으로
-// 참여 중인 프로젝트 목록을 가져옴
+/// 로그인된 uid를 기반으로 참여 중인 프로젝트 목록을 가져옴
 export async function getProjects(uid) {
     const token = await getIdToken();
-    const res = await fetch(`/api/project?uid=${uid}`, {
+    const res = await fetch(`${API_URL}?uid=${uid}`, {
         headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -30,8 +28,7 @@ export async function getProjects(uid) {
     return json.map((p) => ProjectModel(p.id, p));
 }
 
-
-/// 선택된 프로젝트의 정보를 업데이트함(projectId를 받아서)
+/// 선택된 프로젝트의 정보를 업데이트함 (projectId를 받아서)
 export async function updateProject(projectId, updates) {
     const token = await getIdToken();
     const res = await fetch(`${API_URL}/${projectId}`, {
@@ -51,11 +48,11 @@ export async function deleteProject(projectId) {
     const res = await fetch(`${API_URL}/${projectId}`, {
         method: 'DELETE',
         headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`
         },
     });
 
-    /// 본문이 없으면 .json() 호출 시 오류 나므로 안전 처리
+    // 본문이 없으면 .json() 호출 시 오류 나므로 안전 처리
     if (res.status === 204 || res.headers.get('content-length') === '0') {
         return null;
     }
@@ -64,11 +61,10 @@ export async function deleteProject(projectId) {
     return text ? JSON.parse(text) : null;
 }
 
-
 /// [projectId]로 단일 프로젝트를 조회
 export async function fetchProjectById(projectId) {
     const token = await getIdToken();
-    const res = await fetch(`/api/project/${projectId}`, {
+    const res = await fetch(`${API_URL}/${projectId}`, {
         headers: { Authorization: `Bearer ${token}` },
     });
 

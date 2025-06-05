@@ -1,7 +1,8 @@
 import { Routes, Route } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
-import MainPage from "./pages/MainPage";
 import PrivateRoute from "./components/PrivateRoute";
+
+import MainPage from "./pages/MainPage";
+import LoginPage from "./pages/LoginPage";
 
 import ProfilePage from './pages/Profile/ProfilePage';
 import Help from './pages/Profile/Help';
@@ -9,24 +10,23 @@ import Contact from './pages/Profile/Contact';
 
 import Schedule from './pages/SidebarOP/Schedule';
 import ProjectDetail from './pages/SidebarOP/ProjectDetail';
+import PracticePage from "./pages/PracticePage";
+import ResultPage from "./pages/ResultPage";
 
-import ExtractDOCX from './pages/SidebarOP/ExtractDOCX';
 import ExtractTXT from './pages/SidebarOP/ExtractTXT';
+import ExtractDOCX from './pages/SidebarOP/ExtractDOCX';
 
 export default function Router() {
     return (
         <Routes>
             <Route path="/login" element={<LoginPage />} />
 
-            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/help" element={<Help />} />
             <Route path="/contact" element={<Contact />} />
 
-            <Route path="/schedule" element={<Schedule />} />
-            <Route path="/project/:id" element={<ProjectDetail />} />
+            <Route path="/docx" element={<ExtractDOCX />} />
+            <Route path="/txt" element={<ExtractTXT />} />
 
-            <Route path="/extdocx" element={<ExtractDOCX />} />
-            <Route path="/exttxt" element={<ExtractTXT />} />
             <Route
                 path="/"
                 element={
@@ -40,6 +40,38 @@ export default function Router() {
                 element={
                     <PrivateRoute>
                         <ProfilePage />
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/schedule"
+                element={
+                    <PrivateRoute>
+                        <Schedule />
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/project/:id"
+                element={
+                    <PrivateRoute>
+                        <ProjectDetail />
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/practice/:id"
+                element={
+                    <PrivateRoute>
+                        <PracticePage />
+                    </PrivateRoute>
+                }
+            />
+            <Route
+                path="/result/:id"
+                element={
+                    <PrivateRoute>
+                        <ResultPage />
                     </PrivateRoute>
                 }
             />

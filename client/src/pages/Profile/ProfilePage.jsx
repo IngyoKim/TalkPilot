@@ -1,19 +1,12 @@
 import { useState } from 'react';
-import {
-    FaUserCircle,
-    FaEdit,
-    FaCheckCircle,
-    FaChartLine,
-    FaBullseye,
-    FaPoll,
-    FaAngellist,
-    FaTachometerAlt,
-} from 'react-icons/fa';
+import { FaUserCircle, FaEdit, FaCheckCircle, FaChartLine, FaBullseye, FaPoll, FaAngellist, FaTachometerAlt } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 import { updateUser } from '@/utils/api/user';
 import Sidebar from '@/components/SideBar';
 import { useUser } from '@/contexts/UserContext';
 import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
+import ToastMessage from '@/components/ToastMessage';
 
 const mainColor = '#673AB7';
 
@@ -26,6 +19,12 @@ export default function ProfilePage() {
     const [nickname, setNickname] = useState(user?.name ?? '');
 
     const handleToggleSidebar = () => setIsSidebarOpen(prev => !prev);
+    const navigate = useNavigate();
+    const [messages, setMessages] = useState([]);
+
+    const showMessage = (text, type = 'green', duration = 3000) => { //토스트 메시지
+        setMessages((prev) => [...prev, { id: Date.now(), text, type, duration }]);
+    };
 
     // 닉네임 수정 시작
     const startEditNickname = () => {
@@ -39,10 +38,11 @@ export default function ProfilePage() {
             await updateUser({ nickname: nickname });
             setUser(prev => ({ ...prev, nickname: nickname }));
             setIsEditingNickname(false);
-            alert('닉네임이 수정되었습니다.');
-        } catch (e) {
-            alert('닉네임 수정에 실패했습니다.');
-            console.error(e);
+            showMessage('닉네임을 수정했습니다.', 'yellow');
+
+        } catch (err) {
+            showMessage('닉네임 수정하는데 실패했습니다.', 'red');
+            console.error(err);
         }
     };
 
@@ -150,7 +150,7 @@ export default function ProfilePage() {
                             발표 기록 보기
                         </div>
                         <div style={styles.placeholder}>당신의 발표 기록 데이터를 확인할 수 있습니다.</div>
-                        <button style={styles.actionButton}>확인하기</button>
+                        <button style={styles.actionButton} onClick={() => navigate('/projectrecord')}>확인하기</button>
                     </div>
 
                     <div style={styles.gridBox}>
@@ -159,7 +159,9 @@ export default function ProfilePage() {
                             임시 STT 테스트
                         </div>
                         <div style={styles.placeholder}>STT 기능을 확인할 수 있습니다.</div>
-                        <button style={styles.actionButton}>테스트</button>
+                        <button style={styles.actionButton} onClick={() => navigate('/stttest')}>
+                            테스트
+                        </button>
                     </div>
 
                     <div style={styles.gridBox}>
@@ -168,10 +170,13 @@ export default function ProfilePage() {
                             CPM 계산 페이지
                         </div>
                         <div style={styles.placeholder}>당신의 CPM이 몇인지 측정하세요.</div>
-                        <button style={styles.actionButton}>테스트</button>
+                        <button style={styles.actionButton} onClick={() => navigate('/cpmtest')}>
+                            테스트
+                        </button>
                     </div>
                 </div>
             </div>
+            <ToastMessage messages={messages} setMessages={setMessages} />
         </div>
     );
 }

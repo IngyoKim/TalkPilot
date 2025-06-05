@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import Sidebar from '../../components/SideBar';
 import ProfileDropdown from '../Profile/ProfileDropdown';
+import ToastMessage from '../../components/ToastMessage';
 
 const mainColor = '#673AB7';
 
@@ -9,17 +10,47 @@ export default function FileUploadPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);//사이드바 열림 여부
     const [files, setFiles] = useState([]);//업로드된 파일 목록
     const fileInputRef = useRef(null);// 숨겨진 input 요소에 접근하기 위한 ref
+    const [messages, setMessages] = useState([]);
 
     // 파일 선택 시 호출되는 핸들러
     const handleFileChange = (e) => {
         const selectedFiles = Array.from(e.target.files);
-        setFiles(prev => [...prev, ...selectedFiles]);// 파일 목록에 추가
+
+        if (selectedFiles.length > 0) {
+            setFiles(prev => [...prev, ...selectedFiles]);
+
+            setMessages(prev => [
+                ...prev,
+                {
+                    text: `${selectedFiles.length}개의 파일이 추가되었습니다.`,
+                    duration: 3000,
+                    type: 'green',
+                },
+            ]);
+        }
+        else {
+            setMessages(prev => [
+                ...prev,
+                {
+                    text: '선택된 파일이 없습니다.',
+                    duration: 3000,
+                    type: 'red',
+                },
+            ]);
+        }
     };
 
     // 추출 텍스트 복사 기능
     const handleCopy = () => {
         navigator.clipboard.writeText('여기에 추출된 텍스트가 들어갑니다.');
-        alert('복사되었습니다.');
+        setMessages(prev => [
+            ...prev,
+            {
+                text: '텍스트가 복사되었습니다.',
+                duration: 3000,
+                type: 'green',
+            },
+        ]);
     };
 
     // 숨겨진 파일 input 클릭 유도
@@ -79,6 +110,7 @@ export default function FileUploadPage() {
                         </button>
                     </div>
                 </div>
+                <ToastMessage messages={messages} setMessages={setMessages} />
             </div>
         </div >
     );

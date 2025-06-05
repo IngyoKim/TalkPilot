@@ -8,6 +8,10 @@ import ProfilePage from './pages/Profile/ProfilePage';
 import Help from './pages/Profile/Help';
 import Contact from './pages/Profile/Contact';
 
+import CPMtestPage from './pages/Profile/CPMtestPage';
+import STTtest from './pages/Profile/STTtest';
+import ProjectRecord from './pages/Profile/ProjectRecord';
+
 import Schedule from './pages/SidebarOP/Schedule';
 import ProjectDetail from './pages/SidebarOP/ProjectDetail';
 import PracticePage from "./pages/PracticePage";
@@ -23,6 +27,13 @@ export default function Router() {
 
             <Route path="/help" element={<Help />} />
             <Route path="/contact" element={<Contact />} />
+
+            <Route path="/cpmtest" element={<CPMtestPage />} />
+            <Route path="/stttest" element={<STTtest />} />
+            <Route path="/projectrecord" element={<ProjectRecord />} />
+
+            <Route path="/schedule" element={<Schedule />} />
+            <Route path="/project/:id" element={<ProjectDetail />} />
 
             <Route path="/docx" element={<ExtractDOCX />} />
             <Route path="/txt" element={<ExtractTXT />} />

@@ -4,7 +4,6 @@ import { FaSearch } from 'react-icons/fa';
 import Sidebar from '@/components/SideBar';
 import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
 
-
 export default function Help() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [query, setQuery] = useState('');

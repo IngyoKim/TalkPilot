@@ -161,7 +161,8 @@ const styles = {
     },
     profileContainer: {
         position: 'fixed',
-        marginRight: '32px',
+        right: '32px',
+        top: '16px',
         zIndex: 1002,
     },
     profileIcon: {

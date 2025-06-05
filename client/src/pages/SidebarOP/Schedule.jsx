@@ -54,10 +54,10 @@ export default function SchedulePage() {
                 selectedCellRef.current.style.backgroundColor = '';
                 selectedCellRef.current.style.color = '';
             }
-
+            // 현재 셀 선택 스타일 적용
+            args.el.style.backgroundColor = '#D1C4E9';
             args.el.style.backgroundColor = 'rgba(103,58,183, 0.3)';
             selectedCellRef.current = args.el;
-
             calendarRef.current?.getApi().gotoDate(args.date);
         };
     };

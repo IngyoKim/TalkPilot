@@ -21,8 +21,7 @@ export default function Sidebar({ isOpen }) {
             <div style={styles.logo} onClick={() => window.location.reload()}>
                 TalkPilot
             </div>
-            <button style={styles.practiceBtn}>Add Project</button>
-
+            <button style={styles.practiceBtn}>Make your speech smarter</button>
             {sidebarItems.map(({ icon, text }) => (
                 <SidebarItem key={text} icon={icon} text={text} />
             ))}

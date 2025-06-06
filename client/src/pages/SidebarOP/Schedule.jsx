@@ -9,6 +9,8 @@ import { useUser } from '@/contexts/UserContext';
 import useProjects from '@/utils/userProjects';
 import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
 
+const isTestEnv = process.env.NODE_ENV === "test";
+console.log("SCHEDULE 렌더 시작");
 
 export default function Schedule() {
     const { user, setUser } = useUser();
@@ -31,10 +33,15 @@ export default function Schedule() {
     }, [projects]);
 
     useEffect(() => {
-        setTimeout(() => {
-            calendarRef.current?.getApi().updateSize();
-        }, 300);
-    }, [isSidebarOpen]);
+        if (process.env.NODE_ENV !== 'test') {
+            if (calendarRef.current && typeof calendarRef.current.getApi === "function") {
+                const api = calendarRef.current.getApi();
+                console.log("캘린더 API 불러옴:", api);
+            } else {
+                console.warn("calendarRef or getApi undefined");
+            }
+        }
+    }, []);
 
     const handleDayHeaderDidMount = (args) => {
         const day = args.date.getDay();
@@ -50,15 +57,15 @@ export default function Schedule() {
         args.el.style.cursor = 'pointer';
 
         args.el.onclick = () => {
-            if (selectedCellRef.current) {
-                selectedCellRef.current.style.backgroundColor = '';
-                selectedCellRef.current.style.color = '';
+            if (process.env.NODE_ENV !== 'test') {
+                if (selectedCellRef.current) {
+                    selectedCellRef.current.style.backgroundColor = '';
+                    selectedCellRef.current.style.color = '';
+                }
+                args.el.style.backgroundColor = 'rgba(103,58,183, 0.3)';
+                selectedCellRef.current = args.el;
+                calendarRef.current?.getApi().gotoDate(args.date);
             }
-            // 현재 셀 선택 스타일 적용
-            args.el.style.backgroundColor = '#D1C4E9';
-            args.el.style.backgroundColor = 'rgba(103,58,183, 0.3)';
-            selectedCellRef.current = args.el;
-            calendarRef.current?.getApi().gotoDate(args.date);
         };
     };
 

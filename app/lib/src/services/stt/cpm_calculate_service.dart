@@ -16,8 +16,9 @@ class CpmCalculateService extends ChangeNotifier {
     '경청해 주셔서 감사합니다.',
   ];
 
-  final _db = DatabaseService();
-  final _auth = FirebaseAuth.instance;
+  final DatabaseService _db;
+  final FirebaseAuth _auth;
+  final UserService _userService;
 
   int _currentIndex = 0;
   DateTime? _startTime;
@@ -25,12 +26,22 @@ class CpmCalculateService extends ChangeNotifier {
   CpmStage _stage = CpmStage.ready;
   final List<double> _cpmList = [];
 
+  CpmCalculateService({
+    DatabaseService? databaseService,
+    UserService? userService,
+    FirebaseAuth? firebaseAuth,
+  })  : _db = databaseService ?? DatabaseService(),
+        _auth = firebaseAuth ?? FirebaseAuth.instance,
+        _userService = userService ?? UserService();
+
   String get currentSentence => _sentences[_currentIndex];
+
   double? get cpmResult => _cpmResult;
-  double? get averageCpm =>
-      _cpmList.isEmpty
-          ? null
-          : _cpmList.reduce((a, b) => a + b) / _cpmList.length;
+
+  double? get averageCpm => _cpmList.isEmpty
+      ? null
+      : _cpmList.reduce((a, b) => a + b) / _cpmList.length;
+
   String get buttonText {
     switch (_stage) {
       case CpmStage.ready:
@@ -43,6 +54,7 @@ class CpmCalculateService extends ChangeNotifier {
   }
 
   CpmStage get stage => _stage;
+
   bool get isLast => _currentIndex == _sentences.length - 1;
 
   void onButtonPressed(BuildContext context) async {
@@ -77,17 +89,16 @@ class CpmCalculateService extends ChangeNotifier {
             });
 
             // 2. CPM 기록 추가
-            final historyService = UserService();
-            await historyService.addCpmRecord(
+            await _userService.addCpmRecord(
               user.uid,
               CpmRecordModel(cpm: avg, timestamp: DateTime.now()),
             );
 
             // 3. 평균 재계산하여 업데이트 (history 기준)
-            await historyService.updateAverageCpm(user.uid);
+            await _userService.updateAverageCpm(user.uid);
           }
 
-          /// ProfilePage로 이동
+          // ProfilePage로 이동
           if (context.mounted) {
             Navigator.pop(context, avg);
           }

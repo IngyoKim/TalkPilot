@@ -3,7 +3,16 @@ import 'package:talk_pilot/src/services/database/database_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
 
 extension CpmHistoryService on UserService {
-  DatabaseService get _cpmDb => DatabaseService();
+  static DatabaseService? _providedDb;
+  static void setMockDatabaseService(DatabaseService db) {
+    _providedDb = db;
+  }
+
+  static void clearMockDatabaseService() {
+    _providedDb = null;
+  }
+
+  DatabaseService get _cpmDb => _providedDb ?? DatabaseService();
 
   Future<void> addCpmRecord(
     String uid,

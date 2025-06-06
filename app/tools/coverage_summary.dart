@@ -26,8 +26,14 @@ void main() async {
   int totalStatements = 0;
   int totalMissed = 0;
 
-  print('${'Name'.padRight(40)} ${'Stmts'.padLeft(5)} ${'Miss'.padLeft(5)} ${'Cover'.padLeft(6)}');
-  print('-' * 60);
+  const nameWidth = 50;
+  const colWidth = 7;
+
+  print('${'Name'.padRight(nameWidth)}'
+      '${'Stmts'.padLeft(colWidth)}'
+      '${'Miss'.padLeft(colWidth)}'
+      '${'Cover'.padLeft(colWidth + 1)}');
+  print('-' * (nameWidth + colWidth * 3 + 1));
 
   for (final entry in coverageData.entries) {
     final filePath = entry.key.replaceAll('\\', '/');
@@ -40,12 +46,18 @@ void main() async {
     totalStatements += total;
     totalMissed += missed;
 
-    print('${filePath.padRight(40)} ${'$total'.padLeft(5)} ${'$missed'.padLeft(5)} ${percent.toStringAsFixed(1).padLeft(5)}%');
+    print('${filePath.padRight(nameWidth)}'
+        '${'$total'.padLeft(colWidth)}'
+        '${'$missed'.padLeft(colWidth)}'
+        '${percent.toStringAsFixed(1).padLeft(colWidth)}%');
   }
 
-  print('-' * 60);
+  print('-' * (nameWidth + colWidth * 3 + 1));
   final totalPercent = totalStatements == 0
       ? 100.0
       : ((totalStatements - totalMissed) / totalStatements * 100);
-  print('${'TOTAL'.padRight(40)} ${'$totalStatements'.padLeft(5)} ${'$totalMissed'.padLeft(5)} ${totalPercent.toStringAsFixed(1).padLeft(5)}%');
+  print('${'TOTAL'.padRight(nameWidth)}'
+      '${'$totalStatements'.padLeft(colWidth)}'
+      '${'$totalMissed'.padLeft(colWidth)}'
+      '${totalPercent.toStringAsFixed(1).padLeft(colWidth)}%');
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as projectAPI from '@/utils/api/project';
 import { useUser } from '@/contexts/UserContext';
@@ -7,7 +7,7 @@ import { AudioRecorder } from '@/utils/stt/AudioRecorder';
 import LiveCpm from '@/utils/stt/LiveCpm';
 import {
     calculateAccuracy,
-    calculateProgress,
+    calculateProgressByLastMatch,
     splitText,
     getMatchedFlags,
 } from '@/utils/stt/scriptUtils';
@@ -19,6 +19,7 @@ export default function PracticePage() {
 
     const [project, setProject] = useState(null);
     const [recognizedText, setRecognizedText] = useState('');
+    const [savedText, setSavedText] = useState('');
     const [wpm, setWpm] = useState(0);
 
     const {
@@ -34,8 +35,6 @@ export default function PracticePage() {
         sendAudioChunk,
     } = useSttSocket();
 
-    /// sendAudioChunk를 넘기도록 수정
-    /// 아 진짜 죽을거 같아요...왤케 해결이 안됨???
     const recorderRef = useRef(null);
     const { cpm, status, start: startCpm, update: updateCpm, stop: stopCpm } = LiveCpm(user?.cpm ?? 200);
 
@@ -52,6 +51,7 @@ export default function PracticePage() {
         setRecognizedText(transcriptText);
         updateCpm(transcriptText);
 
+        // WPM 계산
         const startTime = transcripts[0]?.timestamp;
         const elapsedMin = startTime ? (Date.now() - new Date(startTime)) / 60000 : 0;
 
@@ -61,27 +61,51 @@ export default function PracticePage() {
         }
     }, [transcriptText, transcripts]);
 
+    // savedText 업데이트 → Flutter 구조 동일하게 만들기
+    useEffect(() => {
+        const current = transcriptText.trim();
+        const lastSaved = savedText.trim();
+
+        const compareLength = 2;
+        const currentPrefix = current.substring(0, Math.min(compareLength, current.length));
+        const savedPrefix = lastSaved.substring(0, Math.min(compareLength, lastSaved.length));
+
+        if (currentPrefix === savedPrefix) {
+            const newPart = current.length > lastSaved.length ? current.substring(lastSaved.length).trim() : '';
+            if (newPart) {
+                setSavedText((prev) => prev + ' ' + newPart);
+            }
+        } else {
+            setSavedText(current);
+        }
+    }, [transcriptText, savedText]);
+
+    const scriptChunks = useMemo(() => splitText(project?.script ?? ''), [project?.script]);
+    const matchedFlags = useMemo(
+        () => getMatchedFlags(scriptChunks, savedText + recognizedText),
+        [scriptChunks, savedText, recognizedText]
+    );
+    const rawCurrentIndex = matchedFlags.findIndex((flag) => !flag);
+    const currentIndex = rawCurrentIndex === -1 ? scriptChunks.length : rawCurrentIndex;
+
     const handleStart = async () => {
         try {
-            if (!isConnected) {
-                await connect();
-            }
-
+            if (!isConnected) await connect();
             if (!socket.current || !socket.current.connected) {
-                alert('STT 서버와 연결되지 않았습니다. 잠시 후 다시 시도하세요.');
+                alert('STT 서버와 연결되지 않았습니다.');
                 return;
             }
 
             clearTranscript();
             setRecognizedText('');
+            setSavedText('');
 
             recorderRef.current = AudioRecorder(sendAudioChunk);
             await recorderRef.current.startRecording();
-
             startCpm();
         } catch (e) {
-            alert('STT 서버 연결에 실패했습니다.');
             console.error(e);
+            alert('STT 서버 연결 실패');
         }
     };
 
@@ -89,19 +113,18 @@ export default function PracticePage() {
         try {
             await recorderRef.current?.stopRecording();
             recorderRef.current = null;
-
             stopCpm();
             endAudio();
             disconnect();
 
-            const accuracy = calculateAccuracy(project.script, transcriptText);
-            const progress = calculateProgress(project.script, transcriptText);
+            const accuracy = calculateAccuracy(scriptChunks, savedText + recognizedText);
+            const progress = calculateProgressByLastMatch(scriptChunks, savedText + recognizedText);
 
             navigate(`/result/${projectId}`, {
                 state: {
                     wpm,
                     cpm,
-                    recognizedText: transcriptText,
+                    recognizedText: savedText + recognizedText,
                     accuracy,
                     progress,
                     status,
@@ -115,27 +138,14 @@ export default function PracticePage() {
 
     if (!project) return <div>프로젝트 정보 로딩 중...</div>;
 
-    const scriptWords = splitText(project.script ?? '');
-    const matchedFlags = getMatchedFlags(project.script ?? '', transcriptText);
-    const currentIndex = matchedFlags.findIndex(flag => !flag);
-
     return (
         <div style={styles.container}>
             <h2>발표 연습 - {project.title}</h2>
             <p>대본 길이: {project.script?.length ?? 0}자</p>
 
-            <div
-                style={{
-                    marginBottom: 20,
-                    padding: 12,
-                    backgroundColor: '#e3f2fd',
-                    borderRadius: 6,
-                    minHeight: 50,
-                    whiteSpace: 'pre-wrap',
-                }}
-            >
+            <div style={styles.transcriptBox}>
                 <strong>현재 STT 텍스트:</strong>
-                <p>{transcriptText || '아직 입력이 없습니다.'}</p>
+                <p>{(savedText + ' ' + recognizedText).trim() || '아직 입력이 없습니다.'}</p>
             </div>
 
             <div style={styles.controlRow}>
@@ -144,7 +154,7 @@ export default function PracticePage() {
             </div>
 
             <div style={styles.scriptBox}>
-                {scriptWords.map((word, idx) => {
+                {scriptChunks.map((word, idx) => {
                     const isMatched = matchedFlags[idx];
                     const isCurrent = idx === currentIndex;
                     return (
@@ -162,7 +172,7 @@ export default function PracticePage() {
             </div>
 
             <div style={styles.resultBox}>
-                <p><strong>STT 결과:</strong> {transcriptText}</p>
+                <p><strong>STT 결과:</strong> {(savedText + ' ' + recognizedText).trim()}</p>
                 <p>WPM: {wpm} / CPM: {cpm} ({status})</p>
                 <p>발표 시간: {(speakingDuration / 1000).toFixed(1)}초</p>
             </div>
@@ -171,39 +181,25 @@ export default function PracticePage() {
 }
 
 const styles = {
-    container: {
-        padding: 40,
-        fontFamily: 'sans-serif'
+    container: { padding: 40, fontFamily: 'sans-serif' },
+    transcriptBox: {
+        marginBottom: 20, padding: 12,
+        backgroundColor: '#e3f2fd', borderRadius: 6,
+        minHeight: 50, whiteSpace: 'pre-wrap',
     },
-    controlRow: {
-        marginTop: 20,
-        marginBottom: 20,
-        display: 'flex',
-        gap: 12
-    },
+    controlRow: { marginTop: 20, marginBottom: 20, display: 'flex', gap: 12 },
     button: {
-        padding: '10px 20px',
-        fontWeight: 'bold',
-        borderRadius: 8,
-        backgroundColor: '#673AB7',
-        color: '#fff',
-        border: 'none',
+        padding: '10px 20px', fontWeight: 'bold', borderRadius: 8,
+        backgroundColor: '#673AB7', color: '#fff', border: 'none',
     },
     scriptBox: {
-        marginTop: 20,
-        padding: 20,
-        backgroundColor: '#f9f9f9',
-        borderRadius: 8,
+        marginTop: 20, padding: 20,
+        backgroundColor: '#f9f9f9', borderRadius: 8,
         lineHeight: 1.8,
     },
-    word: {
-        padding: '2px 4px',
-        borderRadius: 4,
-    },
+    word: { padding: '2px 4px', borderRadius: 4 },
     resultBox: {
-        marginTop: 20,
-        padding: 20,
-        backgroundColor: '#f3f3f3',
-        borderRadius: 8,
+        marginTop: 20, padding: 20,
+        backgroundColor: '#f3f3f3', borderRadius: 8,
     },
 };

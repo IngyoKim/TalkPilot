@@ -26,7 +26,7 @@ void main() async {
   int totalStatements = 0;
   int totalMissed = 0;
 
-  const nameWidth = 50;
+  const nameWidth = 60;
   const colWidth = 7;
 
   print('${'Name'.padRight(nameWidth)}'

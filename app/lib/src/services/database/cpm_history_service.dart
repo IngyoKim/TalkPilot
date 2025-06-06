@@ -3,22 +3,31 @@ import 'package:talk_pilot/src/services/database/database_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
 
 extension CpmHistoryService on UserService {
-  static final _cpmDb = DatabaseService();
+  DatabaseService get _cpmDb => DatabaseService();
 
-  Future<void> addCpmRecord(String uid, CpmRecordModel record) async {
+  Future<void> addCpmRecord(
+    String uid,
+    CpmRecordModel record, {
+    DatabaseService? db,
+  }) async {
     final recordId = record.timestamp.millisecondsSinceEpoch.toString();
-    await _cpmDb.writeDB("users/$uid/cpmHistory/$recordId", record.toMap());
+    final targetDb = db ?? _cpmDb;
+    await targetDb.writeDB("users/$uid/cpmHistory/$recordId", record.toMap());
   }
 
-  Future<List<CpmRecordModel>> getCpmHistory(String uid) async {
-    return _cpmDb.fetchDB<CpmRecordModel>(
+  Future<List<CpmRecordModel>> getCpmHistory(
+    String uid, {
+    DatabaseService? db,
+  }) async {
+    final _db = db ?? _cpmDb;
+    return _db.fetchDB<CpmRecordModel>(
       path: "users/$uid/cpmHistory",
       fromMap: (map) => CpmRecordModel.fromMap(map),
     );
   }
 
-  Future<void> updateAverageCpm(String uid) async {
-    final history = await getCpmHistory(uid);
+  Future<void> updateAverageCpm(String uid, {DatabaseService? db}) async {
+    final history = await getCpmHistory(uid, db: db);
     if (history.isEmpty) return;
 
     final avg =
@@ -26,14 +35,20 @@ extension CpmHistoryService on UserService {
     await updateUser(uid, {'cpm': avg});
   }
 
-  Future<void> clearCpmHistory(String uid) async {
-    await _cpmDb.deleteDB("users/$uid/cpmHistory");
+  Future<void> clearCpmHistory(String uid, {DatabaseService? db}) async {
+    final _db = db ?? _cpmDb;
+    await _db.deleteDB("users/$uid/cpmHistory");
     await updateUser(uid, {'cpm': 0.0});
   }
 
-  Future<void> deleteCpmRecord(String uid, int timestampMillis) async {
+  Future<void> deleteCpmRecord(
+    String uid,
+    int timestampMillis, {
+    DatabaseService? db,
+  }) async {
+    final _db = db ?? _cpmDb;
     final recordId = timestampMillis.toString();
-    await _cpmDb.deleteDB("users/$uid/cpmHistory/$recordId");
-    await updateAverageCpm(uid);
+    await _db.deleteDB("users/$uid/cpmHistory/$recordId");
+    await updateAverageCpm(uid, db: db);
   }
 }

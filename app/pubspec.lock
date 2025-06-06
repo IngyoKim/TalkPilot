@@ -322,7 +322,7 @@ packages:
     source: hosted
     version: "11.3.5"
   firebase_database_platform_interface:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: firebase_database_platform_interface
       sha256: b65f416dd2c8ac2d5322241e5411a24ed3da43d0f38aaf9ab6c211d72e52261b

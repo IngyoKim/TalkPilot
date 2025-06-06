@@ -5,7 +5,10 @@ module.exports = {
     transform: {
         '^.+\\.(t|j)s$': 'ts-jest',
     },
-    collectCoverageFrom: ['**/*.(t|j)s'],
+    collectCoverageFrom: [
+        '{auth,project,stt,user}/**/!(*.controller|*.module).ts',
+        '!auth/firebase-admin.ts',
+    ],
     coverageDirectory: '../coverage',
     testEnvironment: 'node',
 };

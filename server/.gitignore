@@ -43,3 +43,7 @@ credentials/*
 credentials
 secrets/*
 secrets
+
+# coverage
+coverage
+coverage/*

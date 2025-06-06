@@ -90,14 +90,14 @@ describe('ProjectService', () => {
     });
 
     it('updateProject should update project data with updatedAt', async () => {
-        const updates = { title: 'Updated Title' };
+        const updates = { title: 'updated title' };
 
         await service.updateProject('test_project', updates);
 
         expect(mockDatabaseService.update).toHaveBeenCalledWith(
             'projects/test_project',
             expect.objectContaining({
-                title: 'Updated Title',
+                title: 'updated title',
                 updatedAt: expect.any(String),
             }),
         );
@@ -107,5 +107,14 @@ describe('ProjectService', () => {
         await service.deleteProject('test_project');
 
         expect(mockDatabaseService.delete).toHaveBeenCalledWith('projects/test_project');
+    });
+
+    it('getProjectById should return null if project does not exist', async () => {
+        (mockDatabaseService.read as jest.Mock).mockResolvedValue(null);
+
+        const result = await service.getProjectById('non_existing_project');
+
+        expect(result).toBeNull();
+        expect(mockDatabaseService.read).toHaveBeenCalledWith('projects/non_existing_project');
     });
 });

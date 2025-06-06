@@ -103,7 +103,7 @@ export default function ProfilePage() {
                                     ) : (
                                         <>
                                             {user.nickname}
-                                            <FaEdit style={styles.editIcon} onClick={startEditNickname} />
+                                            <FaEdit data-testid="edit-nickname" onClick={() => setIsEditingNickname(true)} />
                                         </>
                                     )}
                                 </div>

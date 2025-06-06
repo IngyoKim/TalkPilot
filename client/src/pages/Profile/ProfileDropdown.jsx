@@ -99,37 +99,39 @@ export default function ProfileDropdown({ isSidebarOpen, onToggleSidebar }) {
                 <ArrowIcon />
             </div>
 
-            <div style={styles.profileContainer} ref={menuRef}>
-                <div style={styles.profileIcon} onClick={() => setMenuOpen(o => !o)}>
-                    <FaUser size={20} color={mainColor} />
-                </div>
-
-                {menuOpen && (
-                    <div style={styles.dropdown}>
-                        <div style={styles.userInfo}>
-                            <span style={styles.userName}>{user?.name || 'Guest'}</span>
-                            <span style={styles.userEmail}>{user?.email || 'guest@example.com'}</span>
-                        </div>
-                        <div style={styles.divider} />
-                        {menuItems.map((item, i) => (
-                            <div
-                                key={i}
-                                style={{
-                                    ...styles.menuItem,
-                                    color: item.isDanger ? '#e53935' : '#333',
-                                }}
-                                onClick={() => {
-                                    item.onClick();
-                                    setMenuOpen(false);
-                                }}
-                            >
-                                <span style={styles.iconWrapper}>{item.icon}</span>
-                                <span>{item.label}</span>
-                            </div>
-                        ))}
-                    </div>
-                )}
+            <div
+                data-testid="profile-icon"
+                style={styles.profileIcon}
+                onClick={() => setMenuOpen(o => !o)}
+            >
+                <FaUser size={20} color={mainColor} />
             </div>
+
+            {menuOpen && (
+                <div style={styles.dropdown}>
+                    <div style={styles.userInfo}>
+                        <span style={styles.userName}>{user?.name || 'Guest'}</span>
+                        <span style={styles.userEmail}>{user?.email || 'guest@example.com'}</span>
+                    </div>
+                    <div style={styles.divider} />
+                    {menuItems.map((item, i) => (
+                        <div
+                            key={i}
+                            style={{
+                                ...styles.menuItem,
+                                color: item.isDanger ? '#e53935' : '#333',
+                            }}
+                            onClick={() => {
+                                item.onClick();
+                                setMenuOpen(false);
+                            }}
+                        >
+                            <span style={styles.iconWrapper}>{item.icon}</span>
+                            <span>{item.label}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

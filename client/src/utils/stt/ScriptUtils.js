@@ -90,18 +90,16 @@ export function calculateAccuracy(scriptChunks, recognizedText) {
 export function getMatchedFlags(scriptChunks, recognizedText) {
     const recognizedWords = splitText(recognizedText);
     const matchedFlags = new Array(scriptChunks.length).fill(false);
-    const usedIndexes = new Set();
     let lastMatchedIndex = -1;
 
-    for (let i = 0; i < scriptChunks.length; i++) {
+    for (let i = 0; i < recognizedWords.length; i++) {
         const start = Math.max(0, lastMatchedIndex - 8);
-        const end = Math.min(recognizedWords.length, lastMatchedIndex + 8);
+        const end = Math.min(scriptChunks.length, lastMatchedIndex + 8);
 
         for (let j = start; j < end; j++) {
-            if (usedIndexes.has(j)) continue;
-            if (isSimilar(scriptChunks[i], recognizedWords[j])) {
-                matchedFlags[i] = true;
-                usedIndexes.add(j);
+            if (matchedFlags[j]) continue;
+            if (isSimilar(recognizedWords[i], scriptChunks[j])) {
+                matchedFlags[j] = true;
                 lastMatchedIndex = j;
                 break;
             }

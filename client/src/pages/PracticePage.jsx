@@ -10,7 +10,7 @@ import {
     calculateProgressByLastMatch,
     splitText,
     getMatchedFlags,
-} from '@/utils/stt/scriptUtils';
+} from '@/utils/stt/ScriptUtils';
 
 export default function PracticePage() {
     const { id: projectId } = useParams();
@@ -21,6 +21,7 @@ export default function PracticePage() {
     const [recognizedText, setRecognizedText] = useState('');
     const [savedText, setSavedText] = useState('');
     const [wpm, setWpm] = useState(0);
+    const [elapsedTime, setElapsedTime] = useState(0);
 
     const {
         socket,
@@ -36,6 +37,8 @@ export default function PracticePage() {
     } = useSttSocket();
 
     const recorderRef = useRef(null);
+    const timerRef = useRef(null);
+
     const { cpm, status, start: startCpm, update: updateCpm, stop: stopCpm } = LiveCpm(user?.cpm ?? 200);
 
     useEffect(() => {
@@ -51,7 +54,6 @@ export default function PracticePage() {
         setRecognizedText(transcriptText);
         updateCpm(transcriptText);
 
-        // WPM 계산
         const startTime = transcripts[0]?.timestamp;
         const elapsedMin = startTime ? (Date.now() - new Date(startTime)) / 60000 : 0;
 
@@ -61,7 +63,6 @@ export default function PracticePage() {
         }
     }, [transcriptText, transcripts]);
 
-    // savedText 업데이트 → Flutter 구조 동일하게 만들기
     useEffect(() => {
         const current = transcriptText.trim();
         const lastSaved = savedText.trim();
@@ -85,8 +86,16 @@ export default function PracticePage() {
         () => getMatchedFlags(scriptChunks, savedText + recognizedText),
         [scriptChunks, savedText, recognizedText]
     );
+
+    const progress = useMemo(
+        () => calculateProgressByLastMatch(scriptChunks, savedText + recognizedText),
+        [scriptChunks, savedText, recognizedText]
+    );
+
     const rawCurrentIndex = matchedFlags.findIndex((flag) => !flag);
     const currentIndex = rawCurrentIndex === -1 ? scriptChunks.length : rawCurrentIndex;
+
+    const expectedDurationSec = project?.estimatedTime ?? 120;
 
     const handleStart = async () => {
         try {
@@ -99,10 +108,15 @@ export default function PracticePage() {
             clearTranscript();
             setRecognizedText('');
             setSavedText('');
+            setElapsedTime(0);
 
             recorderRef.current = AudioRecorder(sendAudioChunk);
             await recorderRef.current.startRecording();
             startCpm();
+
+            timerRef.current = setInterval(() => {
+                setElapsedTime((prev) => prev + 1);
+            }, 1000);
         } catch (e) {
             console.error(e);
             alert('STT 서버 연결 실패');
@@ -117,6 +131,11 @@ export default function PracticePage() {
             endAudio();
             disconnect();
 
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+            }
+
             const accuracy = calculateAccuracy(scriptChunks, savedText + recognizedText);
             const progress = calculateProgressByLastMatch(scriptChunks, savedText + recognizedText);
 
@@ -129,6 +148,7 @@ export default function PracticePage() {
                     progress,
                     status,
                     speakingDuration,
+                    elapsedTime,
                 },
             });
         } catch (e) {
@@ -140,17 +160,35 @@ export default function PracticePage() {
 
     return (
         <div style={styles.container}>
+
             <h2>발표 연습 - {project.title}</h2>
             <p>대본 길이: {project.script?.length ?? 0}자</p>
-
-            <div style={styles.transcriptBox}>
-                <strong>현재 STT 텍스트:</strong>
-                <p>{(savedText + ' ' + recognizedText).trim() || '아직 입력이 없습니다.'}</p>
-            </div>
 
             <div style={styles.controlRow}>
                 <button onClick={handleStart} style={styles.button}>시작</button>
                 <button onClick={handleStop} style={styles.button}>종료</button>
+            </div>
+
+            <div style={styles.resultBox}>
+                <h3 style={styles.resultTitle}>발표 결과</h3>
+                <div style={styles.resultItem}>
+                    <span style={styles.resultLabel}>진행률:</span>
+                    <span style={styles.resultValue}>{(progress * 100).toFixed(1)}%</span>
+                </div>
+                <div style={styles.resultItem}>
+                    <span style={styles.resultLabel}>CPM:</span>
+                    <span style={styles.resultValue}>{cpm} ({status})</span>
+                </div>
+                <div style={styles.resultItem}>
+                    <span style={styles.resultLabel}>발표 시간:</span>
+                    <span style={styles.resultValue}>{elapsedTime}초 / 예상 {Math.round(expectedDurationSec)}초</span>
+                </div>
+                {/* <div style={styles.resultItem}>
+                    <span style={styles.resultLabel}>STT 결과:</span>
+                    <div style={styles.sttTextBox}>
+                        {(savedText + ' ' + recognizedText).trim() || '아직 입력이 없습니다.'}
+                    </div>
+                </div> */}
             </div>
 
             <div style={styles.scriptBox}>
@@ -170,23 +208,12 @@ export default function PracticePage() {
                     );
                 })}
             </div>
-
-            <div style={styles.resultBox}>
-                <p><strong>STT 결과:</strong> {(savedText + ' ' + recognizedText).trim()}</p>
-                <p>WPM: {wpm} / CPM: {cpm} ({status})</p>
-                <p>발표 시간: {(speakingDuration / 1000).toFixed(1)}초</p>
-            </div>
         </div>
     );
 }
 
 const styles = {
     container: { padding: 40, fontFamily: 'sans-serif' },
-    transcriptBox: {
-        marginBottom: 20, padding: 12,
-        backgroundColor: '#e3f2fd', borderRadius: 6,
-        minHeight: 50, whiteSpace: 'pre-wrap',
-    },
     controlRow: { marginTop: 20, marginBottom: 20, display: 'flex', gap: 12 },
     button: {
         padding: '10px 20px', fontWeight: 'bold', borderRadius: 8,
@@ -199,7 +226,44 @@ const styles = {
     },
     word: { padding: '2px 4px', borderRadius: 4 },
     resultBox: {
-        marginTop: 20, padding: 20,
-        backgroundColor: '#f3f3f3', borderRadius: 8,
+        marginTop: 20,
+        padding: 20,
+        backgroundColor: '#ffffff',
+        borderRadius: 12,
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        lineHeight: 1.6,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+    },
+    resultTitle: {
+        fontSize: '18px',
+        fontWeight: 'bold',
+        marginBottom: '10px',
+        color: '#333',
+    },
+    resultItem: {
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        fontSize: '15px',
+    },
+    resultLabel: {
+        fontWeight: 'bold',
+        color: '#555',
+        marginRight: '8px',
+    },
+    resultValue: {
+        color: '#222',
+    },
+    sttTextBox: {
+        marginTop: '5px',
+        padding: '8px',
+        backgroundColor: '#f9f9f9',
+        borderRadius: '6px',
+        border: '1px solid #ddd',
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
+        color: '#444',
     },
 };

@@ -31,13 +31,13 @@ export const logout = async () => {
 /// Firebase에서 uid를 가져옴
 export const getCurrentUid = () => {
     const user = getAuth().currentUser;
-    if (!user) throw new error("로그인된 사용자가 없습니다.");
+    if (!user) throw new Error("로그인된 사용자가 없습니다.");
     return user.uid;
 };
 
 /// Firebase에서 Id token을 가져옴
 export const getIdToken = async () => {
     const user = getAuth().currentUser;
-    if (!user) throw new error('로그인된 사용자가 없습니다.');
+    if (!user) throw new Error("로그인된 사용자가 없습니다.");
     return await user.getIdToken();
 };

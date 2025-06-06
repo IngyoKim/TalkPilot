@@ -5,6 +5,7 @@ import { serverLogin } from '@/utils/auth/auth';
 import { auth } from '@/utils/auth/firebaseConfig';
 
 const AuthContext = createContext(null);
+export const UserContext = createContext();
 
 export function AuthProvider({ children }) {
     const [authUser, setAuthUser] = useState(null);

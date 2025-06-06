@@ -9,7 +9,7 @@ import Sidebar from '@/components/SideBar';
 import { useUser } from '@/contexts/UserContext';
 import ToastMessage from '@/components/ToastMessage';
 
-export default function ProjectDetailPage() {
+export default function ProjectDetail() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const { id } = useParams();
     const navigate = useNavigate();

@@ -10,7 +10,7 @@ import useProjects from '@/utils/userProjects';
 import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
 
 
-export default function SchedulePage() {
+export default function Schedule() {
     const { user, setUser } = useUser();
     const { projects } = useProjects(user, setUser);
 

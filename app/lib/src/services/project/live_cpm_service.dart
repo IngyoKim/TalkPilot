@@ -1,7 +1,12 @@
 import 'dart:async';
 
 class LiveCpmService {
-  final Stopwatch _stopwatch = Stopwatch();
+  final Stopwatch Function() stopwatchFactory;
+
+  LiveCpmService({Stopwatch Function()? stopwatchFactory})
+      : stopwatchFactory = stopwatchFactory ?? (() => Stopwatch());
+
+  Stopwatch? _stopwatch; // 수정 → nullable로 바꾸고 start() 에서 할당
   Timer? _timer;
   int _totalCharacters = 0;
   double _userAverageCpm = 0.0;
@@ -13,14 +18,15 @@ class LiveCpmService {
     required double userAverageCpm,
     required Function(double cpm, String status) onCpmUpdate,
   }) {
+    _stopwatch = stopwatchFactory(); // 여기에 주입한 stopwatch 사용!
     _userAverageCpm = userAverageCpm;
     _onCpmUpdate = onCpmUpdate;
     _totalCharacters = 0;
-    _stopwatch.reset();
-    _stopwatch.start();
+    _stopwatch!.reset();
+    _stopwatch!.start();
 
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      final minutes = _stopwatch.elapsed.inSeconds / 60;
+      final minutes = _stopwatch!.elapsed.inSeconds / 60;
       if (minutes > 0.1) {
         final cpm = _totalCharacters / minutes;
         _currentCpm = cpm; // 저장
@@ -35,7 +41,7 @@ class LiveCpmService {
   }
 
   void stop() {
-    _stopwatch.stop();
+    _stopwatch?.stop();
     _timer?.cancel();
     _timer = null;
     _onCpmUpdate = null;
@@ -44,7 +50,8 @@ class LiveCpmService {
   void reset() {
     stop();
     _totalCharacters = 0;
-    _stopwatch.reset();
+    _stopwatch?.reset();
+    _currentCpm = 0.0; 
   }
 
   String getCpmStatus(double userCpm, double currentCpm) {

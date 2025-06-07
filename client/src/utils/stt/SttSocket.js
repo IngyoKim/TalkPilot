@@ -7,19 +7,21 @@ export default function useSttSocket() {
     const firebaseToken = authUser?.token;
 
     const socketRef = useRef(null);
-    const [isConnected, setIsConnected] = useState(false);
-    const [transcripts, setTranscripts] = useState([]);
-    const [transcriptText, setTranscriptText] = useState('');
-    const [speakingDuration, setSpeakingDuration] = useState(0);
-
-    const sentWordsRef = useRef(new Set());
+    const silenceTimerRef = useRef(null);
     const sessionStartRef = useRef(null);
     const lastTranscriptRef = useRef(null);
     const onTranscriptCallbackRef = useRef(null);
 
+    const [isConnected, setIsConnected] = useState(false);
+    const [transcripts, setTranscripts] = useState([]);
+    const [recognizedText, setRecognizedText] = useState('');
+    const [savedText, setSavedText] = useState('');
+    const [speakingDuration, setSpeakingDuration] = useState(0);
+
     const setOnTranscript = (cb) => {
         onTranscriptCallbackRef.current = cb;
     };
+
     const connect = () => {
         return new Promise((resolve, reject) => {
             if (!firebaseToken) {
@@ -33,10 +35,6 @@ export default function useSttSocket() {
                 socketRef.current = null;
             }
 
-            /// url을 https 프로토콜에서 wss 프로토콜로 변경
-            /// web socket은 secure websocket으로 통신함.
-            /// 일단 작동이 되니깐 건들지 말기!!
-            /// 제발...이거 만드는데 너무 힘들었어요...
             const rawUrl = import.meta.env.VITE_SERVER_URL;
             const wsUrl = rawUrl.startsWith('https')
                 ? rawUrl.replace(/^https/, 'wss')
@@ -81,25 +79,70 @@ export default function useSttSocket() {
                 }
                 lastTranscriptRef.current = currentTime;
 
-                const words = transcript.split(/\s+/);
-                let newText = '';
+                /// Flutter처럼 recognizedText는 원문 그대로 저장
+                setRecognizedText(transcript);
 
-                for (const word of words) {
-                    if (!sentWordsRef.current.has(word)) {
-                        sentWordsRef.current.add(word);
-                        newText += word + ' ';
-                    }
+                // console.log('🟢 recognizedText updated to:', transcript);
+
+                /// Flutter처럼 savedText는 _silenceTimer에서 prefix 비교 후 업데이트
+                if (silenceTimerRef.current) {
+                    clearTimeout(silenceTimerRef.current);
                 }
 
-                setTranscriptText((prev) => (prev + newText).trim());
+                silenceTimerRef.current = setTimeout(() => {
+                    setSavedText((savedText) => {
+                        const compareLength = 2;
+
+                        const currentText = transcript.trim();
+                        const lastSaved = savedText.trim();
+
+                        const currentPrefix = currentText.length >= compareLength
+                            ? currentText.substring(0, compareLength)
+                            : currentText;
+
+                        const savedPrefix = lastSaved.length >= compareLength
+                            ? lastSaved.substring(0, compareLength)
+                            : lastSaved;
+
+                        let newSavedText = savedText;
+
+                        if (currentText.length === 0) {
+                            newSavedText = savedText;
+                        } else if (lastSaved.length === 0) {
+                            newSavedText = currentText + ' ';
+                        }
+                        if (currentPrefix === savedPrefix) {
+                            const newPart = currentText.length > lastSaved.length
+                                ? currentText.substring(lastSaved.length).trim()
+                                : '';
+                            if (newPart.length > 0) {
+                                newSavedText = savedText + newPart + ' ';
+                            } else {
+                                newSavedText = savedText;
+                            }
+                        } else {
+                            /// 동일 문장이 계속 반복되는 경우 방지
+                            if (savedText.endsWith(currentText + ' ') || savedText.endsWith(currentText)) {
+                                return savedText;
+                            } else {
+                                return savedText + currentText + ' ';
+                            }
+                        }
+
+                        console.log('🟠 savedText updated to:', newSavedText);
+
+                        return newSavedText;
+                    });
+                }, 1000);
+
+                /// transcripts는 로그용으로 유지
                 setTranscripts((prev) => [...prev, { transcript, timestamp }]);
 
-                /// 필요 시 외부 콜백 실행(실제로는 안 쓸 듯?)
+                /// 필요 시 외부 콜백 실행
                 if (onTranscriptCallbackRef.current) {
                     onTranscriptCallbackRef.current(transcript);
                 }
             });
-
 
             socketRef.current = socket;
         });
@@ -138,9 +181,9 @@ export default function useSttSocket() {
 
     const clearTranscript = () => {
         setTranscripts([]);
-        setTranscriptText('');
+        setRecognizedText('');
+        setSavedText('');
         setSpeakingDuration(0);
-        sentWordsRef.current.clear();
         sessionStartRef.current = null;
         lastTranscriptRef.current = null;
     };
@@ -151,7 +194,8 @@ export default function useSttSocket() {
         connect,
         disconnect,
         transcripts,
-        transcriptText,
+        recognizedText,
+        savedText,
         speakingDuration,
         sendAudioChunk,
         endAudio,

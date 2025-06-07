@@ -14,8 +14,8 @@ import 'package:talk_pilot/src/pages/project_page/widgets/script_part_page.dart'
 import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/script_upload_button.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/editable/editable_text_editor.dart';
-import 'package:talk_pilot/src/services/project/estimated_time_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
+import 'package:talk_pilot/src/utils/project/estimated_time_service.dart';
 
 class ProjectPage extends StatefulWidget {
   final String projectId;
@@ -150,11 +150,12 @@ class _ProjectPageState extends State<ProjectPage> {
                   ),
                 ),
                 onFieldSubmitted: (text) async {
-                  final keywords = text
-                      .split(',')
-                      .map((s) => s.trim())
-                      .where((s) => s.isNotEmpty)
-                      .toList();
+                  final keywords =
+                      text
+                          .split(',')
+                          .map((s) => s.trim())
+                          .where((s) => s.isNotEmpty)
+                          .toList();
 
                   await _projectService.updateProject(project.id, {
                     'keywords': keywords,

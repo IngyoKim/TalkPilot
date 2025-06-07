@@ -1,6 +1,6 @@
 import 'package:talk_pilot/src/services/database/project_service.dart';
-import 'package:talk_pilot/src/services/database/project_stream_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
+import 'package:talk_pilot/src/services/database/project_stream_service.dart';
 
 class EstimatedTimeService {
   final ProjectStreamService _projectStreamService;
@@ -30,16 +30,16 @@ class EstimatedTimeService {
 
       if (script == null || script.isEmpty) return;
 
-      final normalizedKeywords = keywords
-          .map((e) => e.trim().toLowerCase())
-          .where((e) => e.isNotEmpty)
-          .toList()
-        ..sort();
+      final normalizedKeywords =
+          keywords
+              .map((e) => e.trim().toLowerCase())
+              .where((e) => e.isNotEmpty)
+              .toList()
+            ..sort();
 
-      final normalizedParts = parts
-          .map((e) => '${e.uid}:${e.startIndex}-${e.endIndex}')
-          .toList()
-        ..sort();
+      final normalizedParts =
+          parts.map((e) => '${e.uid}:${e.startIndex}-${e.endIndex}').toList()
+            ..sort();
 
       final currentState =
           '$script::${normalizedParts.join(',')}::${normalizedKeywords.join(',')}';

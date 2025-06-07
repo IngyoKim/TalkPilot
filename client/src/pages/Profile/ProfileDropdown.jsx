@@ -4,8 +4,7 @@ import {
     FaChevronLeft,
     FaChevronRight,
     FaUser,
-    FaQuestionCircle,
-    FaEnvelope,
+    FaInfoCircle,
     FaSignOutAlt,
     FaUserEdit,
 } from 'react-icons/fa';
@@ -61,19 +60,11 @@ export default function ProfileDropdown({ isSidebarOpen, onToggleSidebar }) {
             },
         },
         {
-            icon: <FaQuestionCircle />,
-            label: 'Help',
+            icon: <FaInfoCircle />,
+            label: 'Credits',
             onClick: () => {
-                console.log('Navigating to /help');
-                navigate('/help');
-            },
-        },
-        {
-            icon: <FaEnvelope />,
-            label: 'Contact us',
-            onClick: () => {
-                console.log('Navigating to /contact');
-                navigate('/contact');
+                console.log('Navigating to /credits');
+                navigate('/credits');
             },
         },
         {

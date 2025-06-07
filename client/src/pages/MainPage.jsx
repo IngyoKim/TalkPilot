@@ -9,9 +9,9 @@ import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
 import ToastMessage from '@/components/ToastMessage';
 
 const mainColor = '#673AB7';
-const STATUS_COLORS = { //상태 이름 변경
+const STATUS_COLORS = {
     preparing: '#4CAF50',
-    보류: '#FFC107',
+    paused: '#FFC107',
     completed: '#F44336',
 };
 
@@ -37,7 +37,7 @@ export default function MainPage() {
         changeStatus,
     } = useProjects(user, setUser);
 
-    const showMessage = (text, type = 'green', duration = 3000) => { //토스트 메시지
+    const showMessage = (text, type = 'green', duration = 3000) => {
         setMessages((prev) => [...prev, { id: Date.now(), text, type, duration }]);
     };
 
@@ -54,6 +54,19 @@ export default function MainPage() {
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [messages, setMessages] = useState([]);
     const containerRef = useRef();
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (containerRef.current && !containerRef.current.contains(e.target)) {
+                setActiveDropdown(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     useEffect(() => {
         const loadNicknames = async () => {
@@ -308,26 +321,87 @@ export default function MainPage() {
 
 const styles = {
     dropdown: {
-        position: 'absolute', top: 30, right: 8, backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: 6,
-        boxShadow: '0 2px 6px rgba(0,0,0,0.2)', zIndex: 10,
+        position: 'absolute',
+        top: 30, right: 8,
+        backgroundColor: '#fff',
+        border: '1px solid #ccc',
+        borderRadius: 6,
+        boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+        zIndex: 10,
     },
     dropdownItem: {
-        display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', cursor: 'pointer', fontSize: 13,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '6px 12px',
+        cursor: 'pointer',
+        fontSize: 13,
     },
-    dropdownDot: { width: 10, height: 10, borderRadius: '50%' },
+    dropdownDot: {
+        width: 10,
+        height: 10,
+        borderRadius: '50%'
+    },
     modalOverlay: {
-        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)',
-        display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 999,
+        position: 'fixed',
+        top: 0, left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 999,
     },
     modal: {
-        backgroundColor: '#f2e8ff', padding: 24, borderRadius: 20, width: '90%', maxWidth: 360,
+        backgroundColor: '#f2e8ff',
+        padding: 24, borderRadius: 20,
+        width: '90%',
+        maxWidth: 360,
         boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
     },
-    tabWrapper: { display: 'flex', borderRadius: 10, overflow: 'hidden', marginBottom: 16 },
-    tabButton: { flex: 1, padding: 8, border: 'none', cursor: 'pointer' },
-    inputGroup: { marginBottom: 12, display: 'flex', flexDirection: 'column', fontSize: 14 },
-    input: { padding: 8, border: '1px solid #ccc', borderRadius: 6, fontSize: 14 },
-    modalActions: { display: 'flex', justifyContent: 'space-between', marginTop: 20 },
-    cancelBtn: { backgroundColor: 'transparent', color: mainColor, border: 'none', fontWeight: 'bold', cursor: 'pointer' },
-    confirmBtn: { backgroundColor: mainColor, color: '#fff', border: 'none', padding: '8px 16px', borderRadius: 8, fontWeight: 'bold', cursor: 'pointer' },
+    tabWrapper: {
+        display: 'flex',
+        borderRadius: 10,
+        overflow: 'hidden',
+        marginBottom: 16
+    },
+    tabButton: {
+        flex: 1,
+        padding: 8,
+        border: 'none',
+        cursor: 'pointer'
+    },
+    inputGroup: {
+        marginBottom: 12,
+        display: 'flex',
+        flexDirection: 'column',
+        fontSize: 14
+    },
+    input: {
+        padding: 8,
+        border: '1px solid #ccc',
+        borderRadius: 6,
+        fontSize: 14
+    },
+    modalActions: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginTop: 20
+    },
+    cancelBtn: {
+        backgroundColor: 'transparent'
+        , color: mainColor,
+        border: 'none',
+        fontWeight: 'bold',
+        cursor: 'pointer'
+    },
+    confirmBtn: {
+        backgroundColor: mainColor,
+        color: '#fff',
+        border: 'none',
+        padding: '8px 16px',
+        borderRadius: 8,
+        fontWeight: 'bold', cursor: 'pointer'
+    },
 };

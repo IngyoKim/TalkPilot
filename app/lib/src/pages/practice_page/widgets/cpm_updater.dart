@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:talk_pilot/src/services/database/user_service.dart';
 import 'package:talk_pilot/src/provider/user_provider.dart';
+import 'package:talk_pilot/src/services/database/user_service.dart';
 
 class CpmUpdater extends StatefulWidget {
-  final double progress;  
-  final double currentCpm;  
-  final bool alreadyUpdated; 
+  final double progress;
+  final double currentCpm;
+  final bool alreadyUpdated;
   final VoidCallback onUpdated;
 
   const CpmUpdater({
@@ -49,9 +49,7 @@ class _CpmUpdaterState extends State<CpmUpdater> {
 
     final newAvg = ((existing.cpm! + widget.currentCpm) / 2).toStringAsFixed(2);
 
-    await _userService.updateUser(user.uid, {
-      'cpm': double.parse(newAvg),
-    });
+    await _userService.updateUser(user.uid, {'cpm': double.parse(newAvg)});
 
     widget.onUpdated();
   }

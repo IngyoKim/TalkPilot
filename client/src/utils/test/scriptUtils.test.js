@@ -3,7 +3,7 @@ import {
     calculateProgressByLastMatch,
     calculateAccuracy,
     getMatchedFlags,
-} from './ScriptUtils';
+} from '../stt/ScriptUtils';
 
 describe('scriptUtils', () => {
     describe('splitText', () => {

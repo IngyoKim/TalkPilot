@@ -1,5 +1,5 @@
 import { describe, it, vi, expect, beforeEach } from 'vitest';
-import { AudioRecorder } from './AudioRecorder';
+import { AudioRecorder } from '../stt/AudioRecorder';
 
 describe('AudioRecorder', () => {
     let mockSendAudioChunk;

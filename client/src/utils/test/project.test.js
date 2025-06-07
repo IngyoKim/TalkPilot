@@ -4,7 +4,7 @@ import {
     updateProject,
     deleteProject,
     fetchProjectById,
-} from './project';
+} from '../api/project';
 import { getIdToken } from '@/utils/auth/auth';
 
 // ✅ fetch를 전역으로 vi.fn으로 모킹 선언

@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import useProjects from './userProjects';
+import useProjects from '../userProjects';
 
 vi.mock('@/utils/api/user', () => ({
     updateUser: vi.fn(() => Promise.resolve()),

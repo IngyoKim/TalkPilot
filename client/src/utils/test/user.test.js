@@ -5,7 +5,7 @@ import {
     updateUser,
     initUser,
     deleteUser,
-} from './user';
+} from '../api/user';
 import { getIdToken } from '@/utils/auth/auth';
 
 global.fetch = vi.fn();

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { signInWithKakao } from './kakaoLogin';
+import { signInWithKakao } from '../auth/kakaoLogin';
 import { serverLogin } from '@/utils/auth/auth';
 import { getAuth, signInWithCustomToken } from 'firebase/auth';
 

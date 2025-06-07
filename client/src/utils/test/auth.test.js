@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getCurrentUid, getIdToken, logout, serverLogin } from './auth';
+import { getCurrentUid, getIdToken, logout, serverLogin } from '../auth/auth';
 
 vi.mock('firebase/auth', async (importOriginal) => {
   const actual = await importOriginal();

@@ -1,7 +1,7 @@
 import { describe, it, vi, expect, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import io from 'socket.io-client';
-import useSttSocket from './SttSocket';
+import useSttSocket from '../stt/SttSocket';
 
 // 이벤트 핸들러 저장용
 let eventHandlers = {};

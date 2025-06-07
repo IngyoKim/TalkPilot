@@ -1,6 +1,6 @@
 import { describe, it, vi, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import LiveCpm from './LiveCpm';
+import LiveCpm from '../stt/LiveCpm';
 
 vi.useFakeTimers();
 

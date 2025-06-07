@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { signInWithGoogle } from './googleLogin';
+import { signInWithGoogle } from '../auth/googleLogin';
 import { serverLogin } from '@/utils/auth/auth';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 

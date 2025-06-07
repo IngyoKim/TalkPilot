@@ -26,6 +26,10 @@ export default function Help() {
         {
             question: '프로젝트는 무슨 기능이 있나요?',
             answer: '프로젝트 내에서는 대본 관리, 발표 연습, 실시간 음성 인식, 발표 분석 결과 확인, 팀원 관리 기능을 제공합니다.'
+        },
+        {
+            question: '앱 다운로드는 어떻게 하나요?',
+            answer: '앱 다운로드는 [앱 다운로드 페이지](/app-download)에서 가능합니다. Android APK 직접 다운로드 및 내부 앱 공유 링크 안내를 확인하세요.'
         }
     ];
 

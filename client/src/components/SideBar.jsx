@@ -6,6 +6,7 @@ import {
     FaCalendarAlt,
     FaQuestionCircle,
     FaEnvelope,
+    FaDownload,
 } from 'react-icons/fa';
 
 const mainColor = '#673AB7';
@@ -45,6 +46,8 @@ function SidebarItem({ icon, text }) {
         }
         else if (text === 'Contact Us') {
             navigate('/contact');
+        } else if (text === 'App Download') {
+            navigate('/download');
         }
     };
     return (
@@ -68,6 +71,7 @@ const sidebarItems = [
     { icon: <FaCalendarAlt size={18} />, text: 'Schedule' },
     { icon: <FaQuestionCircle size={18} />, text: 'Help' },
     { icon: <FaEnvelope size={18} />, text: 'Contact Us' },
+    { icon: <FaDownload size={18} />, text: 'App Download' },
 ];
 
 const styles = {

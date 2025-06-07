@@ -41,11 +41,21 @@ export default function CreditPage() {
 
                         <h3 style={styles.subHeading}><FaTools style={styles.icon} /> 기술 스택</h3>
                         <div style={styles.badges}>
-                            <img src="https://img.shields.io/badge/Flutter-%2302569B.svg?logo=flutter&logoColor=white" alt="Flutter" />
-                            <img src="https://img.shields.io/badge/React-%2361DAFB.svg?logo=react&logoColor=black" alt="React" />
-                            <img src="https://img.shields.io/badge/NestJS-%23E0234E.svg?logo=nestjs&logoColor=white" alt="NestJS" />
-                            <img src="https://img.shields.io/badge/Firebase-%23FFCA28.svg?logo=firebase&logoColor=black" alt="Firebase" />
-                            <img src="https://img.shields.io/badge/Google%20Cloud%20STT-%234285F4.svg?logo=googlecloud&logoColor=white" alt="Google Cloud STT" />
+                            <a href="https://flutter.dev/" target="_blank" rel="noopener noreferrer">
+                                <img src="https://img.shields.io/badge/Flutter-%2302569B.svg?logo=flutter&logoColor=white" alt="Flutter" />
+                            </a>
+                            <a href="https://react.dev/" target="_blank" rel="noopener noreferrer">
+                                <img src="https://img.shields.io/badge/React-%2361DAFB.svg?logo=react&logoColor=black" alt="React" />
+                            </a>
+                            <a href="https://nestjs.com/" target="_blank" rel="noopener noreferrer">
+                                <img src="https://img.shields.io/badge/NestJS-%23E0234E.svg?logo=nestjs&logoColor=white" alt="NestJS" />
+                            </a>
+                            <a href="https://firebase.google.com/" target="_blank" rel="noopener noreferrer">
+                                <img src="https://img.shields.io/badge/Firebase-%23FFCA28.svg?logo=firebase&logoColor=black" alt="Firebase" />
+                            </a>
+                            <a href="https://cloud.google.com/speech-to-text" target="_blank" rel="noopener noreferrer">
+                                <img src="https://img.shields.io/badge/Google%20Cloud%20STT-%234285F4.svg?logo=googlecloud&logoColor=white" alt="Google Cloud STT" />
+                            </a>
                         </div>
                     </div>
 

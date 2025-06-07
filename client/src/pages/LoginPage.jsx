@@ -43,6 +43,11 @@ export default function LoginPage() {
 
     return (
         <div style={styles.container}>
+            <img
+                src="/assets/logo.png"
+                alt="TalkPilot Logo"
+                style={styles.logo}
+            />
             <h1 style={styles.title}>TalkPilot</h1>
             <p style={styles.subtitle}>발표를 더 똑똑하게, 함께 준비해요.</p>
 
@@ -62,6 +67,12 @@ const styles = {
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "#f7f7f7",
+    },
+    logo: {
+        width: '180px',
+        height: 'auto',
+        marginBottom: '20px',
+        objectFit: 'contain',
     },
     title: {
         fontSize: "32px",

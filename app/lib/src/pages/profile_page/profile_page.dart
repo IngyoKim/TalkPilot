@@ -100,10 +100,14 @@ class _ProfilePageState extends State<ProfilePage> {
             StatsSummaryCard(
               completedCount:
                   userModel?.projectIds?.values
-                      .where((v) => v == 'Completed')
+                      .where((v) => v == 'completed')
                       .length ??
                   0,
-              averageScore: userModel?.averageScore ?? 0,
+              inProgressCount:
+                  userModel?.projectIds?.values
+                      .where((v) => v == 'preparing')
+                      .length ??
+                  0,
               averageCPM: userModel?.cpm?.round() ?? 0,
               targetScore: userModel?.targetScore ?? 0,
             ),

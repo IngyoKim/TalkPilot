@@ -9,7 +9,6 @@ import Help from './pages/Sidebar/Help';
 import Contact from './pages/Sidebar/Contact';
 
 import CPMtestPage from './pages/Profile/CPMtestPage';
-import STTtest from './pages/Profile/STTtest';
 import ProjectRecord from './pages/Profile/ProjectRecord';
 
 import Schedule from './pages/Sidebar/Schedule';
@@ -33,7 +32,6 @@ export default function Router() {
             <Route path="/download" element={<AppDownload />} />
 
             <Route path="/cpmtest" element={<CPMtestPage />} />
-            <Route path="/stttest" element={<STTtest />} />
             <Route path="/projectrecord" element={<ProjectRecord />} />
 
             <Route path="/docx" element={<ExtractDOCX />} />

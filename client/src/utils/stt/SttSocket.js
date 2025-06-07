@@ -83,7 +83,6 @@ export default function useSttSocket() {
                 // recognizedText는 원문 그대로 저장
                 setRecognizedText(transcript);
 
-                // 🔥 prevRecognizedText 확인
                 const prevRecognizedText = prevRecognizedTextRef.current.trim();
                 const currentText = transcript.trim();
 
@@ -136,12 +135,11 @@ export default function useSttSocket() {
                             }
                         }
 
-                        // ✅ prevRecognizedText 갱신 조건 추가
                         if (currentText.length >= prevRecognizedText.length) {
                             prevRecognizedTextRef.current = currentText;
-                            console.log('✅ prevRecognizedText 갱신됨');
+                            // console.log('prevRecognizedText 갱신됨');
                         } else {
-                            console.log('⚠️ prevRecognizedText 유지 (current shorter)');
+                            console.log('prevRecognizedText 유지 (current shorter)');
                         }
 
                         return newSavedText;

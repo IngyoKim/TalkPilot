@@ -11,8 +11,6 @@ import {
     getMatchedFlags,
 } from '@/utils/stt/ScriptUtils';
 
-// ... import 그대로 유지
-
 export default function PracticePage() {
     const { id: projectId } = useParams();
     const navigate = useNavigate();
@@ -103,7 +101,6 @@ export default function PracticePage() {
         return matchCount / scriptChunks.length;
     }, [socketSavedText, socketRecognizedText, scriptChunks]);
 
-    // ✅ CPM 계산 추가
     const cpmProgressBased = useMemo(() => {
         if (!project?.script?.length || elapsedTime === 0) return 0;
         const cps = (progress * project.script.length) / elapsedTime;

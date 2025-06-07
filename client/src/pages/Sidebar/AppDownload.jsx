@@ -33,7 +33,7 @@ export default function AppDownload() {
 
                     {/* 내부 앱 공유용 링크 */}
                     <a
-                        href="#" // 내부 앱 공유 링크 (추후 교체)
+                        href="https://play.google.com/apps/test/RQZxlRXJ85A/ahAO29uNSWisKuSbkWF1mQ4tYm-OZ3yYGDITZGyi3ZR-zbRpK-eec0_HE8L8hWd7asnZlpU-hY-c1rc-VIv0eSXlhY" // 내부 앱 공유 링크 (추후 교체)
                         style={styles.downloadBtn}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -49,7 +49,7 @@ export default function AppDownload() {
 
                     {/* 직접 APK 다운로드 */}
                     <a
-                        href="" // 다운로드 링크 추가하기
+                        href="https://github.com/IngyoKim/TalkPilot/releases/tag/v1.0.5" // 다운로드 링크 추가하기
                         style={styles.downloadBtn}
                         download
                     >

@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function SocialLoginButton({ provider, onClick }) {
     const styles = {
         google: {

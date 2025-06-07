@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
-import 'package:talk_pilot/src/services/text_extract/text_extract_service.dart';
+import 'package:talk_pilot/src/utils/text_extract/text_extract_service.dart';
 
 class ScriptUploadButton extends StatelessWidget {
   final bool isLoading;

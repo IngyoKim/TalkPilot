@@ -3,7 +3,10 @@ import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/services/database/database_logger.dart';
 
 class DatabaseStreamService {
-  final FirebaseDatabase _database = FirebaseDatabase.instance;
+  final FirebaseDatabase _database;
+
+  DatabaseStreamService({FirebaseDatabase? database})
+      : _database = database ?? FirebaseDatabase.instance;
 
   Stream<T> streamData<T>({
     required String path,

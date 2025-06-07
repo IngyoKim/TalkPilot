@@ -3,7 +3,10 @@ import 'package:talk_pilot/src/models/user_model.dart';
 import 'package:talk_pilot/src/services/database/database_service.dart';
 
 class UserService {
-  final _db = DatabaseService();
+  final DatabaseService _db;
+
+  UserService({DatabaseService? databaseService})
+    : _db = databaseService ?? DatabaseService();
 
   Future<void> writeUser(UserModel user, {bool onlyIfAbsent = false}) async {
     if (onlyIfAbsent) {
@@ -51,7 +54,7 @@ class UserService {
       'updatedAt': DateTime.now().toIso8601String(),
       'projectIds': {},
       'averageScore': 0.0,
-      'targetScore': 90.0,
+      'targetScore': 70.0,
       'cpm': 0.0,
     };
 

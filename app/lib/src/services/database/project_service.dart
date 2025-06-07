@@ -4,12 +4,17 @@ import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/services/database/database_service.dart';
 
 class ProjectService {
-  final DatabaseService _db = DatabaseService();
+  final DatabaseService _db;
+  final FirebaseDatabase _firebaseDatabase;
   final String basePath = 'projects';
   final _uuid = const Uuid();
 
-  /// user쪽에도 [projectId]를 업데이트 해야함.
-  /// projectModel을 return.
+  ProjectService({
+    DatabaseService? databaseService,
+    FirebaseDatabase? firebaseDatabase,
+  })  : _db = databaseService ?? DatabaseService(),
+        _firebaseDatabase = firebaseDatabase ?? FirebaseDatabase.instance;
+
   Future<ProjectModel> writeProject({
     required String title,
     required String description,
@@ -50,7 +55,7 @@ class ProjectService {
   Future<void> updateProject(String id, Map<String, dynamic> updates) async {
     final fullUpdates = {
       ...updates,
-      'updatedAt': DateTime.now().toIso8601String(), // 자동으로 updateAt 갱신
+      'updatedAt': DateTime.now().toIso8601String(),
     };
     await _db.updateDB('$basePath/$id', fullUpdates);
   }
@@ -60,22 +65,19 @@ class ProjectService {
   }
 
   Future<List<ProjectModel>> fetchProjects(String uid) async {
-    final snapshot = await FirebaseDatabase.instance.ref(basePath).get();
+    final snapshot = await _firebaseDatabase.ref(basePath).get();
 
     if (!snapshot.exists) return [];
 
     return snapshot.children
         .map((child) {
           final map = Map<String, dynamic>.from(child.value as Map);
-          final project = ProjectModel.fromMap(child.key!, map);
-          return project;
+          return ProjectModel.fromMap(child.key!, map);
         })
         .where((project) => project.participants.containsKey(uid))
         .toList();
   }
 
-  /// 프로젝트의 누락된 필드 초기화
-  /// 변경이 불가한 필드는 에러 유발이 가능하니 수정의 유의할 것
   Future<void> initProject(ProjectModel project) async {
     final existingMap = await _db.readDB<Map<String, dynamic>>(
       '$basePath/${project.id}',
@@ -84,7 +86,6 @@ class ProjectService {
 
     final updateMap = <String, dynamic>{};
 
-    // 특정 필드가 DB에 없고, 프로젝트에 값이 존재하면 추가
     void setIfMissing(String key, dynamic value) {
       final isMissing =
           !existingMap.containsKey(key) || existingMap[key] == null;

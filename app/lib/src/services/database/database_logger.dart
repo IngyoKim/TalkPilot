@@ -1,14 +1,18 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-/// Pretty log helper
-/// json 형태로 데이터 출력
-void log(String tag, dynamic data) {
+typedef LogFunction = void Function(String tag, dynamic data);
+typedef ErrorFunction = void Function(String tag, Object error);
+
+LogFunction dbLog = (tag, data) {
   final pretty = const JsonEncoder.withIndent('  ').convert(data);
   debugPrint("[DatabaseService] $tag:\n$pretty");
-}
+};
 
-/// Error log helper
-void error(String tag, Object error) {
+ErrorFunction dbError = (tag, error) {
   debugPrint("[DatabaseService] $tag - error: $error");
-}
+};
+
+void log(String tag, dynamic data) => dbLog(tag, data);
+void error(String tag, Object error) => dbError(tag, error);
+

@@ -7,12 +7,12 @@ class SectionExpansionTile extends StatefulWidget {
   final bool initiallyExpanded;
 
   const SectionExpansionTile({
-    Key? key,
+    super.key,
     required this.index,
     required this.title,
     required this.content,
     this.initiallyExpanded = false,
-  }) : super(key: key);
+  });
 
   @override
   State<SectionExpansionTile> createState() => _SectionExpansionTileState();

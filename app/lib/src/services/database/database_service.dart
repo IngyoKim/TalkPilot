@@ -3,7 +3,11 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:talk_pilot/src/services/database/database_logger.dart';
 
 class DatabaseService {
-  final FirebaseDatabase _database = FirebaseDatabase.instance;
+  final FirebaseDatabase _database;
+  FirebaseDatabase get database => _database;
+
+  DatabaseService({FirebaseDatabase? database})
+      : _database = database ?? FirebaseDatabase.instance;
 
   /// Create or overwrite data at [path]
   Future<void> writeDB(String path, Map<String, dynamic> data) async {

@@ -16,6 +16,7 @@ void showProjectActionDialog(BuildContext context) {
   );
 }
 
+// ignore_for_file: use_build_context_synchronously
 class _ProjectActionDialog extends StatefulWidget {
   const _ProjectActionDialog();
 
@@ -197,9 +198,10 @@ class _ProjectActionDialogState extends State<_ProjectActionDialog> {
           child: const Text('취소'),
         ),
         TextButton(
-          onPressed: isProcessing
-              ? null
-              : () => currentIndex == 0 ? _handleCreate() : _handleJoin(),
+          onPressed:
+              isProcessing
+                  ? null
+                  : () => currentIndex == 0 ? _handleCreate() : _handleJoin(),
           child: Text(currentIndex == 0 ? '생성' : '참여'),
         ),
       ],

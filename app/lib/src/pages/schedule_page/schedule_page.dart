@@ -95,7 +95,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('스케줄', style: TextStyle(color: Colors.white)),
+        title: const Text('Schedule', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.deepPurple,
       ),
       body: ListView(

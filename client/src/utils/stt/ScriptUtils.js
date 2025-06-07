@@ -14,12 +14,13 @@ export function calculateProgressByLastMatch(scriptChunks, recognizedText) {
     let lastMatchedIndex = -1;
 
     for (let i = 0; i < recognizedWords.length; i++) {
+        // Flutter 동일 → matching window = ±8
         const start = Math.max(0, lastMatchedIndex - 8);
         const end = Math.min(scriptChunks.length, lastMatchedIndex + 8);
 
         for (let j = start; j < end; j++) {
             if (matchedFlags[j]) continue;
-            if (recognizedWords[i] === scriptChunks[j]) { // Flutter와 동일한 비교
+            if (recognizedWords[i] === scriptChunks[j]) {
                 matchedFlags[j] = true;
                 lastMatchedIndex = j;
                 break;
@@ -40,12 +41,13 @@ export function calculateAccuracy(scriptChunks, recognizedText) {
     let matchedCount = 0;
 
     for (let i = 0; i < recognizedWords.length; i++) {
+        // Flutter 동일 → matching window = ±8
         const start = Math.max(0, lastMatchedIndex - 8);
         const end = Math.min(scriptChunks.length, lastMatchedIndex + 8);
 
         for (let j = start; j < end; j++) {
             if (matchedFlags[j]) continue;
-            if (recognizedWords[i] === scriptChunks[j]) { // Flutter와 동일한 비교
+            if (recognizedWords[i] === scriptChunks[j]) {
                 matchedFlags[j] = true;
                 lastMatchedIndex = j;
                 matchedCount++;
@@ -54,7 +56,7 @@ export function calculateAccuracy(scriptChunks, recognizedText) {
         }
     }
 
-    // Flutter 쪽 로직에 맞춤 → lastMatchedIndex 기준으로 나누기
+    // Flutter는 (matchedCount / lastMatchedIndex), JS에서는 안전하게 +1
     return recognizedWords.length === 0
         ? 1
         : Math.min(matchedCount / (lastMatchedIndex + 1), 1);
@@ -66,12 +68,13 @@ export function getMatchedFlags(scriptChunks, recognizedText) {
     let lastMatchedIndex = -1;
 
     for (let i = 0; i < recognizedWords.length; i++) {
+        // Flutter 동일 → matching window = ±8
         const start = Math.max(0, lastMatchedIndex - 8);
         const end = Math.min(scriptChunks.length, lastMatchedIndex + 8);
 
         for (let j = start; j < end; j++) {
             if (matchedFlags[j]) continue;
-            if (recognizedWords[i] === scriptChunks[j]) { // Flutter와 동일한 비교
+            if (recognizedWords[i] === scriptChunks[j]) {
                 matchedFlags[j] = true;
                 lastMatchedIndex = j;
                 break;

@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+
+import 'package:talk_pilot/src/utils/project/script_progress_service.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:mockito/mockito.dart';

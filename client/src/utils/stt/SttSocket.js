@@ -11,6 +11,7 @@ export default function useSttSocket() {
     const sessionStartRef = useRef(null);
     const lastTranscriptRef = useRef(null);
     const onTranscriptCallbackRef = useRef(null);
+    const prevRecognizedTextRef = useRef('');
 
     const [isConnected, setIsConnected] = useState(false);
     const [transcripts, setTranscripts] = useState([]);
@@ -79,12 +80,13 @@ export default function useSttSocket() {
                 }
                 lastTranscriptRef.current = currentTime;
 
-                /// Flutter처럼 recognizedText는 원문 그대로 저장
+                // recognizedText는 원문 그대로 저장
                 setRecognizedText(transcript);
 
-                // console.log('🟢 recognizedText updated to:', transcript);
+                const prevRecognizedText = prevRecognizedTextRef.current.trim();
+                const currentText = transcript.trim();
 
-                /// Flutter처럼 savedText는 _silenceTimer에서 prefix 비교 후 업데이트
+                // silenceTimer에서 savedText 업데이트
                 if (silenceTimerRef.current) {
                     clearTimeout(silenceTimerRef.current);
                 }
@@ -93,52 +95,61 @@ export default function useSttSocket() {
                     setSavedText((savedText) => {
                         const compareLength = 2;
 
-                        const currentText = transcript.trim();
-                        const lastSaved = savedText.trim();
-
                         const currentPrefix = currentText.length >= compareLength
                             ? currentText.substring(0, compareLength)
                             : currentText;
 
-                        const savedPrefix = lastSaved.length >= compareLength
-                            ? lastSaved.substring(0, compareLength)
-                            : lastSaved;
+                        const prevPrefix = prevRecognizedText.length >= compareLength
+                            ? prevRecognizedText.substring(0, compareLength)
+                            : prevRecognizedText;
 
                         let newSavedText = savedText;
 
                         if (currentText.length === 0) {
                             newSavedText = savedText;
-                        } else if (lastSaved.length === 0) {
+                        } else if (savedText.length === 0) {
                             newSavedText = currentText + ' ';
-                        }
-                        if (currentPrefix === savedPrefix) {
-                            const newPart = currentText.length > lastSaved.length
-                                ? currentText.substring(lastSaved.length).trim()
+                        } else if (currentPrefix === prevPrefix) {
+                            const newPart = currentText.length > prevRecognizedText.length
+                                ? currentText.substring(prevRecognizedText.length).trim()
                                 : '';
                             if (newPart.length > 0) {
                                 newSavedText = savedText + newPart + ' ';
-                            } else {
-                                newSavedText = savedText;
                             }
                         } else {
-                            /// 동일 문장이 계속 반복되는 경우 방지
-                            if (savedText.endsWith(currentText + ' ') || savedText.endsWith(currentText)) {
-                                return savedText;
+                            let commonLength = 0;
+                            while (
+                                commonLength < currentText.length &&
+                                commonLength < prevRecognizedText.length &&
+                                currentText.charAt(commonLength) === prevRecognizedText.charAt(commonLength)
+                            ) {
+                                commonLength++;
+                            }
+
+                            const newPart = currentText.substring(commonLength).trim();
+
+                            if (newPart.length > 0) {
+                                newSavedText = savedText + newPart + ' ';
                             } else {
-                                return savedText + currentText + ' ';
+                                newSavedText = savedText + currentText + ' ';
                             }
                         }
 
-                        console.log('🟠 savedText updated to:', newSavedText);
+                        if (currentText.length >= prevRecognizedText.length) {
+                            prevRecognizedTextRef.current = currentText;
+                            // console.log('prevRecognizedText 갱신됨');
+                        } else {
+                            console.log('prevRecognizedText 유지 (current shorter)');
+                        }
 
                         return newSavedText;
                     });
-                }, 1000);
+                }, 100);
 
-                /// transcripts는 로그용으로 유지
+                // transcripts는 로그용으로 유지
                 setTranscripts((prev) => [...prev, { transcript, timestamp }]);
 
-                /// 필요 시 외부 콜백 실행
+                // 필요 시 외부 콜백 실행
                 if (onTranscriptCallbackRef.current) {
                     onTranscriptCallbackRef.current(transcript);
                 }
@@ -186,6 +197,7 @@ export default function useSttSocket() {
         setSpeakingDuration(0);
         sessionStartRef.current = null;
         lastTranscriptRef.current = null;
+        prevRecognizedTextRef.current = ''; // prevRecognizedText도 초기화!
     };
 
     return {

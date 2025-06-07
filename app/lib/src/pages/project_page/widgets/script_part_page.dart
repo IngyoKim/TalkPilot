@@ -7,6 +7,7 @@ import 'package:talk_pilot/src/models/script_part_model.dart';
 import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
+import 'package:talk_pilot/src/utils/project/script_part_service.dart'; // 서비스 import
 
 class ScriptPartPage extends StatefulWidget {
   final String projectId;
@@ -27,6 +28,8 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
   late ProjectProvider provider;
   final GlobalKey _richTextKey = GlobalKey();
   final TextStyle _textStyle = const TextStyle(fontSize: 16);
+
+  final _scriptPartService = ScriptPartService(); // 서비스 인스턴스
 
   @override
   void initState() {
@@ -60,166 +63,6 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
     provider = context.read<ProjectProvider>();
   }
 
-  /// 색상 매칭
-  Color getColorForUid(String uid, ProjectModel project) {
-    final colors = [
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-      Colors.red,
-      Colors.teal,
-      Colors.brown,
-    ];
-    final index = project.participants.keys.toList().indexOf(uid);
-    return colors[index % colors.length];
-  }
-
-  /// 파트 저장
-  void _overwriteParts(ProjectModel project, int start, int end) {
-    if (selectedUid == null || localScriptParts == null) {
-      ToastMessage.show("참여자를 먼저 선택하세요.");
-      return;
-    }
-
-    final s = start < end ? start : end;
-    final e = start > end ? start : end;
-    final parts = List<ScriptPartModel>.from(localScriptParts!);
-
-    /// 파트 중복되는 부분을 덮어씌움(기존 파트는 잘림)
-    final newParts = <ScriptPartModel>[];
-    for (final part in parts) {
-      if (e <= part.startIndex || s >= part.endIndex) {
-        newParts.add(part);
-      } else {
-        if (part.startIndex < s) {
-          newParts.add(
-            ScriptPartModel(
-              uid: part.uid,
-              startIndex: part.startIndex,
-              endIndex: s,
-            ),
-          );
-        }
-        if (part.endIndex > e) {
-          newParts.add(
-            ScriptPartModel(
-              uid: part.uid,
-              startIndex: e,
-              endIndex: part.endIndex,
-            ),
-          );
-        }
-      }
-    }
-
-    /// 새로운 파트 추가
-    newParts.add(
-      ScriptPartModel(uid: selectedUid!, startIndex: s, endIndex: e),
-    );
-
-    /// [startIndex]로 정렬(색상을 맞춤춤)
-    newParts.sort((a, b) => a.startIndex.compareTo(b.startIndex));
-
-    setState(() {
-      localScriptParts = newParts;
-    });
-  }
-
-  /// 드래그 구역 표시
-  List<InlineSpan> buildTextSpans(
-    ProjectModel project,
-    List<ScriptPartModel> scriptParts,
-    int? dragStart,
-    int? dragEnd,
-    String script,
-  ) {
-    final uidMap = List<String?>.filled(script.length, null);
-
-    for (final part in scriptParts) {
-      for (
-        int i = part.startIndex;
-        i < part.endIndex && i < script.length;
-        i++
-      ) {
-        uidMap[i] = part.uid;
-      }
-    }
-
-    if (dragStart != null && dragEnd != null && dragStart > dragEnd) {
-      final tmp = dragStart;
-      dragStart = dragEnd;
-      dragEnd = tmp;
-    }
-
-    List<InlineSpan> spans = [];
-    String? currentUid = uidMap[0];
-    int segmentStart = 0;
-
-    for (int i = 1; i <= script.length; i++) {
-      final uid = (i < script.length) ? uidMap[i] : null;
-      final isInDragRange =
-          dragStart != null && dragEnd != null && i > dragStart && i <= dragEnd;
-
-      if (isInDragRange) {
-        if (segmentStart < dragStart) {
-          spans.add(
-            _buildSpan(
-              script.substring(segmentStart, dragStart),
-              currentUid,
-              project,
-            ),
-          );
-        }
-
-        spans.add(
-          TextSpan(
-            text: script.substring(dragStart, dragEnd),
-            style: const TextStyle(
-              backgroundColor: Colors.yellowAccent,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-        );
-
-        segmentStart = dragEnd;
-        currentUid = null;
-        i = dragEnd;
-        dragStart = null;
-        dragEnd = null;
-        continue;
-      }
-
-      if (uid != currentUid || i == script.length) {
-        spans.add(
-          _buildSpan(script.substring(segmentStart, i), currentUid, project),
-        );
-        currentUid = uid;
-        segmentStart = i;
-      }
-    }
-
-    return spans;
-  }
-
-  /// 선택중인 파트 표시
-  TextSpan _buildSpan(String text, String? uid, ProjectModel project) {
-    return TextSpan(
-      text: text,
-      style: TextStyle(
-        backgroundColor:
-            uid != null
-                // ignore: deprecated_member_use
-                ? getColorForUid(uid, project).withOpacity(0.3)
-                : Colors.transparent,
-        fontWeight: uid != null ? FontWeight.bold : FontWeight.normal,
-        color: Colors.black,
-      ),
-    );
-  }
-
-  /// 드래그 중인 위치 파악 및 텍스트 인덱스 계산
   int _getTextOffset(Offset globalPosition) {
     final box = _richTextKey.currentContext?.findRenderObject() as RenderBox?;
     if (box == null) return 0;
@@ -278,29 +121,28 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
                     value: selectedUid,
                     hint: const Text('참여자 선택'),
                     isExpanded: true,
-                    items:
-                        project.participants.keys.map((uid) {
-                          final nickname =
-                              participantNicknames[uid] ?? '알 수 없음';
-                          final role = project.participants[uid] ?? 'member';
-                          return DropdownMenuItem(
-                            value: uid,
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 14,
-                                  height: 14,
-                                  margin: const EdgeInsets.only(right: 8),
-                                  decoration: BoxDecoration(
-                                    color: getColorForUid(uid, project),
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                Flexible(child: Text('$nickname ($role)')),
-                              ],
+                    items: project.participants.keys.map((uid) {
+                      final nickname =
+                          participantNicknames[uid] ?? '알 수 없음';
+                      final role = project.participants[uid] ?? 'member';
+                      return DropdownMenuItem(
+                        value: uid,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 14,
+                              height: 14,
+                              margin: const EdgeInsets.only(right: 8),
+                              decoration: BoxDecoration(
+                                color: _scriptPartService.getColorForUid(uid, project),
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                          );
-                        }).toList(),
+                            Flexible(child: Text('$nickname ($role)')),
+                          ],
+                        ),
+                      );
+                    }).toList(),
                     onChanged: (v) => setState(() => selectedUid = v),
                   ),
                 ),
@@ -312,7 +154,7 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: getColorForUid(selectedUid!, project),
+                      color: _scriptPartService.getColorForUid(selectedUid!, project),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
@@ -342,12 +184,21 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
                   });
                 },
                 onPanEnd: (_) {
-                  if (dragStartIndex != null && dragEndIndex != null) {
-                    _overwriteParts(project, dragStartIndex!, dragEndIndex!);
+                  if (dragStartIndex != null &&
+                      dragEndIndex != null &&
+                      selectedUid != null) {
                     setState(() {
+                      localScriptParts = _scriptPartService.overwriteParts(
+                        currentParts: localScriptParts!,
+                        selectedUid: selectedUid!,
+                        start: dragStartIndex!,
+                        end: dragEndIndex!,
+                      );
                       dragStartIndex = null;
                       dragEndIndex = null;
                     });
+                  } else if (selectedUid == null) {
+                    ToastMessage.show("참여자를 먼저 선택하세요.");
                   }
                 },
                 child: SingleChildScrollView(
@@ -356,12 +207,12 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
                     key: _richTextKey,
                     text: TextSpan(
                       style: _textStyle,
-                      children: buildTextSpans(
-                        project,
-                        localScriptParts!,
-                        dragStartIndex,
-                        dragEndIndex,
-                        script,
+                      children: _scriptPartService.buildTextSpans(
+                        project: project,
+                        scriptParts: localScriptParts!,
+                        dragStart: dragStartIndex,
+                        dragEnd: dragEndIndex,
+                        script: script,
                       ),
                     ),
                   ),

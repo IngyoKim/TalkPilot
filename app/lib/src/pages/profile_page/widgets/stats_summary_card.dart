@@ -3,14 +3,14 @@ import 'package:talk_pilot/src/pages/profile_page/widgets/stats_item.dart';
 
 class StatsSummaryCard extends StatelessWidget {
   final int completedCount;
-  final double averageScore;
+  final int inProgressCount;
   final int averageCPM;
   final double targetScore;
 
   const StatsSummaryCard({
     super.key,
     required this.completedCount,
-    required this.averageScore,
+    required this.inProgressCount,
     required this.averageCPM,
     required this.targetScore,
   });
@@ -43,9 +43,9 @@ class StatsSummaryCard extends StatelessWidget {
                   ),
                   Expanded(
                     child: StatItem(
-                      icon: Icons.star,
-                      value: averageScore.toStringAsFixed(1),
-                      label: '평균 점수',
+                      icon: Icons.timelapse,
+                      value: '$inProgressCount',
+                      label: '진행중인 발표',
                     ),
                   ),
                 ],

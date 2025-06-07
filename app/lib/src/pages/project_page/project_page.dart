@@ -6,6 +6,8 @@ import 'package:talk_pilot/src/provider/user_provider.dart';
 import 'package:talk_pilot/src/components/loading_indicator.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/database/project_stream_service.dart';
+import 'package:talk_pilot/src/services/database/database_stream_service.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 import 'package:talk_pilot/src/pages/project_page/widgets/practice_button.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/script_part_page.dart';
@@ -13,6 +15,7 @@ import 'package:talk_pilot/src/pages/project_page/widgets/project_info_card.dart
 import 'package:talk_pilot/src/pages/project_page/widgets/script_upload_button.dart';
 import 'package:talk_pilot/src/pages/project_page/widgets/editable/editable_text_editor.dart';
 import 'package:talk_pilot/src/utils/project/estimated_time_service.dart';
+import 'package:talk_pilot/src/services/database/user_service.dart';
 
 class ProjectPage extends StatefulWidget {
   final String projectId;
@@ -23,14 +26,30 @@ class ProjectPage extends StatefulWidget {
 }
 
 class _ProjectPageState extends State<ProjectPage> {
-  final _projectService = ProjectService();
-  final _estimatedTimeService = EstimatedTimeService();
+  late final ProjectStreamService _projectStreamService;
+  late final ProjectService _projectService;
+  late final EstimatedTimeService _estimatedTimeService;
+
   bool isLoading = false;
   bool isScriptEditable = false;
 
   @override
   void initState() {
     super.initState();
+
+    _projectStreamService = ProjectStreamService(
+      streamHelper: DatabaseStreamService(),
+      firebaseDatabase: FirebaseDatabase.instance,
+    );
+
+    _projectService = ProjectService();
+
+    _estimatedTimeService = EstimatedTimeService(
+      projectStreamService: _projectStreamService,
+      projectService: _projectService,
+      userService: UserService(),
+    );
+
     _estimatedTimeService.streamEstimatedTime(widget.projectId);
   }
 
@@ -48,7 +67,7 @@ class _ProjectPageState extends State<ProjectPage> {
     final currentUid = context.read<UserProvider>().currentUser?.uid;
 
     return StreamBuilder<ProjectModel>(
-      stream: _projectService.streamProject(widget.projectId),
+      stream: _projectStreamService.streamProject(widget.projectId),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Scaffold(
@@ -131,12 +150,11 @@ class _ProjectPageState extends State<ProjectPage> {
                   ),
                 ),
                 onFieldSubmitted: (text) async {
-                  final keywords =
-                      text
-                          .split(',')
-                          .map((s) => s.trim())
-                          .where((s) => s.isNotEmpty)
-                          .toList();
+                  final keywords = text
+                      .split(',')
+                      .map((s) => s.trim())
+                      .where((s) => s.isNotEmpty)
+                      .toList();
 
                   await _projectService.updateProject(project.id, {
                     'keywords': keywords,

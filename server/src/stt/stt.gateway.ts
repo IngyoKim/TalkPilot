@@ -5,10 +5,10 @@ import {
     OnGatewayDisconnect,
     WebSocketServer,
 } from '@nestjs/websockets';
+import { Inject } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { SpeechClient } from '@google-cloud/speech';
-import { readFileSync } from 'fs';
 import { admin } from '../auth/firebase-admin';
+import { SpeechClient } from '@google-cloud/speech';
 
 @WebSocketGateway({
     cors: {
@@ -18,19 +18,18 @@ import { admin } from '../auth/firebase-admin';
         ],
         credentials: true,
     },
-}) export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
-    private client: SpeechClient;
+})
+
+export class SttGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private recognizeStreams = new Map<string, any>();
     private streamTimers = new Map<string, NodeJS.Timeout>();
 
     @WebSocketServer()
     server: Server;
 
-    constructor() {
-        const path = process.env.STT_SERVICE_ACCOUNT_KEY_PATH || '/etc/secrets/stt-service-account.json';
-        const credentials = JSON.parse(readFileSync(path, 'utf-8'));
-        this.client = new SpeechClient({ credentials });
-    }
+    constructor(
+        @Inject('SPEECH_CLIENT') private readonly client: SpeechClient
+    ) { }
 
     async handleConnection(socket: Socket) {
         const token = socket.handshake.auth?.token;
@@ -88,7 +87,7 @@ import { admin } from '../auth/firebase-admin';
                 const result = data.results?.[0];
                 const transcript = result?.alternatives?.[0]?.transcript;
                 if (transcript) {
-                    const now = Date.now(); // 서버 기준 현재 시간(ms 단위)
+                    const now = Date.now();
                     socket.emit('stt-result', {
                         transcript,
                         timestamp: now,
@@ -97,7 +96,7 @@ import { admin } from '../auth/firebase-admin';
             })
             .on('error', (e) => {
                 console.error(`STT 스트림 오류: ${e.message}`);
-                this.startNewStream(socket); // 자동 재시작
+                this.startNewStream(socket);
             });
 
         this.recognizeStreams.set(socket.id, stream);
@@ -105,6 +104,7 @@ import { admin } from '../auth/firebase-admin';
         const timer = setTimeout(() => {
             this.startNewStream(socket);
         }, 290_000);
+        timer.unref();
         this.streamTimers.set(socket.id, timer);
     }
 

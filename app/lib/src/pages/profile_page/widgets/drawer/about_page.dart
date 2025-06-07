@@ -46,7 +46,8 @@ class _AboutPageState extends State<AboutPage> {
                 '  - 발화 속도와 대본 길이를 기반으로 예상 발표 시간 자동 산출\n'
                 '  - 2인 이상의 발표자가 있는 경우도 처리 가능\n\n'
                 '• 멀티 플랫폼 지원\n'
-                '  - Flutter 기반 모바일 앱과 React + NestJS 기반 웹 클라이언트 제공',
+                '  - Flutter 기반 모바일 앱과 React + NestJS 기반 웹 클라이언트 제공\n'
+                '  - 웹 클라이언트 주소: talkpilot.vercel.app',
             initiallyExpanded: _isExpanded[1],
           ),
           SectionExpansionTile(

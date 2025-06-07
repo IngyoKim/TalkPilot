@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:talk_pilot/src/models/script_part_model.dart';
-import 'package:talk_pilot/src/services/project/script_part_service.dart';
+import 'package:talk_pilot/src/utils/project/script_part_service.dart';
 
 void main() {
   late ScriptPartService service;

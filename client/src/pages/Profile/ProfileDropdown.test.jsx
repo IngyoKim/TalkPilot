@@ -54,26 +54,16 @@ test('Account Detail 클릭 시 /profile로 이동', () => {
     expect(navigateMock).toHaveBeenCalledWith('/profile');
 });
 
-test('Help 클릭 시 /help로 이동', () => {
+// Credits 테스트로 Help 및 Contact us 테스트 대체
+test('Credits 클릭 시 /credits로 이동', () => {
     render(
         <MemoryRouter>
             <ProfileDropdown isSidebarOpen={true} onToggleSidebar={() => { }} />
         </MemoryRouter>
     );
     fireEvent.click(screen.getByTestId('profile-icon'));
-    fireEvent.click(screen.getByText('Help'));
-    expect(navigateMock).toHaveBeenCalledWith('/help');
-});
-
-test('Contact us 클릭 시 /contact로 이동', () => {
-    render(
-        <MemoryRouter>
-            <ProfileDropdown isSidebarOpen={true} onToggleSidebar={() => { }} />
-        </MemoryRouter>
-    );
-    fireEvent.click(screen.getByTestId('profile-icon'));
-    fireEvent.click(screen.getByText('Contact us'));
-    expect(navigateMock).toHaveBeenCalledWith('/contact');
+    fireEvent.click(screen.getByText('Credits'));
+    expect(navigateMock).toHaveBeenCalledWith('/credits');
 });
 
 test('Log Out 클릭 시 confirm 후 logout 호출 및 /login으로 이동', async () => {

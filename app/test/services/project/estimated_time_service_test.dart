@@ -9,7 +9,7 @@ import 'package:talk_pilot/src/models/user_model.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/database/project_stream_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
-import 'package:talk_pilot/src/services/project/estimated_time_service.dart';
+import 'package:talk_pilot/src/utils/project/estimated_time_service.dart';
 
 // @GenerateMocks 선언
 @GenerateMocks([ProjectStreamService, ProjectService, UserService])
@@ -38,8 +38,9 @@ void main() {
 
     final controller = StreamController<ProjectModel>();
 
-    when(mockProjectStreamService.streamProject(projectId))
-        .thenAnswer((_) => controller.stream);
+    when(
+      mockProjectStreamService.streamProject(projectId),
+    ).thenAnswer((_) => controller.stream);
 
     // owner user cpm 설정
     final user = UserModel(
@@ -50,8 +51,7 @@ void main() {
       cpm: 300.0,
     );
 
-    when(mockUserService.readUser('owner_uid'))
-        .thenAnswer((_) async => user);
+    when(mockUserService.readUser('owner_uid')).thenAnswer((_) async => user);
 
     estimatedTimeService.streamEstimatedTime(projectId, force: true);
 
@@ -77,11 +77,14 @@ void main() {
     final expectedKeywordTime = expectedKeywordCount * 0.5;
 
     final expectedTotalTimeSecDouble = double.parse(
-        ((expectedBaseTime + expectedKeywordTime)).toStringAsFixed(2));
+      ((expectedBaseTime + expectedKeywordTime)).toStringAsFixed(2),
+    );
 
-    verify(mockProjectService.updateProject(projectId, {
-      'estimatedTime': expectedTotalTimeSecDouble,
-    })).called(1);
+    verify(
+      mockProjectService.updateProject(projectId, {
+        'estimatedTime': expectedTotalTimeSecDouble,
+      }),
+    ).called(1);
 
     await controller.close();
   });
@@ -91,8 +94,9 @@ void main() {
 
     final controller = StreamController<ProjectModel>();
 
-    when(mockProjectStreamService.streamProject(projectId))
-        .thenAnswer((_) => controller.stream);
+    when(
+      mockProjectStreamService.streamProject(projectId),
+    ).thenAnswer((_) => controller.stream);
 
     // 각 part user cpm 설정
     final user1 = UserModel(
@@ -111,10 +115,8 @@ void main() {
       cpm: 400.0,
     );
 
-    when(mockUserService.readUser('user1'))
-        .thenAnswer((_) async => user1);
-    when(mockUserService.readUser('user2'))
-        .thenAnswer((_) async => user2);
+    when(mockUserService.readUser('user1')).thenAnswer((_) async => user1);
+    when(mockUserService.readUser('user2')).thenAnswer((_) async => user2);
 
     estimatedTimeService.streamEstimatedTime(projectId, force: true);
 
@@ -146,18 +148,23 @@ void main() {
 
     await Future.delayed(Duration(milliseconds: 100));
 
-    final text1Length = script.substring(part1.startIndex, part1.endIndex).trim().length;
-    final text2Length = script.substring(part2.startIndex, part2.endIndex).trim().length;
+    final text1Length =
+        script.substring(part1.startIndex, part1.endIndex).trim().length;
+    final text2Length =
+        script.substring(part2.startIndex, part2.endIndex).trim().length;
 
     final expectedTime1 = (text1Length / user1.cpm!) * 60;
     final expectedTime2 = (text2Length / user2.cpm!) * 60;
 
     final expectedTotalTimeSecDouble = double.parse(
-        (expectedTime1 + expectedTime2).toStringAsFixed(2));
+      (expectedTime1 + expectedTime2).toStringAsFixed(2),
+    );
 
-    verify(mockProjectService.updateProject(projectId, {
-      'estimatedTime': expectedTotalTimeSecDouble,
-    })).called(1);
+    verify(
+      mockProjectService.updateProject(projectId, {
+        'estimatedTime': expectedTotalTimeSecDouble,
+      }),
+    ).called(1);
 
     await controller.close();
   });

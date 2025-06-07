@@ -7,7 +7,7 @@ import 'package:talk_pilot/src/models/script_part_model.dart';
 import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
-import 'package:talk_pilot/src/services/project/script_part_service.dart'; // 서비스 import
+import 'package:talk_pilot/src/utils/project/script_part_service.dart'; // 서비스 import
 
 class ScriptPartPage extends StatefulWidget {
   final String projectId;
@@ -121,28 +121,32 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
                     value: selectedUid,
                     hint: const Text('참여자 선택'),
                     isExpanded: true,
-                    items: project.participants.keys.map((uid) {
-                      final nickname =
-                          participantNicknames[uid] ?? '알 수 없음';
-                      final role = project.participants[uid] ?? 'member';
-                      return DropdownMenuItem(
-                        value: uid,
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 14,
-                              height: 14,
-                              margin: const EdgeInsets.only(right: 8),
-                              decoration: BoxDecoration(
-                                color: _scriptPartService.getColorForUid(uid, project),
-                                shape: BoxShape.circle,
-                              ),
+                    items:
+                        project.participants.keys.map((uid) {
+                          final nickname =
+                              participantNicknames[uid] ?? '알 수 없음';
+                          final role = project.participants[uid] ?? 'member';
+                          return DropdownMenuItem(
+                            value: uid,
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 14,
+                                  height: 14,
+                                  margin: const EdgeInsets.only(right: 8),
+                                  decoration: BoxDecoration(
+                                    color: _scriptPartService.getColorForUid(
+                                      uid,
+                                      project,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                Flexible(child: Text('$nickname ($role)')),
+                              ],
                             ),
-                            Flexible(child: Text('$nickname ($role)')),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                          );
+                        }).toList(),
                     onChanged: (v) => setState(() => selectedUid = v),
                   ),
                 ),
@@ -154,7 +158,10 @@ class _ScriptPartPageState extends State<ScriptPartPage> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: _scriptPartService.getColorForUid(selectedUid!, project),
+                      color: _scriptPartService.getColorForUid(
+                        selectedUid!,
+                        project,
+                      ),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(

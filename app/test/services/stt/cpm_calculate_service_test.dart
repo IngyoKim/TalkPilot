@@ -7,7 +7,7 @@ import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 import 'package:talk_pilot/src/services/database/cpm_history_service.dart';
 import 'package:talk_pilot/src/services/database/database_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
-import 'package:talk_pilot/src/services/stt/cpm_calculate_service.dart';
+import 'package:talk_pilot/src/utils/project/cpm_calculate_service.dart';
 
 @GenerateNiceMocks([MockSpec<UserService>(), MockSpec<DatabaseService>()])
 import 'cpm_calculate_service_test.mocks.dart';

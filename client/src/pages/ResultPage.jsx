@@ -76,9 +76,19 @@ function ResultRow({ label, value }) {
 }
 
 const styles = {
-    container: { padding: 32, fontFamily: 'sans-serif', textAlign: 'center' },
-    header: { fontSize: 24, marginBottom: 20, color: '#673AB7' },
-    score: { marginBottom: 20 },
+    container: {
+        padding: 32,
+        fontFamily: 'sans-serif',
+        textAlign: 'center'
+    },
+    header: {
+        fontSize: 24,
+        marginBottom: 20,
+        color: '#673AB7'
+    },
+    score: {
+        marginBottom: 20,
+    },
     scoreValue: {
         fontSize: 48,
         fontWeight: 'bold',

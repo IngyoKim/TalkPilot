@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/models/cpm_record_model.dart';
 import 'package:talk_pilot/src/services/database/cpm_history_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
@@ -8,7 +9,8 @@ class PresentationHistoryPage extends StatefulWidget {
   const PresentationHistoryPage({super.key});
 
   @override
-  State<PresentationHistoryPage> createState() => _PresentationHistoryPageState();
+  State<PresentationHistoryPage> createState() =>
+      _PresentationHistoryPageState();
 }
 
 class _PresentationHistoryPageState extends State<PresentationHistoryPage> {
@@ -33,20 +35,21 @@ class _PresentationHistoryPageState extends State<PresentationHistoryPage> {
   Future<void> _clearCpmHistory() async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('기록 초기화'),
-        content: const Text('모든 발표 기록을 삭제하시겠습니까?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('취소'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('기록 초기화'),
+            content: const Text('모든 발표 기록을 삭제하시겠습니까?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('취소'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('삭제'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('삭제'),
-          ),
-        ],
-      ),
     );
 
     if (confirm == true) {
@@ -56,9 +59,7 @@ class _PresentationHistoryPageState extends State<PresentationHistoryPage> {
         setState(() {
           _cpmHistoryFuture = Future.value([]);
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('발표 기록이 삭제되었습니다')),
-        );
+        ToastMessage.show("발표 기록이 삭제되었습니다");
       }
     }
   }
@@ -66,32 +67,34 @@ class _PresentationHistoryPageState extends State<PresentationHistoryPage> {
   Future<void> _deleteSingleRecord(CpmRecordModel record) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('기록 삭제'),
-        content: const Text('이 발표 기록을 삭제하시겠습니까?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('취소'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('기록 삭제'),
+            content: const Text('이 발표 기록을 삭제하시겠습니까?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('취소'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('삭제'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('삭제'),
-          ),
-        ],
-      ),
     );
 
     if (confirm == true) {
       final uid = FirebaseAuth.instance.currentUser?.uid;
       if (uid != null) {
-        await _userService.deleteCpmRecord(uid, record.timestamp.millisecondsSinceEpoch);
+        await _userService.deleteCpmRecord(
+          uid,
+          record.timestamp.millisecondsSinceEpoch,
+        );
         setState(() {
           _cpmHistoryFuture = _userService.getCpmHistory(uid);
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('기록이 삭제되었습니다')),
-        );
+        ToastMessage.show("기록이 삭제되었습니다");
       }
     }
   }

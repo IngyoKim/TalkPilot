@@ -51,7 +51,7 @@ class UserService {
       'updatedAt': DateTime.now().toIso8601String(),
       'projectIds': {},
       'averageScore': 0.0,
-      'targetScore': 90.0,
+      'targetScore': 70.0,
       'cpm': 0.0,
     };
 

@@ -2,10 +2,8 @@ import { useState } from 'react';
 
 import { Sidebar } from '@/components/SideBar';
 import { useUser } from '@/contexts/UserContext';
-import { useProjects } from '@/utils/useProjects';
-import { ProjectCard } from '@/components/ProjectCard';
-import { ProjectModal } from '@/components/ProjectModal';
-import { ProfileDropdown } from '@/pages/Profile/ProfileDropdown';
+import userProjects from '@/utils/userProjects';
+import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
 
 
 const mainColor = '#673AB7';
@@ -18,8 +16,8 @@ export default function ProjectCard() {
         join,
         update,
         remove,
-        changeStatus,
-    } = useProjects(user);
+        changeStatus
+    } = userProjects(user);
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [showModal, setShowModal] = useState(false);
@@ -39,7 +37,6 @@ export default function ProjectCard() {
         setShowModal(false);
         setEditProject(null);
     };
-
     return (
         <div style={{ display: 'flex' }}>
             <div style={{ flex: 1, padding: 20, marginLeft: isSidebarOpen ? 240 : 0 }}>
@@ -73,7 +70,7 @@ export default function ProjectCard() {
                     }}
                 >
                     {projects.map((project) => (
-                        <ProjectCard
+                        <ProjectItemCard
                             key={project.id}
                             project={project}
                             onEdit={handleOpenEdit}
@@ -82,18 +79,20 @@ export default function ProjectCard() {
                         />
                     ))}
                 </div>
-
-                {showModal && (
-                    <ProjectModal
-                        mode={editProject ? 'edit' : 'createOrJoin'}
-                        project={editProject}
-                        onClose={handleCloseModal}
-                        onCreate={create}
-                        onJoin={(projectId) => join(projectId, user)}
-                        onUpdate={update}
-                    />
-                )}
             </div>
+        </div>
+    );
+};
+
+// ✅ 내부에서만 쓰이는 카드 컴포넌트 정의
+function ProjectItemCard({ project, onEdit, onDelete, onStatusChange }) {
+    return (
+        <div style={{ border: '1px solid #ccc', borderRadius: 8, padding: 16 }}>
+            <h3>{project.title}</h3>
+            <p>{project.description}</p>
+            <button onClick={() => onEdit(project)}>수정</button>
+            <button onClick={() => onDelete(project.id)}>삭제</button>
+            <button onClick={() => onStatusChange(project.id, 'done')}>완료</button>
         </div>
     );
 }

@@ -4,6 +4,9 @@ import 'package:talk_pilot/src/pages/practice_page/widgets/result_button.dart';
 
 import 'package:talk_pilot/src/pages/practice_page/widgets/info_card.dart';
 import 'package:talk_pilot/src/pages/practice_page/widgets/cpm_updater.dart';
+import 'package:talk_pilot/src/pages/practice_page/widgets/result_button.dart';
+import 'package:talk_pilot/src/pages/practice_page/widgets/presentation_practice_controller.dart';
+
 import 'package:talk_pilot/src/utils/project/script_comparison_view.dart';
 
 class PresentationPracticePage extends StatefulWidget {

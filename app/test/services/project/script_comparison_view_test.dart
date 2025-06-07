@@ -4,8 +4,18 @@ import 'package:talk_pilot/src/utils/project/script_comparison_view.dart';
 
 void main() {
   group('ScriptComparisonView', () {
-    testWidgets('renders correctly with matched words bold and colored', (WidgetTester tester) async {
-      final scriptChunks = ['Hello', 'world', 'this', 'is', 'a', 'test', 'script'];
+    testWidgets('renders correctly with matched words bold and colored', (
+      WidgetTester tester,
+    ) async {
+      final scriptChunks = [
+        'Hello',
+        'world',
+        'this',
+        'is',
+        'a',
+        'test',
+        'script',
+      ];
       final recognizedText = 'Hello world this is';
 
       await tester.pumpWidget(
@@ -45,7 +55,9 @@ void main() {
       }
     });
 
-    testWidgets('renders empty Text when scriptChunks is empty', (WidgetTester tester) async {
+    testWidgets('renders empty Text when scriptChunks is empty', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

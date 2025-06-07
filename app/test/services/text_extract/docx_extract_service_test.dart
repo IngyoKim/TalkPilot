@@ -23,7 +23,13 @@ void main() {
 
     // word/document.xml 에 원하는 content 넣기
     final documentXmlBytes = utf8.encode(documentXmlContent);
-    archive.addFile(ArchiveFile('word/document.xml', documentXmlBytes.length, documentXmlBytes));
+    archive.addFile(
+      ArchiveFile(
+        'word/document.xml',
+        documentXmlBytes.length,
+        documentXmlBytes,
+      ),
+    );
 
     // ZIP 으로 인코딩
     final zipBytes = ZipEncoder().encode(archive)!;
@@ -36,26 +42,30 @@ void main() {
   }
 
   test('extracts simple text from DOCX', () async {
-    final docxFile = await createFakeDocxFile(documentXmlContent: '''
+    final docxFile = await createFakeDocxFile(
+      documentXmlContent: '''
       <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
         <w:body>
           <w:p><w:r><w:t>Hello world</w:t></w:r></w:p>
         </w:body>
       </w:document>
-    ''');
+    ''',
+    );
 
     final result = await docxExtractService.extractTextFromDocx(docxFile);
     expect(result, contains('Hello world'));
   });
 
   test('returns empty string when document.xml has no w:t elements', () async {
-    final docxFile = await createFakeDocxFile(documentXmlContent: '''
+    final docxFile = await createFakeDocxFile(
+      documentXmlContent: '''
       <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
         <w:body>
           <w:p><w:r></w:r></w:p>
         </w:body>
       </w:document>
-    ''');
+    ''',
+    );
 
     final result = await docxExtractService.extractTextFromDocx(docxFile);
     expect(result.trim(), '');
@@ -73,7 +83,9 @@ void main() {
   });
 
   test('returns error message when document.xml is invalid XML', () async {
-    final docxFile = await createFakeDocxFile(documentXmlContent: '<<<not-valid-xml>>>');
+    final docxFile = await createFakeDocxFile(
+      documentXmlContent: '<<<not-valid-xml>>>',
+    );
 
     final result = await docxExtractService.extractTextFromDocx(docxFile);
     expect(result, contains('DOCX 텍스트 추출 실패'));

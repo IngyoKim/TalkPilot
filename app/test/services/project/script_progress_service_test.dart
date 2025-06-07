@@ -1,9 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:talk_pilot/src/utils/project/script_progress_service.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/models/project_model.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
+import 'package:talk_pilot/src/utils/project/script_progress_service.dart';
 
 @GenerateMocks([ProjectService])
 import 'script_progress_service_test.mocks.dart';
@@ -14,7 +16,9 @@ void main() {
 
   setUp(() {
     mockProjectService = MockProjectService();
-    scriptProgressService = ScriptProgressService(projectService: mockProjectService);
+    scriptProgressService = ScriptProgressService(
+      projectService: mockProjectService,
+    );
   });
 
   test('splitText correctly splits text', () {
@@ -37,12 +41,16 @@ void main() {
       script: script,
     );
 
-    when(mockProjectService.readProject(projectId)).thenAnswer((_) async => project);
+    when(
+      mockProjectService.readProject(projectId),
+    ).thenAnswer((_) async => project);
 
     await scriptProgressService.loadScript(projectId);
 
     final recognizedText = 'Hello world this is a test';
-    final progress = scriptProgressService.calculateProgressByLastMatch(recognizedText);
+    final progress = scriptProgressService.calculateProgressByLastMatch(
+      recognizedText,
+    );
 
     expect(progress, closeTo(6 / 7, 0.01));
   });
@@ -60,7 +68,9 @@ void main() {
       script: script,
     );
 
-    when(mockProjectService.readProject(projectId)).thenAnswer((_) async => project);
+    when(
+      mockProjectService.readProject(projectId),
+    ).thenAnswer((_) async => project);
 
     await scriptProgressService.loadScript(projectId);
 

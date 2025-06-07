@@ -42,7 +42,7 @@ class _WorkPageState extends State<WorkPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('프로젝트', style: TextStyle(color: Colors.white)),
+        title: const Text('Work', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.deepPurple,
         actions: [
           Padding(

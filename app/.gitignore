@@ -61,3 +61,6 @@ app/lib/firebase_options.dart
 app/.env
 app/.env.debug
 app/.env.release
+
+# Coverage output
+coverage/

@@ -3,18 +3,27 @@ import 'package:talk_pilot/src/services/database/project_stream_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
 
 class EstimatedTimeService {
-  final _projectService = ProjectService();
-  final _userService = UserService();
+  final ProjectStreamService _projectStreamService;
+  final ProjectService _projectService;
+  final UserService _userService;
 
   final Set<String> _subscribedProjects = {};
   final Map<String, String> _prevStateMap = {};
   final Map<String, List<String>> _prevKeywordMap = {};
 
+  EstimatedTimeService({
+    required ProjectStreamService projectStreamService,
+    required ProjectService projectService,
+    required UserService userService,
+  })  : _projectStreamService = projectStreamService,
+        _projectService = projectService,
+        _userService = userService;
+
   void streamEstimatedTime(String projectId, {bool force = false}) {
     if (_subscribedProjects.contains(projectId) && !force) return;
     _subscribedProjects.add(projectId);
 
-    _projectService.streamProject(projectId).listen((project) async {
+    _projectStreamService.streamProject(projectId).listen((project) async {
       final script = project.script?.trim();
       final parts = project.scriptParts ?? [];
       final keywords = project.keywords ?? [];

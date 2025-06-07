@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 
 class ScriptProgressService {
-  final ProjectService _projectService = ProjectService();
+  final ProjectService _projectService;
   List<String> _scriptChunks = [];
+
+  ScriptProgressService({ProjectService? projectService})
+    : _projectService = projectService ?? ProjectService();
 
   Future<void> loadScript(String projectId) async {
     final project = await _projectService.readProject(projectId);
@@ -38,15 +41,15 @@ class ScriptProgressService {
   }
 
   double calculateAccuracy(String recognizedText) {
-  final recognizedWords = _prepareRecognizedWords(recognizedText);
-  if (recognizedWords.isEmpty || _scriptChunks.isEmpty) return 1.0;
+    final recognizedWords = _prepareRecognizedWords(recognizedText);
+    if (recognizedWords.isEmpty || _scriptChunks.isEmpty) return 1.0;
 
-  final matchedFlags = List<bool>.filled(_scriptChunks.length, false);
+    final matchedFlags = List<bool>.filled(_scriptChunks.length, false);
 
-  int lastMatchedIndex = -1;
-  int matchedCount = 0;
+    int lastMatchedIndex = -1;
+    int matchedCount = 0;
 
-  for (int i = 0; i < recognizedWords.length; i++) {
+    for (int i = 0; i < recognizedWords.length; i++) {
       final start = (lastMatchedIndex - 8).clamp(0, scriptChunks.length);
       final end = (lastMatchedIndex + 8).clamp(0, scriptChunks.length);
 
@@ -61,11 +64,10 @@ class ScriptProgressService {
       }
     }
 
-
-  return recognizedWords.isEmpty
-      ? 1.0
-      : (matchedCount / lastMatchedIndex).clamp(0.0, 1.0);
-}
+    return recognizedWords.isEmpty
+        ? 1.0
+        : (matchedCount / lastMatchedIndex).clamp(0.0, 1.0);
+  }
 
   List<String> _prepareRecognizedWords(String recognizedText) {
     return _splitText(recognizedText);

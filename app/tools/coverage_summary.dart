@@ -1,10 +1,11 @@
 import 'dart:io';
+// ignore_for_file: avoid_print
 
 void main() async {
   final file = File('coverage/lcov.info');
 
   if (!await file.exists()) {
-    print('❌ coverage/lcov.info 파일이 없습니다. 먼저 flutter test --coverage 실행하세요.');
+    print('coverage/lcov.info 파일이 없습니다. 먼저 flutter test --coverage 실행하세요.');
     exit(1);
   }
 
@@ -29,10 +30,12 @@ void main() async {
   const nameWidth = 60;
   const colWidth = 7;
 
-  print('${'Name'.padRight(nameWidth)}'
-      '${'Stmts'.padLeft(colWidth)}'
-      '${'Miss'.padLeft(colWidth)}'
-      '${'Cover'.padLeft(colWidth + 1)}');
+  print(
+    '${'Name'.padRight(nameWidth)}'
+    '${'Stmts'.padLeft(colWidth)}'
+    '${'Miss'.padLeft(colWidth)}'
+    '${'Cover'.padLeft(colWidth + 1)}',
+  );
   print('-' * (nameWidth + colWidth * 3 + 1));
 
   for (final entry in coverageData.entries) {
@@ -46,18 +49,23 @@ void main() async {
     totalStatements += total;
     totalMissed += missed;
 
-    print('${filePath.padRight(nameWidth)}'
-        '${'$total'.padLeft(colWidth)}'
-        '${'$missed'.padLeft(colWidth)}'
-        '${percent.toStringAsFixed(1).padLeft(colWidth)}%');
+    print(
+      '${filePath.padRight(nameWidth)}'
+      '${'$total'.padLeft(colWidth)}'
+      '${'$missed'.padLeft(colWidth)}'
+      '${percent.toStringAsFixed(1).padLeft(colWidth)}%',
+    );
   }
 
   print('-' * (nameWidth + colWidth * 3 + 1));
-  final totalPercent = totalStatements == 0
-      ? 100.0
-      : ((totalStatements - totalMissed) / totalStatements * 100);
-  print('${'TOTAL'.padRight(nameWidth)}'
-      '${'$totalStatements'.padLeft(colWidth)}'
-      '${'$totalMissed'.padLeft(colWidth)}'
-      '${totalPercent.toStringAsFixed(1).padLeft(colWidth)}%');
+  final totalPercent =
+      totalStatements == 0
+          ? 100.0
+          : ((totalStatements - totalMissed) / totalStatements * 100);
+  print(
+    '${'TOTAL'.padRight(nameWidth)}'
+    '${'$totalStatements'.padLeft(colWidth)}'
+    '${'$totalMissed'.padLeft(colWidth)}'
+    '${totalPercent.toStringAsFixed(1).padLeft(colWidth)}%',
+  );
 }

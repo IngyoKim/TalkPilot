@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import mammoth from 'mammoth';
 
 import * as userAPI from '@/utils/api/user';
 import * as projectAPI from '@/utils/api/project';
@@ -9,7 +10,7 @@ import Sidebar from '@/components/SideBar';
 import { useUser } from '@/contexts/UserContext';
 import ToastMessage from '@/components/ToastMessage';
 
-export default function ProjectDetailPage() {
+export default function ProjectPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const { id } = useParams();
     const navigate = useNavigate();
@@ -21,13 +22,15 @@ export default function ProjectDetailPage() {
     const [ownerName, setOwnerName] = useState(null);
     const [messages, setMessages] = useState([]);
 
+    const fileInputRef = useRef(null);
+
     const showMessage = (text, type = 'green', duration = 3000) => {
         setMessages((prev) => [...prev, { id: Date.now(), text, type, duration }]);
     };
 
     const getUserRole = (project, uid) => {
         const role = project.participants?.[uid] || 'member';
-        console.log(`[ProjectDetailPage] 역할 판별 - uid: ${uid}, role: ${role}`);
+        console.log(`[ProjectPage] 역할 판별 - uid: ${uid}, role: ${role}`);
         return role;
     };
 
@@ -36,7 +39,7 @@ export default function ProjectDetailPage() {
         let isMounted = true;
 
         const fetchProject = async () => {
-            console.log('[ProjectDetailPage] fetchProject called');
+            console.log('[ProjectPage] fetchProject called');
             try {
                 const result = await projectAPI.fetchProjectById(id);
                 if (!isMounted) return;
@@ -56,7 +59,7 @@ export default function ProjectDetailPage() {
                 }
             } catch (e) {
                 showMessage('프로젝트 로드 실패', 'red');
-                console.error('[ProjectDetailPage] 프로젝트 로드 실패:', e);
+                console.error('[ProjectPage] 프로젝트 로드 실패:', e);
             } finally {
                 if (isMounted) setLoading(false);
             }
@@ -69,7 +72,7 @@ export default function ProjectDetailPage() {
     }, [id, user?.uid]);
 
     const handleSave = async () => {
-        console.log('[ProjectDetailPage] 저장 시도:', project);
+        console.log('[ProjectPage] 저장 시도:', project);
         try {
             await projectAPI.updateProject(id, project);
             showMessage('프로젝트가 저장되었습니다.', 'green');
@@ -80,8 +83,65 @@ export default function ProjectDetailPage() {
     };
 
     const handleChange = (field, value) => {
-        console.log(`[ProjectDetailPage] 필드 변경 - ${field}:`, value);
+        console.log(`[ProjectPage] 필드 변경 - ${field}:`, value);
         setProject(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleUploadScriptClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleScriptFileChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // 덮어쓸지 확인
+        if (project.script && project.script.trim() !== '') {
+            const confirmOverwrite = window.confirm('기존 대본이 존재합니다. 덮어쓸까요?');
+            if (!confirmOverwrite) {
+                e.target.value = ''; // input 초기화
+                return;
+            }
+        }
+
+        try {
+            if (file.type === 'text/plain') {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const text = reader.result
+                        .replace(/\r\n/g, '\n')
+                        .replace(/\n{2,}/g, '\n\n')
+                        .trim();
+
+                    setProject(prev => ({
+                        ...prev,
+                        script: text,
+                    }));
+                    showMessage('텍스트 파일에서 대본이 추가되었습니다.', 'green');
+                };
+                reader.readAsText(file);
+            } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                const arrayBuffer = await file.arrayBuffer();
+                const result = await mammoth.extractRawText({ arrayBuffer });
+                const cleanedText = result.value
+                    .replace(/\r\n/g, '\n')
+                    .replace(/\n{2,}/g, '\n\n')
+                    .trim();
+
+                setProject(prev => ({
+                    ...prev,
+                    script: cleanedText,
+                }));
+                showMessage('DOCX 파일에서 대본이 추가되었습니다.', 'green');
+            } else {
+                showMessage('지원하지 않는 파일 형식입니다. (txt, docx만 지원)', 'red');
+            }
+        } catch (e) {
+            console.error('파일 읽기 오류:', e);
+            showMessage('파일 읽기 오류', 'red');
+        } finally {
+            e.target.value = ''; // input 초기화
+        }
     };
 
     if (!user?.uid) return <div style={styles.centered}>사용자 정보를 불러오는 중입니다...</div>;
@@ -100,7 +160,22 @@ export default function ProjectDetailPage() {
                 />
 
                 <div style={styles.section}>
-                    <h2 style={styles.title}>프로젝트 정보</h2>
+                    <div style={styles.sectionHeader}>
+                        <h2 style={styles.title}>프로젝트 정보</h2>
+                        {isEditable && (
+                            <>
+                                <button onClick={handleUploadScriptClick} style={styles.uploadScriptButton}>+ 대본 추가</button>
+                                <input
+                                    type="file"
+                                    accept=".txt,.docx"
+                                    ref={fileInputRef}
+                                    onChange={handleScriptFileChange}
+                                    style={{ display: 'none' }}
+                                />
+                            </>
+                        )}
+                    </div>
+
                     <p style={styles.subtitle}>프로젝트 ID: <strong>{id}</strong></p>
                     <p style={styles.metaInfo}>참여자 수: {Object.keys(project.participants || {}).length}</p>
                     <p style={styles.metaInfo}>소유자: {ownerName || '없음'}</p>
@@ -188,6 +263,13 @@ const styles = {
     centered: { padding: 40, fontSize: '16px', textAlign: 'center' },
     section: {
         backgroundColor: 'transparent', padding: '0 8px', maxWidth: '1200px', margin: '0 auto'
+    },
+    sectionHeader: {
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px'
+    },
+    uploadScriptButton: {
+        backgroundColor: '#673AB7', color: '#fff', border: 'none', borderRadius: '6px',
+        padding: '8px 12px', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold'
     },
     title: { fontSize: '28px', fontWeight: 'bold', marginBottom: '8px' },
     subtitle: { fontSize: '14px', color: '#888', marginBottom: '12px' },

@@ -13,12 +13,13 @@ import STTtest from './pages/Profile/STTtest';
 import ProjectRecord from './pages/Profile/ProjectRecord';
 
 import Schedule from './pages/SidebarOP/Schedule';
-import ProjectDetail from './pages/SidebarOP/ProjectDetail';
+import ProjectPage from './pages/SidebarOP/ProjectPage';
 import PracticePage from "./pages/PracticePage";
 import ResultPage from "./pages/ResultPage";
 
 import ExtractTXT from './pages/SidebarOP/ExtractTXT';
 import ExtractDOCX from './pages/SidebarOP/ExtractDOCX';
+import Credit from "./pages/Profile/Credit";
 
 export default function Router() {
     return (
@@ -27,13 +28,14 @@ export default function Router() {
 
             <Route path="/help" element={<Help />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/credits" element={<Credit />} />
 
             <Route path="/cpmtest" element={<CPMtestPage />} />
             <Route path="/stttest" element={<STTtest />} />
             <Route path="/projectrecord" element={<ProjectRecord />} />
 
             <Route path="/schedule" element={<Schedule />} />
-            <Route path="/project/:id" element={<ProjectDetail />} />
+            <Route path="/project/:id" element={<ProjectPage />} />
 
             <Route path="/docx" element={<ExtractDOCX />} />
             <Route path="/txt" element={<ExtractTXT />} />
@@ -66,7 +68,7 @@ export default function Router() {
                 path="/project/:id"
                 element={
                     <PrivateRoute>
-                        <ProjectDetail />
+                        <ProjectPage />
                     </PrivateRoute>
                 }
             />

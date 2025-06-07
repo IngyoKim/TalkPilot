@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import {
     FaHome,
     FaCalendarAlt,
-    FaFileAlt,
-    FaFileInvoice,
+    FaQuestionCircle,
+    FaEnvelope,
 } from 'react-icons/fa';
 
 const mainColor = '#673AB7';
@@ -40,11 +40,11 @@ function SidebarItem({ icon, text }) {
         else if (text === 'Schedule') {
             navigate('/schedule');
         }
-        else if (text === 'Extract .docx') {
-            navigate('/docx');
+        else if (text === 'Help') {
+            navigate('/help');
         }
-        else if (text === 'Extract .txt') {
-            navigate('/txt');
+        else if (text === 'Contact Us') {
+            navigate('/contact');
         }
     };
     return (
@@ -66,8 +66,8 @@ function SidebarItem({ icon, text }) {
 const sidebarItems = [
     { icon: <FaHome size={18} />, text: 'Home' },
     { icon: <FaCalendarAlt size={18} />, text: 'Schedule' },
-    { icon: <FaFileAlt size={18} />, text: 'Extract .txt' },
-    { icon: <FaFileInvoice size={18} />, text: 'Extract .docx' },
+    { icon: <FaQuestionCircle size={18} />, text: 'Help' },
+    { icon: <FaEnvelope size={18} />, text: 'Contact Us' },
 ];
 
 const styles = {

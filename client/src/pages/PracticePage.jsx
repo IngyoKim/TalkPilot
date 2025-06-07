@@ -18,8 +18,8 @@ export default function PracticePage() {
     const { user } = useUser();
 
     const [project, setProject] = useState(null);
-    const [recognizedText, setRecognizedText] = useState(''); // ✅ 유지
-    const [savedText, setSavedText] = useState(''); // ✅ 유지
+    const [recognizedText, setRecognizedText] = useState('');
+    const [savedText, setSavedText] = useState('');
     const [wpm, setWpm] = useState(0);
     const [elapsedTime, setElapsedTime] = useState(0);
 
@@ -27,8 +27,8 @@ export default function PracticePage() {
         socket,
         connect,
         disconnect,
-        recognizedText: socketRecognizedText, // ✅ useSttSocket에서 받아온 recognizedText
-        savedText: socketSavedText, // ✅ useSttSocket에서 받아온 savedText
+        recognizedText: socketRecognizedText,
+        savedText: socketSavedText,
         speakingDuration,
         transcripts,
         isConnected,
@@ -52,8 +52,8 @@ export default function PracticePage() {
     }, [projectId]);
 
     useEffect(() => {
-        setRecognizedText(socketRecognizedText); // ✅ recognizedText 업데이트
-        setSavedText(socketSavedText); // ✅ savedText 업데이트
+        setRecognizedText(socketRecognizedText);
+        setSavedText(socketSavedText);
         updateCpm(socketRecognizedText);
 
         const startTime = transcripts[0]?.timestamp;
@@ -65,7 +65,21 @@ export default function PracticePage() {
         }
     }, [socketRecognizedText, socketSavedText, transcripts]);
 
-    // ❌ prefix 비교 useEffect는 삭제 (useSttSocket에서 이미 처리함)
+    useEffect(() => {
+        return () => {
+            // 페이지 나갈 때 자동 정리
+            console.log('[PracticePage] Cleaning up...');
+            recorderRef.current?.stopRecording();
+            recorderRef.current = null;
+            stopCpm();
+            endAudio();
+            disconnect();
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+            }
+        };
+    }, []);
 
     const scriptChunks = useMemo(() => splitText(project?.script ?? ''), [project?.script]);
     const matchedFlags = useMemo(

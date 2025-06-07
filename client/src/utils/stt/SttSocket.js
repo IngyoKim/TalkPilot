@@ -14,8 +14,8 @@ export default function useSttSocket() {
 
     const [isConnected, setIsConnected] = useState(false);
     const [transcripts, setTranscripts] = useState([]);
-    const [recognizedText, setRecognizedText] = useState(''); // Flutter처럼 원문 그대로
-    const [savedText, setSavedText] = useState(''); // Flutter처럼 prefix 비교로 누적
+    const [recognizedText, setRecognizedText] = useState('');
+    const [savedText, setSavedText] = useState('');
     const [speakingDuration, setSpeakingDuration] = useState(0);
 
     const setOnTranscript = (cb) => {
@@ -79,12 +79,12 @@ export default function useSttSocket() {
                 }
                 lastTranscriptRef.current = currentTime;
 
-                // Flutter처럼 recognizedText는 원문 그대로 저장
+                /// Flutter처럼 recognizedText는 원문 그대로 저장
                 setRecognizedText(transcript);
 
-                console.log('🟢 recognizedText updated to:', transcript); // 👈 추가 (recognizedText 로그 출력)
+                // console.log('🟢 recognizedText updated to:', transcript);
 
-                // Flutter처럼 savedText는 _silenceTimer에서 prefix 비교 후 업데이트
+                /// Flutter처럼 savedText는 _silenceTimer에서 prefix 비교 후 업데이트
                 if (silenceTimerRef.current) {
                     clearTimeout(silenceTimerRef.current);
                 }
@@ -121,7 +121,7 @@ export default function useSttSocket() {
                                 newSavedText = savedText;
                             }
                         } else {
-                            // 동일 문장이 계속 반복되는 경우 방지
+                            /// 동일 문장이 계속 반복되는 경우 방지
                             if (savedText.endsWith(currentText + ' ') || savedText.endsWith(currentText)) {
                                 return savedText;
                             } else {
@@ -129,16 +129,16 @@ export default function useSttSocket() {
                             }
                         }
 
-                        console.log('🟠 savedText updated to:', newSavedText); // 👈 추가 (savedText 로그 출력)
+                        console.log('🟠 savedText updated to:', newSavedText);
 
                         return newSavedText;
                     });
                 }, 1000);
 
-                // transcripts는 로그용으로 유지
+                /// transcripts는 로그용으로 유지
                 setTranscripts((prev) => [...prev, { transcript, timestamp }]);
 
-                // 필요 시 외부 콜백 실행
+                /// 필요 시 외부 콜백 실행
                 if (onTranscriptCallbackRef.current) {
                     onTranscriptCallbackRef.current(transcript);
                 }
@@ -194,8 +194,8 @@ export default function useSttSocket() {
         connect,
         disconnect,
         transcripts,
-        recognizedText, // 원문 그대로 저장됨
-        savedText, // Flutter처럼 prefix 비교로 누적됨
+        recognizedText,
+        savedText,
         speakingDuration,
         sendAudioChunk,
         endAudio,

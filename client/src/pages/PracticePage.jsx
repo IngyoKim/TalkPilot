@@ -7,7 +7,6 @@ import { AudioRecorder } from '@/utils/stt/AudioRecorder';
 import LiveCpm from '@/utils/stt/LiveCpm';
 import {
     calculateAccuracy,
-    calculateProgressByLastMatch,
     splitText,
     getMatchedFlags,
 } from '@/utils/stt/ScriptUtils';
@@ -22,6 +21,7 @@ export default function PracticePage() {
     const [savedText, setSavedText] = useState('');
     const [wpm, setWpm] = useState(0);
     const [elapsedTime, setElapsedTime] = useState(0);
+    const [isRecording, setIsRecording] = useState(false);
 
     const {
         socket,
@@ -67,7 +67,6 @@ export default function PracticePage() {
 
     useEffect(() => {
         return () => {
-            // 페이지 나갈 때 자동 정리
             console.log('[PracticePage] Cleaning up...');
             recorderRef.current?.stopRecording();
             recorderRef.current = null;
@@ -87,18 +86,28 @@ export default function PracticePage() {
         [scriptChunks, socketSavedText, socketRecognizedText]
     );
 
-    const progress = useMemo(
-        () => calculateProgressByLastMatch(scriptChunks, socketSavedText + socketRecognizedText),
-        [scriptChunks, socketSavedText, socketRecognizedText]
-    );
+    const progress = useMemo(() => {
+        const recognizedWords = splitText(socketSavedText + socketRecognizedText);
+        let matchCount = 0;
 
-    const rawCurrentIndex = matchedFlags.findIndex((flag) => !flag);
-    const currentIndex = rawCurrentIndex === -1 ? scriptChunks.length : rawCurrentIndex;
+        for (let i = 0; i < recognizedWords.length && i < scriptChunks.length; i++) {
+            if (scriptChunks[i] === recognizedWords[i]) {
+                matchCount = i + 1;
+            } else {
+                matchCount = i + 1;
+            }
+        }
+
+        return matchCount / scriptChunks.length;
+    }, [socketSavedText, socketRecognizedText, scriptChunks]);
+
+
 
     const expectedDurationSec = project?.estimatedTime ?? 120;
 
     const handleStart = async () => {
         try {
+            if (isRecording) return;
             if (!isConnected) await connect();
             if (!socket.current || !socket.current.connected) {
                 alert('STT 서버와 연결되지 않았습니다.');
@@ -113,6 +122,7 @@ export default function PracticePage() {
             recorderRef.current = AudioRecorder(sendAudioChunk);
             await recorderRef.current.startRecording();
             startCpm();
+            setIsRecording(true);
 
             timerRef.current = setInterval(() => {
                 setElapsedTime((prev) => prev + 1);
@@ -125,11 +135,13 @@ export default function PracticePage() {
 
     const handleStop = async () => {
         try {
+            if (!isRecording) return;
             await recorderRef.current?.stopRecording();
             recorderRef.current = null;
             stopCpm();
             endAudio();
             disconnect();
+            setIsRecording(false);
 
             if (timerRef.current) {
                 clearInterval(timerRef.current);
@@ -137,23 +149,43 @@ export default function PracticePage() {
             }
 
             const accuracy = calculateAccuracy(scriptChunks, socketSavedText + socketRecognizedText);
-            const progress = calculateProgressByLastMatch(scriptChunks, socketSavedText + socketRecognizedText);
 
-            navigate(`/result/${projectId}`, {
-                state: {
-                    wpm,
-                    cpm,
-                    recognizedText: socketSavedText + socketRecognizedText,
-                    accuracy,
-                    progress,
-                    status,
-                    speakingDuration,
-                    elapsedTime,
-                },
-            });
+            if (progress >= 0.9) {
+                navigate(`/result/${projectId}`, {
+                    state: {
+                        wpm,
+                        cpm,
+                        recognizedText: socketSavedText + socketRecognizedText,
+                        accuracy,
+                        progress,
+                        status,
+                        speakingDuration,
+                        elapsedTime,
+                    },
+                });
+            } else {
+                navigate(`/project/${projectId}`);
+            }
         } catch (e) {
             console.error(e);
         }
+    };
+
+    const handleGoToResult = () => {
+        const accuracy = calculateAccuracy(scriptChunks, socketSavedText + socketRecognizedText);
+
+        navigate(`/result/${projectId}`, {
+            state: {
+                wpm,
+                cpm,
+                recognizedText: socketSavedText + socketRecognizedText,
+                accuracy,
+                progress,
+                status,
+                speakingDuration,
+                elapsedTime,
+            },
+        });
     };
 
     if (!project) return <div>프로젝트 정보 로딩 중...</div>;
@@ -165,12 +197,16 @@ export default function PracticePage() {
             <p>대본 길이: {project.script?.length ?? 0}자</p>
 
             <div style={styles.controlRow}>
-                <button onClick={handleStart} style={styles.button}>시작</button>
-                {progress >= 0.9 && (
-                    <button onClick={handleStop} style={styles.button}>결과 보러 가기</button>
+                {isRecording && progress >= 0.9 ? (
+                    <button onClick={handleGoToResult} style={styles.button}>결과 보러 가기</button>
+                ) : isRecording ? (
+                    <button onClick={handleStop} style={styles.button}>중지</button>
+                ) : progress >= 0.9 ? (
+                    <button onClick={handleGoToResult} style={styles.button}>결과 보러 가기</button>
+                ) : (
+                    <button onClick={handleStart} style={styles.button}>시작</button>
                 )}
             </div>
-
 
             <div style={styles.resultBox}>
                 <h3 style={styles.resultTitle}>발표 결과</h3>
@@ -192,12 +228,6 @@ export default function PracticePage() {
                     <span style={styles.resultLabel}>발표 시간:</span>
                     <span style={styles.resultValue}>{elapsedTime}초 / 예상 {Math.round(expectedDurationSec)}초</span>
                 </div>
-                {/** <div style={styles.resultItem}>
-                    <span style={styles.resultLabel}>STT 결과:</span>
-                    <div style={styles.sttTextBox}>
-                        {(socketSavedText + ' ' + socketRecognizedText).trim() || '아직 입력이 없습니다.'}
-                    </div>
-                </div> **/ }
             </div>
 
             <div style={styles.scriptBox}>
@@ -220,7 +250,6 @@ export default function PracticePage() {
         </div>
     );
 }
-
 
 const styles = {
     container: {
@@ -282,15 +311,5 @@ const styles = {
     },
     resultValue: {
         color: '#222',
-    },
-    sttTextBox: {
-        marginTop: '5px',
-        padding: '8px',
-        backgroundColor: '#f9f9f9',
-        borderRadius: '6px',
-        border: '1px solid #ddd',
-        whiteSpace: 'pre-wrap',
-        wordBreak: 'break-word',
-        color: '#444',
     },
 };

@@ -18,8 +18,8 @@ export default function PracticePage() {
     const { user } = useUser();
 
     const [project, setProject] = useState(null);
-    const [recognizedText, setRecognizedText] = useState('');
-    const [savedText, setSavedText] = useState('');
+    const [recognizedText, setRecognizedText] = useState(''); // ✅ 유지
+    const [savedText, setSavedText] = useState(''); // ✅ 유지
     const [wpm, setWpm] = useState(0);
     const [elapsedTime, setElapsedTime] = useState(0);
 
@@ -27,7 +27,8 @@ export default function PracticePage() {
         socket,
         connect,
         disconnect,
-        transcriptText,
+        recognizedText: socketRecognizedText, // ✅ useSttSocket에서 받아온 recognizedText
+        savedText: socketSavedText, // ✅ useSttSocket에서 받아온 savedText
         speakingDuration,
         transcripts,
         isConnected,
@@ -51,45 +52,30 @@ export default function PracticePage() {
     }, [projectId]);
 
     useEffect(() => {
-        setRecognizedText(transcriptText);
-        updateCpm(transcriptText);
+        setRecognizedText(socketRecognizedText); // ✅ recognizedText 업데이트
+        setSavedText(socketSavedText); // ✅ savedText 업데이트
+        updateCpm(socketRecognizedText);
 
         const startTime = transcripts[0]?.timestamp;
         const elapsedMin = startTime ? (Date.now() - new Date(startTime)) / 60000 : 0;
 
         if (elapsedMin > 0.1) {
-            const wordCount = transcriptText.trim().split(/\s+/).length;
+            const wordCount = socketRecognizedText.trim().split(/\s+/).length;
             setWpm(Math.round(wordCount / elapsedMin));
         }
-    }, [transcriptText, transcripts]);
+    }, [socketRecognizedText, socketSavedText, transcripts]);
 
-    useEffect(() => {
-        const current = transcriptText.trim();
-        const lastSaved = savedText.trim();
-
-        const compareLength = 2;
-        const currentPrefix = current.substring(0, Math.min(compareLength, current.length));
-        const savedPrefix = lastSaved.substring(0, Math.min(compareLength, lastSaved.length));
-
-        if (currentPrefix === savedPrefix) {
-            const newPart = current.length > lastSaved.length ? current.substring(lastSaved.length).trim() : '';
-            if (newPart) {
-                setSavedText((prev) => prev + ' ' + newPart);
-            }
-        } else {
-            setSavedText(current);
-        }
-    }, [transcriptText, savedText]);
+    // ❌ prefix 비교 useEffect는 삭제 (useSttSocket에서 이미 처리함)
 
     const scriptChunks = useMemo(() => splitText(project?.script ?? ''), [project?.script]);
     const matchedFlags = useMemo(
-        () => getMatchedFlags(scriptChunks, savedText + recognizedText),
-        [scriptChunks, savedText, recognizedText]
+        () => getMatchedFlags(scriptChunks, socketSavedText + socketRecognizedText),
+        [scriptChunks, socketSavedText, socketRecognizedText]
     );
 
     const progress = useMemo(
-        () => calculateProgressByLastMatch(scriptChunks, savedText + recognizedText),
-        [scriptChunks, savedText, recognizedText]
+        () => calculateProgressByLastMatch(scriptChunks, socketSavedText + socketRecognizedText),
+        [scriptChunks, socketSavedText, socketRecognizedText]
     );
 
     const rawCurrentIndex = matchedFlags.findIndex((flag) => !flag);
@@ -136,14 +122,14 @@ export default function PracticePage() {
                 timerRef.current = null;
             }
 
-            const accuracy = calculateAccuracy(scriptChunks, savedText + recognizedText);
-            const progress = calculateProgressByLastMatch(scriptChunks, savedText + recognizedText);
+            const accuracy = calculateAccuracy(scriptChunks, socketSavedText + socketRecognizedText);
+            const progress = calculateProgressByLastMatch(scriptChunks, socketSavedText + socketRecognizedText);
 
             navigate(`/result/${projectId}`, {
                 state: {
                     wpm,
                     cpm,
-                    recognizedText: savedText + recognizedText,
+                    recognizedText: socketSavedText + socketRecognizedText,
                     accuracy,
                     progress,
                     status,
@@ -166,14 +152,23 @@ export default function PracticePage() {
 
             <div style={styles.controlRow}>
                 <button onClick={handleStart} style={styles.button}>시작</button>
-                <button onClick={handleStop} style={styles.button}>종료</button>
+                {progress >= 0.9 && (
+                    <button onClick={handleStop} style={styles.button}>결과 보러 가기</button>
+                )}
             </div>
+
 
             <div style={styles.resultBox}>
                 <h3 style={styles.resultTitle}>발표 결과</h3>
                 <div style={styles.resultItem}>
                     <span style={styles.resultLabel}>진행률:</span>
                     <span style={styles.resultValue}>{(progress * 100).toFixed(1)}%</span>
+                </div>
+                <div style={styles.resultItem}>
+                    <span style={styles.resultLabel}>정확도:</span>
+                    <span style={styles.resultValue}>
+                        {(calculateAccuracy(scriptChunks, socketSavedText + socketRecognizedText) * 100).toFixed(1)}%
+                    </span>
                 </div>
                 <div style={styles.resultItem}>
                     <span style={styles.resultLabel}>CPM:</span>
@@ -183,24 +178,24 @@ export default function PracticePage() {
                     <span style={styles.resultLabel}>발표 시간:</span>
                     <span style={styles.resultValue}>{elapsedTime}초 / 예상 {Math.round(expectedDurationSec)}초</span>
                 </div>
-                {/* <div style={styles.resultItem}>
+                {/** <div style={styles.resultItem}>
                     <span style={styles.resultLabel}>STT 결과:</span>
                     <div style={styles.sttTextBox}>
-                        {(savedText + ' ' + recognizedText).trim() || '아직 입력이 없습니다.'}
+                        {(socketSavedText + ' ' + socketRecognizedText).trim() || '아직 입력이 없습니다.'}
                     </div>
-                </div> */}
+                </div> **/ }
             </div>
 
             <div style={styles.scriptBox}>
                 {scriptChunks.map((word, idx) => {
                     const isMatched = matchedFlags[idx];
-                    const isCurrent = idx === currentIndex;
+
                     return (
                         <span
                             key={idx}
                             style={{
                                 ...styles.word,
-                                backgroundColor: isCurrent ? '#FFD54F' : isMatched ? '#D1C4E9' : 'transparent',
+                                backgroundColor: isMatched ? '#D1C4E9' : 'transparent',
                             }}
                         >
                             {word}{' '}
@@ -211,6 +206,7 @@ export default function PracticePage() {
         </div>
     );
 }
+
 
 const styles = {
     container: { padding: 40, fontFamily: 'sans-serif' },

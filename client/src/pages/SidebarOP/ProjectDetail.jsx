@@ -166,12 +166,6 @@ export default function ProjectDetailPage() {
                         )}
                     </div>
 
-                    {isEditable && (
-                        <button onClick={() => navigate(`/script-part/${project.id}`)} style={styles.secondaryButton}>
-                            대본 파트 할당하기
-                        </button>
-                    )}
-
                     <button onClick={() => navigate(`/practice/${project.id}`)} style={styles.secondaryButton}>
                         연습 시작하기
                     </button>

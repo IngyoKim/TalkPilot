@@ -11,6 +11,8 @@ import {
     getMatchedFlags,
 } from '@/utils/stt/ScriptUtils';
 
+// ... import 그대로 유지
+
 export default function PracticePage() {
     const { id: projectId } = useParams();
     const navigate = useNavigate();
@@ -82,12 +84,12 @@ export default function PracticePage() {
 
     const scriptChunks = useMemo(() => splitText(project?.script ?? ''), [project?.script]);
     const matchedFlags = useMemo(
-        () => getMatchedFlags(scriptChunks, socketSavedText + socketRecognizedText),
+        () => getMatchedFlags(scriptChunks, socketSavedText),
         [scriptChunks, socketSavedText, socketRecognizedText]
     );
 
     const progress = useMemo(() => {
-        const recognizedWords = splitText(socketSavedText + socketRecognizedText);
+        const recognizedWords = splitText(socketSavedText);
         let matchCount = 0;
 
         for (let i = 0; i < recognizedWords.length && i < scriptChunks.length; i++) {
@@ -101,7 +103,12 @@ export default function PracticePage() {
         return matchCount / scriptChunks.length;
     }, [socketSavedText, socketRecognizedText, scriptChunks]);
 
-
+    // ✅ CPM 계산 추가
+    const cpmProgressBased = useMemo(() => {
+        if (!project?.script?.length || elapsedTime === 0) return 0;
+        const cps = (progress * project.script.length) / elapsedTime;
+        return cps * 60;
+    }, [progress, project?.script?.length, elapsedTime]);
 
     const expectedDurationSec = project?.estimatedTime ?? 120;
 
@@ -148,14 +155,14 @@ export default function PracticePage() {
                 timerRef.current = null;
             }
 
-            const accuracy = calculateAccuracy(scriptChunks, socketSavedText + socketRecognizedText);
+            const accuracy = calculateAccuracy(scriptChunks, socketSavedText);
 
             if (progress >= 0.9) {
                 navigate(`/result/${projectId}`, {
                     state: {
                         wpm,
                         cpm,
-                        recognizedText: socketSavedText + socketRecognizedText,
+                        recognizedText: socketSavedText,
                         accuracy,
                         progress,
                         status,
@@ -172,13 +179,13 @@ export default function PracticePage() {
     };
 
     const handleGoToResult = () => {
-        const accuracy = calculateAccuracy(scriptChunks, socketSavedText + socketRecognizedText);
+        const accuracy = calculateAccuracy(scriptChunks, socketSavedText);
 
         navigate(`/result/${projectId}`, {
             state: {
                 wpm,
                 cpm,
-                recognizedText: socketSavedText + socketRecognizedText,
+                recognizedText: socketSavedText,
                 accuracy,
                 progress,
                 status,
@@ -217,12 +224,12 @@ export default function PracticePage() {
                 <div style={styles.resultItem}>
                     <span style={styles.resultLabel}>정확도:</span>
                     <span style={styles.resultValue}>
-                        {(calculateAccuracy(scriptChunks, socketSavedText + socketRecognizedText) * 100).toFixed(1)}%
+                        {(calculateAccuracy(scriptChunks, socketSavedText) * 100).toFixed(1)}%
                     </span>
                 </div>
                 <div style={styles.resultItem}>
-                    <span style={styles.resultLabel}>CPM:</span>
-                    <span style={styles.resultValue}>{cpm} ({status})</span>
+                    <span style={styles.resultLabel}>CPM (진행률 기준):</span>
+                    <span style={styles.resultValue}>{Math.round(cpmProgressBased)} CPM</span>
                 </div>
                 <div style={styles.resultItem}>
                     <span style={styles.resultLabel}>발표 시간:</span>
@@ -250,6 +257,7 @@ export default function PracticePage() {
         </div>
     );
 }
+
 
 const styles = {
     container: {

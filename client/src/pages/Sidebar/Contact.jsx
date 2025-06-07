@@ -3,7 +3,6 @@ import { useState } from 'react';
 import Sidebar from '@/components/SideBar';
 import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
 
-
 const mainColor = '#673AB7';
 
 export default function Contact() {
@@ -35,25 +34,43 @@ export default function Contact() {
                         <p style={styles.description}>
                             메시지나 질문을 보내주시면 저희가 도와드리겠습니다. 협업 관련 연락도 받습니다.
                         </p>
-                        <input style={styles.input} placeholder="이름" />
-                        <input style={styles.input} placeholder="이메일 주소" />
-                        <textarea style={styles.textarea} placeholder="내용" />
-                        <button style={styles.sendBtn}>전달하기</button>
+                        <input id="nameInput" style={styles.input} placeholder="이름" />
+                        <input id="emailInput" style={styles.input} placeholder="이메일 주소" />
+                        <textarea id="messageInput" style={styles.textarea} placeholder="내용" />
+
+                        {/* 전달하기 버튼 → mailto로 연결 */}
+                        <a
+                            href="#"
+                            style={styles.sendBtnLink}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                const name = document.getElementById('nameInput').value;
+                                const email = document.getElementById('emailInput').value;
+                                const message = document.getElementById('messageInput').value;
+                                const mailtoLink = `mailto:jeonsm0404@gmail.com?subject=문의드립니다&body=이름: ${name}%0A이메일: ${email}%0A내용:%0A${encodeURIComponent(message)}`;
+                                window.location.href = mailtoLink;
+                            }}
+                        >
+                            전달하기
+                        </a>
                     </div>
 
-                    {/* 오른쪽: 오피스 정보 카드 및 로고 */}
+                    {/* 오른쪽: 팀원 연락처 카드 */}
                     <div style={styles.right}>
-                        <OfficeCard
-                            city="CheongJu"
-                            address="충청북도 청주시 서원구 충대로 1 E8-1 어딘가"
+                        <TeamMemberCard
+                            name="김민규"
                             phone="010-8120-2338"
-                            hours="(10AM~5PM 평일)"
+                            email="asdfxxk777@gmail.com"
                         />
-                        {/* 대학교 로고 */}
-                        <img
-                            src="/assets/CBNU_white.png"
-                            alt="CBNU Logo"
-                            style={styles.logo}
+                        <TeamMemberCard
+                            name="김인교"
+                            phone="010-5802-5827"
+                            email="a58276976@gmail.com"
+                        />
+                        <TeamMemberCard
+                            name="전상민"
+                            phone="010-5028-4701"
+                            email="jeonsm0404@gmail.com"
                         />
                     </div>
                 </div>
@@ -63,29 +80,19 @@ export default function Contact() {
 }
 
 /**
- * OfficeCard 컴포넌트
- * - 도시명, 주소, 문의 전화, 운영 시간 및 지도 보기 버튼 표시
+ * TeamMemberCard 컴포넌트
+ * - 이름, 전화번호, 이메일 표시 (링크 클릭 가능)
  */
-function OfficeCard({ city, address, phone, hours }) {
+function TeamMemberCard({ name, phone, email }) {
     return (
-        <div style={styles.officeCard}>
-            <h3 style={styles.officeCity}>{city}</h3>
-            <p style={styles.officeText}>{address}</p>
-            {phone && (
-                <p style={styles.officeText}>
-                    <b>일반 문의:</b><br />
-                    {phone}<br />
-                    {hours}
-                </p>
-            )}
-            <button style={styles.viewMapBtn} onClick={() =>
-                window.open(
-                    'https://www.google.co.kr/maps/dir//%EC%B6%A9%EC%B2%AD%EB%B6%81%EB%8F%84+%EC%B2%AD%EC%A3%BC%EC%8B%9C+%EC%84%9C%EC%9B%90%EA%B5%AC+%EC%B6%A9%EB%8C%80%EB%A1%9C+1+%EC%B6%A9%EB%B6%81%EB%8C%80%ED%95%99%EA%B5%90+%EA%B3%B5%EA%B3%BC%EB%8C%80%ED%95%991%ED%98%B8%EA%B4%80/data=!4m8!4m7!1m0!1m5!1m1!1s0x3565298c2b8fa25f:0xaed1ccc87a1c3f0f!2m2!1d127.4582894!2d36.6266955?hl=ko&entry=ttu',
-                    '_blank'
-                )
-            }
-            >위치 확인
-            </button>
+        <div style={styles.memberCard}>
+            <h3 style={styles.memberName}>{name}</h3>
+            <p style={styles.memberInfo}>
+                연락처: <a href={`tel:${phone}`} style={styles.memberLink}>{phone}</a>
+            </p>
+            <p style={styles.memberInfo}>
+                메일: <a href={`mailto:${email}`} style={styles.memberLink}>{email}</a>
+            </p>
         </div>
     );
 }
@@ -137,15 +144,17 @@ const styles = {
         marginBottom: '20px',
         resize: 'vertical',
     },
-    sendBtn: {
+    sendBtnLink: {
+        display: 'inline-block',
         backgroundColor: mainColor,
         color: 'white',
-        border: 'none',
+        textDecoration: 'none',
         padding: '12px',
         borderRadius: '24px',
         fontSize: '16px',
         cursor: 'pointer',
         width: '100px',
+        textAlign: 'center',
     },
     right: {
         flex: 1,
@@ -156,37 +165,25 @@ const styles = {
         color: 'white',
         boxSizing: 'border-box',
         display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: '100%',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
     },
-    officeCard: {
-        flex: 1,
-        margin: 0,
+    memberCard: {
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        padding: '20px',
+        borderRadius: '8px',
+        marginBottom: '16px',
     },
-    logo: {
-        width: 160,
-        opacity: 0.8,
-        marginLeft: '20px',
+    memberName: {
+        fontSize: '18px',
+        fontWeight: 'bold',
+        marginBottom: '8px',
     },
-    officeCity: {
-        fontSize: '22px',
-        fontWeight: '600',
-        marginBottom: '10px',
+    memberInfo: {
+        marginBottom: '6px',
     },
-    officeText: {
-        whiteSpace: 'pre-line',
-        marginBottom: '10px',
-        lineHeight: '1.5',
-    },
-    viewMapBtn: {
-        border: '1px solid white',
-        backgroundColor: 'transparent',
-        color: 'white',
-        padding: '8px 16px',
-        borderRadius: '20px',
-        cursor: 'pointer',
-        fontWeight: '500',
+    memberLink: {
+        color: '#fff',
+        textDecoration: 'underline',
     },
 };

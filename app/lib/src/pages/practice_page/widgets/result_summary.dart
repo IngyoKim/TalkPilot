@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:talk_pilot/src/pages/practice_page/widgets/speaker_cpm_result.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
-import 'package:talk_pilot/src/services/project/score_service.dart';
+import 'package:talk_pilot/src/utils/project/score_service.dart';
 
 class ResultSummary extends StatefulWidget {
   final double scriptAccuracy;

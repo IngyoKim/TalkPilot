@@ -4,7 +4,6 @@ import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
 import ToastMessage from '@/components/ToastMessage';
 import { FaTachometerAlt, FaTrashAlt } from 'react-icons/fa';
 
-// API 연결
 const fetchProjectList = async () => {
     return [
         { id: 1, name: 'AI 프로젝트 발표', cpm: 320, date: '2025-05-30' },

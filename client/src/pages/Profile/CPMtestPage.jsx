@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Sidebar from '@/components/SideBar';
 import ProfileDropdown from '@/pages/Profile/ProfileDropdown';
 
+/// 테스트 페이지(웹에서는 발표중에 cpm 계산)
 export default function CPMtestPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const handleToggleSidebar = () => setIsSidebarOpen(prev => !prev);

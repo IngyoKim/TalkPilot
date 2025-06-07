@@ -168,6 +168,10 @@ const styles = {
         zIndex: 1002,
     },
     profileIcon: {
+        position: 'fixed',
+        top: '16px',
+        right: '32px',
+        zIndex: 1002,
         width: '40px',
         height: '40px',
         borderRadius: '50%',

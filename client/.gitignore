@@ -28,6 +28,8 @@ dist-ssr/
 
 # Coverage
 coverage/
+coverage
+coverage/*
 
 # SSL keys
 *.pem

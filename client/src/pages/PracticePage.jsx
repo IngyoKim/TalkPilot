@@ -121,6 +121,7 @@ export default function PracticePage() {
 
     return (
         <div style={styles.container}>
+
             <h2>발표 연습 - {project.title}</h2>
             <p>대본 길이: {project.script?.length ?? 0}자</p>
 

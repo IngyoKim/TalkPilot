@@ -79,8 +79,6 @@ export default function ProfilePage() {
                                 {profileImage ? (
                                     <img
                                         src={profileImage}
-                                        alt="프로필"
-                                        style={styles.image}
                                     />
                                 ) : (
                                     <FaUserCircle size={100} color="#bbb" />

@@ -261,12 +261,18 @@ export default function MainPage() {
                             {editMode || tab === 'create' ? (
                                 <>
                                     <div style={styles.inputGroup}>
-                                        <label>제목</label>
-                                        <input style={styles.input} value={title} onChange={(e) => setTitle(e.target.value)} />
+                                        <label htmlFor="project-title">제목</label>
+                                        <input
+                                            id="project-title"
+                                            style={styles.input}
+                                            value={title}
+                                            onChange={(e) => setTitle(e.target.value)}
+                                        />
                                     </div>
                                     <div style={styles.inputGroup}>
-                                        <label>설명</label>
+                                        <label htmlFor="project-desc">설명</label>
                                         <textarea
+                                            id="project-desc"
                                             style={{ ...styles.input, resize: 'none', minHeight: 80 }}
                                             value={description}
                                             onChange={(e) => setDescription(e.target.value)}
@@ -275,8 +281,9 @@ export default function MainPage() {
                                 </>
                             ) : (
                                 <div style={styles.inputGroup}>
-                                    <label>참여할 프로젝트 ID</label>
+                                    <label htmlFor="project-join-id">참여할 프로젝트 ID</label>
                                     <input
+                                        id="project-join-id"
                                         style={styles.input}
                                         value={joinProjectId}
                                         onChange={(e) => setJoinProjectId(e.target.value)}

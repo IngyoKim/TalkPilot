@@ -75,7 +75,7 @@ class _AboutPageState extends State<AboutPage> {
           SectionExpansionTile(
             index: 4,
             title: '버전',
-            content: 'v1.0.0',
+            content: 'v1.0.1',
             initiallyExpanded: _isExpanded[4],
           ),
           SectionExpansionTile(

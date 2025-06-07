@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:talk_pilot/src/services/project/script_comparison_view.dart';
+import 'package:talk_pilot/src/utils/project/script_comparison_view.dart';
 
 void main() {
   group('ScriptComparisonView', () {

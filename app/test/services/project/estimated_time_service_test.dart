@@ -9,7 +9,7 @@ import 'package:talk_pilot/src/models/user_model.dart';
 import 'package:talk_pilot/src/services/database/project_service.dart';
 import 'package:talk_pilot/src/services/database/project_stream_service.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
-import 'package:talk_pilot/src/services/project/estimated_time_service.dart';
+import 'package:talk_pilot/src/utils/project/estimated_time_service.dart';
 
 // @GenerateMocks 선언
 @GenerateMocks([ProjectStreamService, ProjectService, UserService])

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:talk_pilot/src/services/project/live_cpm_service.dart';
+import 'package:talk_pilot/src/utils/project/live_cpm_service.dart';
 import 'package:fake_async/fake_async.dart';
 
 class FakeStopwatch implements Stopwatch {

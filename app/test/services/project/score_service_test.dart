@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:talk_pilot/src/services/project/score_service.dart';
+import 'package:talk_pilot/src/utils/project/score_service.dart';
 
 void main() {
   late ScoreService scoreService;

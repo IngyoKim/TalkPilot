@@ -7,7 +7,7 @@ import 'package:talk_pilot/src/models/script_part_model.dart';
 import 'package:talk_pilot/src/provider/project_provider.dart';
 import 'package:talk_pilot/src/components/toast_message.dart';
 import 'package:talk_pilot/src/services/database/user_service.dart';
-import 'package:talk_pilot/src/services/project/script_part_service.dart'; // 서비스 import
+import 'package:talk_pilot/src/utils/project/script_part_service.dart'; // 서비스 import
 
 class ScriptPartPage extends StatefulWidget {
   final String projectId;

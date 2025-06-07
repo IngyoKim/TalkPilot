@@ -36,9 +36,6 @@ export default function Router() {
             <Route path="/stttest" element={<STTtest />} />
             <Route path="/projectrecord" element={<ProjectRecord />} />
 
-            <Route path="/schedule" element={<Schedule />} />
-            <Route path="/project/:id" element={<ProjectPage />} />
-
             <Route path="/docx" element={<ExtractDOCX />} />
             <Route path="/txt" element={<ExtractTXT />} />
 

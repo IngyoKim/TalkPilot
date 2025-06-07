@@ -223,18 +223,35 @@ export default function PracticePage() {
 
 
 const styles = {
-    container: { padding: 40, fontFamily: 'sans-serif' },
-    controlRow: { marginTop: 20, marginBottom: 20, display: 'flex', gap: 12 },
+    container: {
+        padding: 40,
+        fontFamily: 'sans-serif'
+    },
+    controlRow: {
+        marginTop: 20,
+        marginBottom: 20,
+        display: 'flex',
+        gap: 12
+    },
     button: {
-        padding: '10px 20px', fontWeight: 'bold', borderRadius: 8,
-        backgroundColor: '#673AB7', color: '#fff', border: 'none',
+        padding: '10px 20px',
+        fontWeight: 'bold',
+        borderRadius: 8,
+        backgroundColor: '#673AB7',
+        color: '#fff',
+        border: 'none',
     },
     scriptBox: {
-        marginTop: 20, padding: 20,
-        backgroundColor: '#f9f9f9', borderRadius: 8,
+        marginTop: 20,
+        padding: 20,
+        backgroundColor: '#f9f9f9',
+        borderRadius: 8,
         lineHeight: 1.8,
     },
-    word: { padding: '2px 4px', borderRadius: 4 },
+    word: {
+        padding: '2px 4px',
+        borderRadius: 4
+    },
     resultBox: {
         marginTop: 20,
         padding: 20,
